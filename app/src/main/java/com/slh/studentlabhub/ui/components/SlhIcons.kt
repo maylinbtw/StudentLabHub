@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-enum class SlhIcon { Grid, Diamond, Menu, Square, Gear, Refresh, Back, More }
+enum class SlhIcon { Grid, Diamond, Menu, Square, Gear, Refresh, Back, More, Plus }
 
 @Composable
 fun SlhIconView(
@@ -35,6 +35,7 @@ fun SlhIconView(
             SlhIcon.Refresh -> drawRefreshIcon(color, u)
             SlhIcon.Back -> drawBackIcon(color, u)
             SlhIcon.More -> drawMoreIcon(color, u)
+            SlhIcon.Plus -> drawPlusIcon(color, u)
         }
     }
 }
@@ -148,4 +149,10 @@ private fun DrawScope.drawMoreIcon(color: Color, u: Float) {
     listOf(4f, 9f, 14f).forEach { y ->
         drawCircle(color = color, radius = 1.4f * u, center = Offset(9f * u, y * u))
     }
+}
+
+private fun DrawScope.drawPlusIcon(color: Color, u: Float) {
+    val w = 1.4f * u
+    drawLine(color = color, start = Offset(9f * u, 3f * u), end = Offset(9f * u, 15f * u), strokeWidth = w, cap = StrokeCap.Round)
+    drawLine(color = color, start = Offset(3f * u, 9f * u), end = Offset(15f * u, 9f * u), strokeWidth = w, cap = StrokeCap.Round)
 }

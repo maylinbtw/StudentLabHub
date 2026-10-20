@@ -19,6 +19,7 @@ import com.slh.studentlabhub.ui.screens.auth.LoginScreen
 import com.slh.studentlabhub.ui.screens.auth.LoginUiState
 import com.slh.studentlabhub.ui.screens.deadlines.DeadlinesScreen
 import com.slh.studentlabhub.ui.screens.deadlines.sampleCourses
+import com.slh.studentlabhub.ui.screens.labs.LabsRoute
 import com.slh.studentlabhub.ui.screens.placeholder.PlaceholderScreen
 import com.slh.studentlabhub.ui.theme.SlhBlack
 import kotlinx.coroutines.delay
@@ -72,7 +73,10 @@ fun SlhApp() {
                 )
             }
             composable(Routes.LABS) {
-                PlaceholderScreen(overline = "Lab Tracker · Room DB", title = "ЛАБОРАТОРНЫЕ")
+                LabsRoute(
+                    onSubjectClick = {},
+                    onStatisticsClick = {},
+                )
             }
             composable(Routes.REFERENCE) {
                 PlaceholderScreen(overline = "Offline · SQLite", title = "СПРАВОЧНИК")

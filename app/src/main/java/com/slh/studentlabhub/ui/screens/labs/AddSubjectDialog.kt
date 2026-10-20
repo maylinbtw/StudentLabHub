@@ -1,0 +1,242 @@
+package com.slh.studentlabhub.ui.screens.labs
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import com.slh.studentlabhub.ui.components.SectionLabel
+import com.slh.studentlabhub.ui.theme.SlhBlack
+import com.slh.studentlabhub.ui.theme.SlhMono
+import com.slh.studentlabhub.ui.theme.SlhOutline
+import com.slh.studentlabhub.ui.theme.SlhRed
+import com.slh.studentlabhub.ui.theme.SlhSurface
+import com.slh.studentlabhub.ui.theme.SlhTextDisabled
+import com.slh.studentlabhub.ui.theme.SlhTextMuted
+import com.slh.studentlabhub.ui.theme.SlhWhite
+
+@Composable
+fun AddSubjectDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (title: String, semester: Int, labsCount: Int) -> Unit,
+) {
+    var title by rememberSaveable { mutableStateOf("") }
+    var semester by rememberSaveable { mutableStateOf("4") }
+    var labsCount by rememberSaveable { mutableStateOf("8") }
+
+    val semesterValue = semester.toIntOrNull()
+    val labsValue = labsCount.toIntOrNull()
+    val isValid = title.isNotBlank() &&
+            semesterValue != null && semesterValue in 1..12 &&
+            labsValue != null && labsValue in 0..30
+
+    val shape = RoundedCornerShape(12.dp)
+
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(shape)
+                .background(SlhSurface)
+                .border(1.dp, SlhOutline, shape)
+                .padding(20.dp),
+        ) {
+            Text(
+                text = "Lab Tracker · Room DB",
+                color = SlhRed,
+                style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp),
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "НОВЫЙ ПРЕДМЕТ",
+                color = SlhWhite,
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            SlhTextField(
+                label = "НАЗВАНИЕ",
+                value = title,
+                onValueChange = { title = it.take(60) },
+                keyboardType = KeyboardType.Text,
+                capitalization = KeyboardCapitalization.Sentences,
+            )
+            Spacer(modifier = Modifier.height(14.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                SlhTextField(
+                    label = "СЕМЕСТР",
+                    value = semester,
+                    onValueChange = { input -> semester = input.filter { it.isDigit() }.take(2) },
+                    keyboardType = KeyboardType.Number,
+                    modifier = Modifier.weight(1f),
+                )
+                SlhTextField(
+                    label = "КОЛ-ВО ЛР",
+                    value = labsCount,
+                    onValueChange = { input -> labsCount = input.filter { it.isDigit() }.take(2) },
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                DialogOutlinedButton(
+                    text = "ОТМЕНА",
+                    onClick = onDismiss,
+                    modifier = Modifier.weight(1f),
+                )
+                DialogPrimaryButton(
+                    text = "ДОБАВИТЬ",
+                    enabled = isValid,
+                    onClick = {
+                        if (semesterValue != null && labsValue != null) {
+                            onConfirm(title, semesterValue, labsValue)
+                        }
+                    },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SlhTextField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    keyboardType: KeyboardType,
+    modifier: Modifier = Modifier,
+    imeAction: ImeAction = ImeAction.Next,
+    capitalization: KeyboardCapitalization = KeyboardCapitalization.None,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val shape = RoundedCornerShape(8.dp)
+
+    Column(modifier = modifier) {
+        SectionLabel(text = label)
+        Spacer(modifier = Modifier.height(6.dp))
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            singleLine = true,
+            interactionSource = interactionSource,
+            textStyle = TextStyle(
+                color = SlhWhite,
+                fontFamily = SlhMono,
+                fontSize = 14.sp,
+            ),
+            cursorBrush = SolidColor(SlhRed),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = keyboardType,
+                imeAction = imeAction,
+                capitalization = capitalization,
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(shape)
+                .background(SlhBlack)
+                .border(1.dp, if (isFocused) SlhRed else SlhOutline, shape)
+                .padding(horizontal = 12.dp, vertical = 12.dp),
+        )
+    }
+}
+
+@Composable
+private fun DialogOutlinedButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val shape = RoundedCornerShape(8.dp)
+    Box(
+        modifier = modifier
+            .height(44.dp)
+            .clip(shape)
+            .border(1.dp, SlhOutline, shape)
+            .clickable(role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            color = SlhTextMuted,
+            style = MaterialTheme.typography.labelLarge,
+        )
+    }
+}
+
+@Composable
+private fun DialogPrimaryButton(
+    text: String,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val shape = RoundedCornerShape(
+        topStart = 2.dp,
+        bottomStart = 2.dp,
+        topEnd = 8.dp,
+        bottomEnd = 8.dp,
+    )
+    Row(
+        modifier = modifier
+            .height(44.dp)
+            .clip(shape)
+            .background(if (enabled) SlhWhite else SlhOutline)
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .width(5.dp)
+                .fillMaxHeight()
+                .background(if (enabled) SlhRed else SlhTextDisabled),
+        )
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = text,
+                color = if (enabled) SlhBlack else SlhTextMuted,
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
+    }
+}
