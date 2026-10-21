@@ -9,6 +9,11 @@ object Routes {
     const val REFERENCE = "reference"
     const val CALENDAR = "calendar"
     const val SETTINGS = "settings"
+
+    const val ARG_SUBJECT_ID = "subjectId"
+    const val LAB_LIST = "labs/{$ARG_SUBJECT_ID}"
+
+    fun labList(subjectId: Long): String = "labs/$subjectId"
 }
 
 enum class BottomTab(
@@ -23,6 +28,11 @@ enum class BottomTab(
     Settings(Routes.SETTINGS, "Настройки", SlhIcon.Gear);
 
     companion object {
-        fun fromRoute(route: String?): BottomTab? = entries.firstOrNull { it.route == route }
+        fun fromRoute(route: String?): BottomTab? {
+            if (route == null) return null
+            return entries.firstOrNull { tab ->
+                route == tab.route || route.startsWith(tab.route + "/")
+            }
+        }
     }
 }

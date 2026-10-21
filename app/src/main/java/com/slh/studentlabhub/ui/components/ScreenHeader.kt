@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -19,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slh.studentlabhub.ui.theme.SlhOutline
@@ -32,8 +34,10 @@ fun ScreenHeader(
     overline: String,
     title: String,
     modifier: Modifier = Modifier,
+    onBackClick: (() -> Unit)? = null,
     actionIcon: SlhIcon? = null,
     onActionClick: () -> Unit = {},
+    actionMenu: @Composable () -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -51,23 +55,44 @@ fun ScreenHeader(
                     text = overline,
                     color = SlhRed,
                     style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = title,
-                    color = SlhWhite,
-                    style = MaterialTheme.typography.titleLarge,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (onBackClick != null) {
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .clickable(role = Role.Button, onClick = onBackClick),
+                            contentAlignment = Alignment.CenterStart,
+                        ) {
+                            SlhIconView(icon = SlhIcon.Back, color = SlhWhite, size = 16.dp)
+                        }
+                        Spacer(modifier = Modifier.width(2.dp))
+                    }
+                    Text(
+                        text = title,
+                        color = SlhWhite,
+                        style = MaterialTheme.typography.titleLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
             if (actionIcon != null) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .clickable(role = Role.Button, onClick = onActionClick),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    SlhIconView(icon = actionIcon, color = SlhTextSecondary, size = 20.dp)
+                Box {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .clickable(role = Role.Button, onClick = onActionClick),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        SlhIconView(icon = actionIcon, color = SlhTextSecondary, size = 20.dp)
+                    }
+                    actionMenu()
                 }
             }
         }

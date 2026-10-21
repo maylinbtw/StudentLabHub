@@ -10,15 +10,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.slh.studentlabhub.ui.components.SlhBottomBar
 import com.slh.studentlabhub.ui.screens.auth.LoginScreen
 import com.slh.studentlabhub.ui.screens.auth.LoginUiState
 import com.slh.studentlabhub.ui.screens.deadlines.DeadlinesScreen
 import com.slh.studentlabhub.ui.screens.deadlines.sampleCourses
+import com.slh.studentlabhub.ui.screens.lablist.LabListRoute
 import com.slh.studentlabhub.ui.screens.labs.LabsRoute
 import com.slh.studentlabhub.ui.screens.placeholder.PlaceholderScreen
 import com.slh.studentlabhub.ui.theme.SlhBlack
@@ -39,7 +42,9 @@ fun SlhApp() {
                     tabs = BottomTab.entries,
                     selected = currentTab,
                     onTabClick = { tab ->
-                        if (tab != currentTab) {
+                        if (tab == currentTab) {
+                            navController.popBackStack(tab.route, inclusive = false)
+                        } else {
                             navController.navigate(tab.route) {
                                 popUpTo(Routes.DEADLINES) { saveState = true }
                                 launchSingleTop = true
@@ -74,8 +79,21 @@ fun SlhApp() {
             }
             composable(Routes.LABS) {
                 LabsRoute(
-                    onSubjectClick = {},
+                    onSubjectClick = { subject ->
+                        navController.navigate(Routes.labList(subject.id))
+                    },
                     onStatisticsClick = {},
+                )
+            }
+            composable(
+                route = Routes.LAB_LIST,
+                arguments = listOf(
+                    navArgument(Routes.ARG_SUBJECT_ID) { type = NavType.LongType },
+                ),
+            ) {
+                LabListRoute(
+                    onBack = { navController.popBackStack() },
+                    onLabClick = {},
                 )
             }
             composable(Routes.REFERENCE) {

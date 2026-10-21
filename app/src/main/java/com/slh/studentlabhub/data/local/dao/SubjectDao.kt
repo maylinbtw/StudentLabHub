@@ -14,6 +14,10 @@ interface SubjectDao {
     @Query("SELECT * FROM subjects ORDER BY semester DESC, createdAt ASC")
     fun observeSubjectsWithLabs(): Flow<List<SubjectWithLabs>>
 
+    @Transaction
+    @Query("SELECT * FROM subjects WHERE id = :id")
+    fun observeSubjectWithLabs(id: Long): Flow<SubjectWithLabs?>
+
     @Insert
     suspend fun insert(subject: SubjectEntity): Long
 

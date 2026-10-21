@@ -5,7 +5,9 @@ import com.slh.studentlabhub.data.local.AppDatabase
 import com.slh.studentlabhub.data.local.entity.LabEntity
 import com.slh.studentlabhub.data.local.entity.SubjectEntity
 import com.slh.studentlabhub.data.local.entity.SubjectWithLabs
+import com.slh.studentlabhub.domain.model.Lab
 import com.slh.studentlabhub.domain.model.LabStatus
+import com.slh.studentlabhub.domain.model.SubjectDetails
 import com.slh.studentlabhub.domain.model.SubjectSummary
 import com.slh.studentlabhub.domain.repository.LabRepository
 import kotlinx.coroutines.flow.Flow
@@ -20,6 +22,18 @@ class LabRepositoryImpl(
 
     override fun observeSubjects(): Flow<List<SubjectSummary>> =
         subjectDao.observeSubjectsWithLabs().map { list -> list.map { it.toSummary() } }
+
+    override fun observeSubjectDetails(subjectId: Long): Flow<SubjectDetails?> =
+        subjectDao.observeSubjectWithLabs(subjectId).map { subjectWithLabs ->
+            subjectWithLabs?.let {
+                SubjectDetails(
+                    summary = it.toSummary(),
+                    labs = it.labs
+                        .sortedBy { lab -> lab.number }
+                        .map { lab -> lab.toDomain() },
+                )
+            }
+        }
 
     override suspend fun addSubject(title: String, semester: Int, labsCount: Int) {
         database.withTransaction {
@@ -36,6 +50,10 @@ class LabRepositoryImpl(
                 )
             }
         }
+    }
+
+    override suspend fun deleteSubject(subjectId: Long) {
+        subjectDao.deleteById(subjectId)
     }
 
     override suspend fun seedIfEmpty() {
@@ -124,3 +142,14 @@ private fun SubjectWithLabs.toSummary(): SubjectSummary {
         averageScore = if (scores.isEmpty()) null else scores.average(),
     )
 }
+
+private fun LabEntity.toDomain(): Lab = Lab(
+    id = id,
+    subjectId = subjectId,
+    number = number,
+    title = title,
+    status = status,
+    score = score,
+    notes = notes,
+    deadline = deadline,
+)
