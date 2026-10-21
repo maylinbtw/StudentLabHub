@@ -51,17 +51,20 @@ import com.slh.studentlabhub.ui.theme.SlhWhite
 @Composable
 fun AddSubjectDialog(
     onDismiss: () -> Unit,
-    onConfirm: (title: String, semester: Int, labsCount: Int) -> Unit,
+    onConfirm: (title: String, semester: Int, labsCount: Int, practiceCount: Int) -> Unit,
 ) {
     var title by rememberSaveable { mutableStateOf("") }
     var semester by rememberSaveable { mutableStateOf("4") }
-    var labsCount by rememberSaveable { mutableStateOf("8") }
+    var labsCount by rememberSaveable { mutableStateOf("6") }
+    var practiceCount by rememberSaveable { mutableStateOf("0") }
 
     val semesterValue = semester.toIntOrNull()
     val labsValue = labsCount.toIntOrNull()
+    val practiceValue = practiceCount.toIntOrNull()
     val isValid = title.isNotBlank() &&
             semesterValue != null && semesterValue in 1..12 &&
-            labsValue != null && labsValue in 0..30
+            labsValue != null && labsValue in 0..30 &&
+            practiceValue != null && practiceValue in 0..30
 
     val shape = RoundedCornerShape(12.dp)
 
@@ -75,7 +78,7 @@ fun AddSubjectDialog(
                 .padding(20.dp),
         ) {
             Text(
-                text = "Lab Tracker · Room DB",
+                text = "Лабораторные",
                 color = SlhRed,
                 style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp),
             )
@@ -94,18 +97,26 @@ fun AddSubjectDialog(
                 capitalization = KeyboardCapitalization.Sentences,
             )
             Spacer(modifier = Modifier.height(14.dp))
+            SlhTextField(
+                label = "СЕМЕСТР",
+                value = semester,
+                onValueChange = { input -> semester = input.filter { it.isDigit() }.take(2) },
+                keyboardType = KeyboardType.Number,
+                modifier = Modifier.width(120.dp),
+            )
+            Spacer(modifier = Modifier.height(14.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 SlhTextField(
-                    label = "СЕМЕСТР",
-                    value = semester,
-                    onValueChange = { input -> semester = input.filter { it.isDigit() }.take(2) },
+                    label = "ЛАБОРАТОРНЫХ",
+                    value = labsCount,
+                    onValueChange = { input -> labsCount = input.filter { it.isDigit() }.take(2) },
                     keyboardType = KeyboardType.Number,
                     modifier = Modifier.weight(1f),
                 )
                 SlhTextField(
-                    label = "КОЛ-ВО ЛР",
-                    value = labsCount,
-                    onValueChange = { input -> labsCount = input.filter { it.isDigit() }.take(2) },
+                    label = "ПРАКТИЧЕСКИХ",
+                    value = practiceCount,
+                    onValueChange = { input -> practiceCount = input.filter { it.isDigit() }.take(2) },
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Done,
                     modifier = Modifier.weight(1f),
@@ -122,8 +133,8 @@ fun AddSubjectDialog(
                     text = "ДОБАВИТЬ",
                     enabled = isValid,
                     onClick = {
-                        if (semesterValue != null && labsValue != null) {
-                            onConfirm(title, semesterValue, labsValue)
+                        if (semesterValue != null && labsValue != null && practiceValue != null) {
+                            onConfirm(title, semesterValue, labsValue, practiceValue)
                         }
                     },
                     modifier = Modifier.weight(1f),

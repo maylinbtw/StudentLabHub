@@ -5,6 +5,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.slh.studentlabhub.domain.model.LabStatus
+import com.slh.studentlabhub.domain.model.WorkType
 
 @Entity(
     tableName = "labs",
@@ -22,6 +23,7 @@ data class LabEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val subjectId: Long,
+    val type: WorkType = WorkType.LAB,
     val number: Int,
     val title: String,
     val status: LabStatus = LabStatus.NOT_DONE,

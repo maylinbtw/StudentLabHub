@@ -13,7 +13,12 @@ object Routes {
     const val ARG_SUBJECT_ID = "subjectId"
     const val LAB_LIST = "labs/{$ARG_SUBJECT_ID}"
 
+    const val ARG_LAB_ID = "labId"
+    const val LAB_DETAILS = "labs/lab/{$ARG_LAB_ID}"
+
     fun labList(subjectId: Long): String = "labs/$subjectId"
+
+    fun labDetails(labId: Long): String = "labs/lab/$labId"
 }
 
 enum class BottomTab(

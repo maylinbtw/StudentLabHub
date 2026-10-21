@@ -9,13 +9,14 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-enum class SlhIcon { Grid, Diamond, Menu, Square, Gear, Refresh, Back, More, Plus }
+enum class SlhIcon { Grid, Diamond, Menu, Square, Gear, Refresh, Back, More, Plus, Trash }
 
 @Composable
 fun SlhIconView(
@@ -36,6 +37,7 @@ fun SlhIconView(
             SlhIcon.Back -> drawBackIcon(color, u)
             SlhIcon.More -> drawMoreIcon(color, u)
             SlhIcon.Plus -> drawPlusIcon(color, u)
+            SlhIcon.Trash -> drawTrashIcon(color, u)
         }
     }
 }
@@ -155,4 +157,19 @@ private fun DrawScope.drawPlusIcon(color: Color, u: Float) {
     val w = 1.4f * u
     drawLine(color = color, start = Offset(9f * u, 3f * u), end = Offset(9f * u, 15f * u), strokeWidth = w, cap = StrokeCap.Round)
     drawLine(color = color, start = Offset(3f * u, 9f * u), end = Offset(15f * u, 9f * u), strokeWidth = w, cap = StrokeCap.Round)
+}
+
+private fun DrawScope.drawTrashIcon(color: Color, u: Float) {
+    val w = 1.4f * u
+    drawLine(color = color, start = Offset(2.5f * u, 4.5f * u), end = Offset(15.5f * u, 4.5f * u), strokeWidth = w, cap = StrokeCap.Round)
+    drawLine(color = color, start = Offset(7f * u, 2.2f * u), end = Offset(11f * u, 2.2f * u), strokeWidth = w, cap = StrokeCap.Round)
+    val body = Path().apply {
+        moveTo(4.2f * u, 4.5f * u)
+        lineTo(5.2f * u, 16f * u)
+        lineTo(12.8f * u, 16f * u)
+        lineTo(13.8f * u, 4.5f * u)
+    }
+    drawPath(path = body, color = color, style = Stroke(width = w, join = StrokeJoin.Round))
+    drawLine(color = color, start = Offset(7.4f * u, 7.5f * u), end = Offset(7.7f * u, 13f * u), strokeWidth = w, cap = StrokeCap.Round)
+    drawLine(color = color, start = Offset(10.6f * u, 7.5f * u), end = Offset(10.3f * u, 13f * u), strokeWidth = w, cap = StrokeCap.Round)
 }

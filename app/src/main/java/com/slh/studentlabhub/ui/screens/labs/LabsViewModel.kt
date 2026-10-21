@@ -45,12 +45,13 @@ class LabsViewModel(
             initialValue = LabsUiState(),
         )
 
-    fun addSubject(title: String, semester: Int, labsCount: Int) {
+    fun addSubject(title: String, semester: Int, labsCount: Int, practiceCount: Int) {
         viewModelScope.launch {
             repository.addSubject(
                 title = title.trim(),
                 semester = semester,
                 labsCount = labsCount,
+                practiceCount = practiceCount,
             )
         }
     }

@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.slh.studentlabhub.SlhApplication
 import com.slh.studentlabhub.domain.model.SubjectDetails
+import com.slh.studentlabhub.domain.model.WorkType
 import com.slh.studentlabhub.domain.repository.LabRepository
 import com.slh.studentlabhub.navigation.Routes
 import kotlinx.coroutines.flow.SharingStarted
@@ -40,6 +41,12 @@ class LabListViewModel(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = LabListUiState(),
         )
+
+    fun addWork(type: WorkType) {
+        viewModelScope.launch {
+            repository.addWork(subjectId, type)
+        }
+    }
 
     fun deleteSubject() {
         viewModelScope.launch {

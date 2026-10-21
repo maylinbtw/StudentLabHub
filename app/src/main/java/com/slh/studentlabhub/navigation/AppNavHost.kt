@@ -21,6 +21,7 @@ import com.slh.studentlabhub.ui.screens.auth.LoginScreen
 import com.slh.studentlabhub.ui.screens.auth.LoginUiState
 import com.slh.studentlabhub.ui.screens.deadlines.DeadlinesScreen
 import com.slh.studentlabhub.ui.screens.deadlines.sampleCourses
+import com.slh.studentlabhub.ui.screens.labdetails.LabDetailsRoute
 import com.slh.studentlabhub.ui.screens.lablist.LabListRoute
 import com.slh.studentlabhub.ui.screens.labs.LabsRoute
 import com.slh.studentlabhub.ui.screens.placeholder.PlaceholderScreen
@@ -93,17 +94,29 @@ fun SlhApp() {
             ) {
                 LabListRoute(
                     onBack = { navController.popBackStack() },
-                    onLabClick = {},
+                    onLabClick = { lab ->
+                        navController.navigate(Routes.labDetails(lab.id))
+                    },
+                )
+            }
+            composable(
+                route = Routes.LAB_DETAILS,
+                arguments = listOf(
+                    navArgument(Routes.ARG_LAB_ID) { type = NavType.LongType },
+                ),
+            ) {
+                LabDetailsRoute(
+                    onBack = { navController.popBackStack() },
                 )
             }
             composable(Routes.REFERENCE) {
-                PlaceholderScreen(overline = "Offline · SQLite", title = "СПРАВОЧНИК")
+                PlaceholderScreen(overline = "Работает без интернета", title = "СПРАВОЧНИК")
             }
             composable(Routes.CALENDAR) {
-                PlaceholderScreen(overline = "Ручная синхронизация", title = "КАЛЕНДАРЬ")
+                PlaceholderScreen(overline = "Дедлайны по датам", title = "КАЛЕНДАРЬ")
             }
             composable(Routes.SETTINGS) {
-                PlaceholderScreen(overline = "Авторизация / Офлайн-режим / Уведомления", title = "НАСТРОЙКИ")
+                PlaceholderScreen(overline = "Аккаунт и приложение", title = "НАСТРОЙКИ")
             }
         }
     }

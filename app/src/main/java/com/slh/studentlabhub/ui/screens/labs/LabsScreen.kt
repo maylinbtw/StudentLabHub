@@ -75,8 +75,8 @@ fun LabsRoute(
     if (showAddDialog) {
         AddSubjectDialog(
             onDismiss = { showAddDialog = false },
-            onConfirm = { title, semester, labsCount ->
-                viewModel.addSubject(title, semester, labsCount)
+            onConfirm = { title, semester, labsCount, practiceCount ->
+                viewModel.addSubject(title, semester, labsCount, practiceCount)
                 showAddDialog = false
             },
         )
@@ -97,7 +97,7 @@ fun LabsScreen(
             .background(SlhBlack),
     ) {
         ScreenHeader(
-            overline = "Lab Tracker · Room DB",
+            overline = "Учёт и оценки",
             title = "ЛАБОРАТОРНЫЕ",
             actionIcon = SlhIcon.Plus,
             onActionClick = onAddSubjectClick,
@@ -121,7 +121,7 @@ fun LabsScreen(
                 if (state.sections.isEmpty()) {
                     item(key = "empty") {
                         Text(
-                            text = "Пока нет предметов.\nДобавь первый, чтобы начать учёт лабораторных.",
+                            text = "Пока нет предметов.\nДобавь первый, чтобы начать учёт работ.",
                             color = SlhTextMuted,
                             style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,
@@ -256,8 +256,8 @@ private val previewState = LabsUiState(
         SemesterSection(
             semester = 4,
             subjects = listOf(
-                SubjectSummary(1, "ТРПО", 4, 8, 5, 3, 8.33),
-                SubjectSummary(2, "Операционные системы", 4, 6, 3, 2, 7.5),
+                SubjectSummary(1, "ТРПО", 4, 9, 7, 5, 8.5),
+                SubjectSummary(2, "Операционные системы", 4, 6, 5, 4, 7.5),
                 SubjectSummary(3, "Программирование Java", 4, 5, 5, 5, 9.0),
             ),
         ),
@@ -277,10 +277,10 @@ private fun LabsScreenPreview() {
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF000000, widthDp = 390, heightDp = 600)
+@Preview(showBackground = true, backgroundColor = 0xFF000000, widthDp = 390, heightDp = 640)
 @Composable
 private fun AddSubjectDialogPreview() {
     StudentLabHubTheme {
-        AddSubjectDialog(onDismiss = {}, onConfirm = { _, _, _ -> })
+        AddSubjectDialog(onDismiss = {}, onConfirm = { _, _, _, _ -> })
     }
 }

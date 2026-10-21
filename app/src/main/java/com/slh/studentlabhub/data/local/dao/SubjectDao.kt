@@ -18,6 +18,9 @@ interface SubjectDao {
     @Query("SELECT * FROM subjects WHERE id = :id")
     fun observeSubjectWithLabs(id: Long): Flow<SubjectWithLabs?>
 
+    @Query("SELECT title FROM subjects WHERE id = :id")
+    suspend fun getTitle(id: Long): String?
+
     @Insert
     suspend fun insert(subject: SubjectEntity): Long
 

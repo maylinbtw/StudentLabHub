@@ -51,8 +51,14 @@ import com.slh.studentlabhub.domain.model.Lab
 import com.slh.studentlabhub.domain.model.LabStatus
 import com.slh.studentlabhub.domain.model.SubjectDetails
 import com.slh.studentlabhub.domain.model.SubjectSummary
+import com.slh.studentlabhub.domain.model.WorkType
 import com.slh.studentlabhub.ui.components.ScreenHeader
+import com.slh.studentlabhub.ui.components.SectionLabel
 import com.slh.studentlabhub.ui.components.SlhIcon
+import com.slh.studentlabhub.ui.components.SlhIconView
+import com.slh.studentlabhub.ui.components.addButtonLabel
+import com.slh.studentlabhub.ui.components.displayName
+import com.slh.studentlabhub.ui.components.sectionTitle
 import com.slh.studentlabhub.ui.theme.SlhBlack
 import com.slh.studentlabhub.ui.theme.SlhDotInactive
 import com.slh.studentlabhub.ui.theme.SlhMono
@@ -85,6 +91,7 @@ fun LabListRoute(
         state = state,
         onBack = onBack,
         onLabClick = onLabClick,
+        onAddWork = viewModel::addWork,
         onDeleteSubject = viewModel::deleteSubject,
         modifier = modifier,
     )
@@ -95,6 +102,7 @@ fun LabListScreen(
     state: LabListUiState,
     onBack: () -> Unit,
     onLabClick: (Lab) -> Unit,
+    onAddWork: (WorkType) -> Unit,
     onDeleteSubject: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -108,7 +116,7 @@ fun LabListScreen(
             .background(SlhBlack),
     ) {
         ScreenHeader(
-            overline = "Лабораторные работы",
+            overline = "Лабораторные и практические",
             title = details?.summary?.title?.uppercase(Locale.getDefault()) ?: "",
             onBackClick = onBack,
             actionIcon = SlhIcon.More,
@@ -164,7 +172,7 @@ fun LabListScreen(
                     if (details.labs.isEmpty()) {
                         item(key = "empty") {
                             Text(
-                                text = "В этом предмете пока нет лабораторных работ",
+                                text = "В этом предмете пока нет работ",
                                 color = SlhTextMuted,
                                 style = MaterialTheme.typography.bodyMedium,
                                 textAlign = TextAlign.Center,
@@ -174,12 +182,35 @@ fun LabListScreen(
                             )
                         }
                     }
-                    items(items = details.labs, key = { it.id }) { lab ->
-                        LabRow(
-                            lab = lab,
-                            onClick = { onLabClick(lab) },
-                        )
-                        HorizontalDivider(thickness = 1.dp, color = SlhOutline)
+                    WorkType.entries.forEach { type ->
+                        val works = details.labs.filter { it.type == type }
+                        if (works.isNotEmpty()) {
+                            item(key = "section_${type.name}") {
+                                Spacer(modifier = Modifier.height(18.dp))
+                                SectionLabel(text = "${type.sectionTitle} · ${works.size}")
+                                Spacer(modifier = Modifier.height(4.dp))
+                                HorizontalDivider(thickness = 1.dp, color = SlhOutline)
+                            }
+                            items(items = works, key = { it.id }) { lab ->
+                                LabRow(
+                                    lab = lab,
+                                    onClick = { onLabClick(lab) },
+                                )
+                                HorizontalDivider(thickness = 1.dp, color = SlhOutline)
+                            }
+                        }
+                    }
+                    item(key = "add_buttons") {
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            WorkType.entries.forEach { type ->
+                                AddWorkButton(
+                                    text = type.addButtonLabel,
+                                    onClick = { onAddWork(type) },
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -199,7 +230,7 @@ fun LabListScreen(
             },
             text = {
                 Text(
-                    text = "Предмет «${details?.summary?.title.orEmpty()}» и все его лабораторные работы будут удалены без возможности восстановления.",
+                    text = "Предмет «${details?.summary?.title.orEmpty()}» и все его работы будут удалены без возможности восстановления.",
                     color = SlhTextSecondary,
                     style = MaterialTheme.typography.bodyMedium,
                 )
@@ -284,6 +315,7 @@ private fun LabRow(
     onClick: () -> Unit,
 ) {
     val isActive = lab.status != LabStatus.NOT_DONE
+    val showScore = lab.type == WorkType.PRACTICE && lab.score != null && isActive
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -294,7 +326,7 @@ private fun LabRow(
         StatusBox(status = lab.status)
         Spacer(modifier = Modifier.width(12.dp))
         Text(
-            text = "ЛР №${lab.number} · ${lab.title}",
+            text = lab.displayName,
             color = if (isActive) SlhWhite else SlhTextMuted,
             fontFamily = SlhSans,
             fontSize = 14.sp,
@@ -302,9 +334,9 @@ private fun LabRow(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
-        if (lab.score != null && isActive) {
+        if (showScore && lab.score != null) {
             Spacer(modifier = Modifier.width(12.dp))
-            ScoreChip(score = lab.score, defended = lab.status == LabStatus.DEFENDED)
+            ScoreChip(score = lab.score, completed = lab.status == LabStatus.DEFENDED)
         }
     }
 }
@@ -345,14 +377,14 @@ private fun StatusBox(status: LabStatus) {
 @Composable
 private fun ScoreChip(
     score: Int,
-    defended: Boolean,
+    completed: Boolean,
 ) {
     Box(
         modifier = Modifier
             .defaultMinSize(minWidth = 30.dp)
             .height(22.dp)
             .clip(RoundedCornerShape(4.dp))
-            .background(if (defended) SlhRed else SlhDotInactive)
+            .background(if (completed) SlhRed else SlhDotInactive)
             .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -366,29 +398,57 @@ private fun ScoreChip(
     }
 }
 
+@Composable
+private fun AddWorkButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val shape = RoundedCornerShape(8.dp)
+    Row(
+        modifier = modifier
+            .height(38.dp)
+            .clip(shape)
+            .border(1.dp, SlhOutline, shape)
+            .clickable(role = Role.Button, onClick = onClick),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        SlhIconView(icon = SlhIcon.Plus, color = SlhTextMuted, size = 12.dp)
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = text,
+            color = SlhTextMuted,
+            style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.sp),
+            maxLines = 1,
+        )
+    }
+}
+
 private val previewDetails = SubjectDetails(
     summary = SubjectSummary(
         id = 1,
         title = "ТРПО",
         semester = 4,
-        totalLabs = 8,
-        doneLabs = 5,
-        defendedLabs = 3,
-        averageScore = 8.33,
+        totalLabs = 9,
+        doneLabs = 7,
+        defendedLabs = 5,
+        averageScore = 8.5,
     ),
     labs = listOf(
-        Lab(1, 1, 1, "Анализ задачи", LabStatus.DEFENDED, 9, "", null),
-        Lab(2, 1, 2, "Требования", LabStatus.DEFENDED, 8, "", null),
-        Lab(3, 1, 3, "Функц. требования", LabStatus.DEFENDED, 8, "", null),
-        Lab(4, 1, 4, "Модель ЖЦ", LabStatus.DONE, 9, "", null),
-        Lab(5, 1, 5, "Структурное пр.", LabStatus.NOT_DONE, null, "", null),
-        Lab(6, 1, 6, "UX-прототипы", LabStatus.NOT_DONE, null, "", null),
-        Lab(7, 1, 7, "UI-прототипы", LabStatus.NOT_DONE, null, "", null),
-        Lab(8, 1, 8, "Тестирование", LabStatus.NOT_DONE, null, "", null),
+        Lab(1, 1, WorkType.LAB, 1, "Анализ задачи", LabStatus.DEFENDED, null, "", null),
+        Lab(2, 1, WorkType.LAB, 2, "Требования", LabStatus.DEFENDED, null, "", null),
+        Lab(3, 1, WorkType.LAB, 3, "Функц. требования", LabStatus.DEFENDED, null, "", null),
+        Lab(4, 1, WorkType.LAB, 4, "Модель ЖЦ", LabStatus.DONE, null, "", null),
+        Lab(5, 1, WorkType.LAB, 5, "Структурное пр.", LabStatus.DONE, null, "", null),
+        Lab(6, 1, WorkType.LAB, 6, "UX-прототипы", LabStatus.NOT_DONE, null, "", null),
+        Lab(7, 1, WorkType.PRACTICE, 1, "Диаграмма вариантов использования", LabStatus.DEFENDED, 9, "", null),
+        Lab(8, 1, WorkType.PRACTICE, 2, "Диаграмма классов", LabStatus.DEFENDED, 8, "", null),
+        Lab(9, 1, WorkType.PRACTICE, 3, "Тест-кейсы", LabStatus.NOT_DONE, null, "", null),
     ),
 )
 
-@Preview(showBackground = true, backgroundColor = 0xFF000000, widthDp = 390, heightDp = 780)
+@Preview(showBackground = true, backgroundColor = 0xFF000000, widthDp = 390, heightDp = 900)
 @Composable
 private fun LabListScreenPreview() {
     StudentLabHubTheme {
@@ -396,6 +456,7 @@ private fun LabListScreenPreview() {
             state = LabListUiState(isLoading = false, details = previewDetails),
             onBack = {},
             onLabClick = {},
+            onAddWork = {},
             onDeleteSubject = {},
         )
     }

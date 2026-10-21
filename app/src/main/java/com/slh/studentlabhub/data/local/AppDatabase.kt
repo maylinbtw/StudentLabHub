@@ -11,7 +11,7 @@ import com.slh.studentlabhub.data.local.entity.SubjectEntity
 
 @Database(
     entities = [SubjectEntity::class, LabEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
