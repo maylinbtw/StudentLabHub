@@ -10,6 +10,9 @@ object Routes {
     const val CALENDAR = "calendar"
     const val SETTINGS = "settings"
 
+    const val ARG_COURSE_ID = "courseId"
+    const val COURSE_TASKS = "deadlines/course/{$ARG_COURSE_ID}"
+
     const val ARG_SUBJECT_ID = "subjectId"
     const val LAB_LIST = "labs/{$ARG_SUBJECT_ID}"
 
@@ -17,6 +20,8 @@ object Routes {
     const val LAB_DETAILS = "labs/lab/{$ARG_LAB_ID}"
 
     const val STATISTICS = "labs/statistics/summary"
+
+    fun courseTasks(courseId: String): String = "deadlines/course/$courseId"
 
     fun labList(subjectId: Long): String = "labs/$subjectId"
 

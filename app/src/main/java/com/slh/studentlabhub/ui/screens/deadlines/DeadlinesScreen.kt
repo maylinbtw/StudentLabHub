@@ -18,80 +18,91 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.slh.studentlabhub.domain.model.CourseOverview
+import com.slh.studentlabhub.ui.auth.rememberGoogleAuthorization
 import com.slh.studentlabhub.ui.components.DotMatrixText
 import com.slh.studentlabhub.ui.components.ScreenHeader
 import com.slh.studentlabhub.ui.components.SectionLabel
 import com.slh.studentlabhub.ui.components.SlhIcon
 import com.slh.studentlabhub.ui.components.SlhIconView
+import com.slh.studentlabhub.ui.components.SlhProgressDots
 import com.slh.studentlabhub.ui.theme.SlhBlack
-import com.slh.studentlabhub.ui.theme.SlhDotInactive
+import com.slh.studentlabhub.ui.theme.SlhMono
 import com.slh.studentlabhub.ui.theme.SlhOutline
 import com.slh.studentlabhub.ui.theme.SlhRed
+import com.slh.studentlabhub.ui.theme.SlhSans
 import com.slh.studentlabhub.ui.theme.SlhSurface
+import com.slh.studentlabhub.ui.theme.SlhTextDisabled
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
+import com.slh.studentlabhub.ui.theme.SlhTextSecondary
 import com.slh.studentlabhub.ui.theme.SlhWhite
 import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-data class CourseUi(
-    val id: Long,
-    val title: String,
-    val tasksCount: Int,
-    val completedTasks: Int,
-    val nearestDeadline: String,
-    val averageScore: Double,
-)
+private val shortDateFormatter: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("EEE, dd.MM", Locale.forLanguageTag("ru"))
+private val syncTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM HH:mm")
 
-val sampleCourses = listOf(
-    CourseUi(
-        id = 1,
-        title = "ТРПО",
-        tasksCount = 8,
-        completedTasks = 5,
-        nearestDeadline = "15.07",
-        averageScore = 8.3,
-    ),
-    CourseUi(
-        id = 2,
-        title = "Операционные системы",
-        tasksCount = 5,
-        completedTasks = 3,
-        nearestDeadline = "20.07",
-        averageScore = 7.5,
-    ),
-    CourseUi(
-        id = 3,
-        title = "Программирование Java",
-        tasksCount = 6,
-        completedTasks = 5,
-        nearestDeadline = "25.07",
-        averageScore = 9.0,
-    ),
-)
+@Composable
+fun DeadlinesRoute(
+    onCourseClick: (CourseOverview) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: DeadlinesViewModel = viewModel(factory = DeadlinesViewModel.Factory),
+) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    val authorize = rememberGoogleAuthorization(
+        onAuthorized = viewModel::sync,
+        onError = viewModel::onAuthorizationFailed,
+    )
+
+    DeadlinesScreen(
+        state = state,
+        onCourseClick = onCourseClick,
+        onSyncClick = {
+            if (!state.isSyncing) {
+                viewModel.onSyncStarted()
+                authorize()
+            }
+        },
+        modifier = modifier,
+    )
+}
 
 @Composable
 fun DeadlinesScreen(
-    courses: List<CourseUi>,
-    onCourseClick: (CourseUi) -> Unit,
+    state: DeadlinesUiState,
+    onCourseClick: (CourseOverview) -> Unit,
     onSyncClick: () -> Unit,
     modifier: Modifier = Modifier,
-    isSyncing: Boolean = false,
 ) {
+    val highlightedId = state.courses
+        .filter { it.nearestDeadline != null }
+        .minByOrNull { it.nearestDeadline ?: Long.MAX_VALUE }
+        ?.id
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -103,26 +114,79 @@ fun DeadlinesScreen(
             actionIcon = SlhIcon.Refresh,
             onActionClick = onSyncClick,
         )
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 24.dp),
-        ) {
-            item {
-                SectionLabel(text = "МОИ КУРСЫ")
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-            itemsIndexed(items = courses, key = { _, course -> course.id }) { index, course ->
-                CourseCard(
-                    course = course,
-                    highlighted = index == 0,
-                    onClick = { onCourseClick(course) },
+        if (state.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = SlhRed,
+                    strokeWidth = 2.dp,
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                ProgressDots(total = course.tasksCount, filled = course.completedTasks)
-                Spacer(modifier = Modifier.height(14.dp))
             }
-            item {
-                SyncButton(isSyncing = isSyncing, onClick = onSyncClick)
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 24.dp),
+            ) {
+                item(key = "header") {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        SectionLabel(
+                            text = "МОИ КУРСЫ",
+                            modifier = Modifier.weight(1f),
+                        )
+                        state.lastSyncAt?.let { syncedAt ->
+                            Text(
+                                text = "обновлено ${syncedAt.format(syncTimeFormatter)}",
+                                color = SlhTextMuted,
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                    }
+                    state.errorMessage?.let { message ->
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = message,
+                            color = SlhRed,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                if (state.courses.isEmpty()) {
+                    item(key = "empty") {
+                        Text(
+                            text = if (state.isSyncing) {
+                                "Загружаем курсы из Google Classroom…"
+                            } else {
+                                "Курсы ещё не загружены.\nНажми «синхронизировать с GC»."
+                            },
+                            color = SlhTextMuted,
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 32.dp),
+                        )
+                    }
+                }
+                items(items = state.courses, key = { it.id }) { course ->
+                    CourseCard(
+                        course = course,
+                        highlighted = course.id == highlightedId,
+                        onClick = { onCourseClick(course) },
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    SlhProgressDots(total = course.tasksCount, filled = course.completedCount)
+                    Spacer(modifier = Modifier.height(14.dp))
+                }
+                item(key = "sync") {
+                    SyncButton(isSyncing = state.isSyncing, onClick = onSyncClick)
+                }
             }
         }
     }
@@ -130,7 +194,7 @@ fun DeadlinesScreen(
 
 @Composable
 private fun CourseCard(
-    course: CourseUi,
+    course: CourseOverview,
     highlighted: Boolean,
     onClick: () -> Unit,
 ) {
@@ -167,37 +231,50 @@ private fun CourseCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+                course.teacherName?.let { teacher ->
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = teacher,
+                        color = SlhTextSecondary,
+                        fontFamily = SlhSans,
+                        fontSize = 12.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "${course.tasksCount} ${tasksWord(course.tasksCount)} · дедлайн ${course.nearestDeadline}",
+                    text = courseSubtitle(course),
                     color = SlhTextMuted,
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+                if (course.redoCount > 0) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "${course.redoCount} на доработку",
+                        color = SlhRed,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
             }
             Spacer(modifier = Modifier.width(12.dp))
-            DotMatrixText(
-                text = String.format(Locale.US, "%.1f", course.averageScore),
-                color = SlhRed,
-            )
-        }
-    }
-}
-
-@Composable
-private fun ProgressDots(
-    total: Int,
-    filled: Int,
-) {
-    Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-        repeat(total) { index ->
-            Box(
-                modifier = Modifier
-                    .size(7.dp)
-                    .clip(CircleShape)
-                    .background(if (index < filled) SlhWhite else SlhDotInactive),
-            )
+            val average = course.averageScore
+            if (average != null) {
+                DotMatrixText(
+                    text = String.format(Locale.US, "%.1f", average),
+                    color = SlhRed,
+                )
+            } else {
+                Text(
+                    text = "—",
+                    color = SlhTextDisabled,
+                    fontFamily = SlhMono,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                )
+            }
         }
     }
 }
@@ -229,12 +306,25 @@ private fun SyncButton(
         }
         Spacer(modifier = Modifier.width(10.dp))
         Text(
-            text = "синхронизировать с GC",
+            text = if (isSyncing) "синхронизация…" else "синхронизировать с GC",
             color = SlhTextMuted,
             style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.5.sp),
         )
     }
 }
+
+private fun courseSubtitle(course: CourseOverview): String {
+    val tasks = "${course.tasksCount} ${tasksWord(course.tasksCount)}"
+    val deadline = course.nearestDeadline
+        ?.let { "дедлайн ${it.format(shortDateFormatter)}" }
+        ?: "нет активных дедлайнов"
+    return "$tasks · $deadline"
+}
+
+private fun Long.format(formatter: DateTimeFormatter): String =
+    Instant.ofEpochMilli(this)
+        .atZone(ZoneId.systemDefault())
+        .format(formatter)
 
 private fun tasksWord(count: Int): String {
     val mod100 = count % 100
@@ -247,12 +337,49 @@ private fun tasksWord(count: Int): String {
     }
 }
 
+private val previewCourses = listOf(
+    CourseOverview(
+        id = "1",
+        title = "ТРПО",
+        teacherName = "Иванова Анна Сергеевна",
+        tasksCount = 8,
+        completedCount = 5,
+        redoCount = 0,
+        nearestDeadline = 1_784_000_000_000,
+        averageScore = 8.3,
+    ),
+    CourseOverview(
+        id = "2",
+        title = "Операционные системы",
+        teacherName = "Петров Игорь Николаевич +1",
+        tasksCount = 5,
+        completedCount = 3,
+        redoCount = 0,
+        nearestDeadline = 1_785_000_000_000,
+        averageScore = 7.5,
+    ),
+    CourseOverview(
+        id = "3",
+        title = "Программирование Java",
+        teacherName = null,
+        tasksCount = 6,
+        completedCount = 6,
+        redoCount = 0,
+        nearestDeadline = null,
+        averageScore = null,
+    ),
+)
+
 @Preview(showBackground = true, backgroundColor = 0xFF000000, widthDp = 390, heightDp = 780)
 @Composable
 private fun DeadlinesScreenPreview() {
     StudentLabHubTheme {
         DeadlinesScreen(
-            courses = sampleCourses,
+            state = DeadlinesUiState(
+                isLoading = false,
+                courses = previewCourses,
+                lastSyncAt = 1_784_000_000_000,
+            ),
             onCourseClick = {},
             onSyncClick = {},
         )

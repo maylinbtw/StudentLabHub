@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 private object DotMatrixFont {
-    private val dash = listOf("...", "...", "...", "###", "...", "...", "...")
+    private val dash = listOf(".....", ".....", ".....", "#####", ".....", ".....", ".....")
 
     val glyphs: Map<Char, List<String>> = mapOf(
         '0' to listOf(".###.", "#...#", "#...#", "#...#", "#...#", "#...#", ".###."),
