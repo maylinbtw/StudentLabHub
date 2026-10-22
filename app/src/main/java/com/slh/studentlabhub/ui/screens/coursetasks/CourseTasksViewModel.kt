@@ -29,19 +29,20 @@ data class CourseTasksUiState(
 
 class CourseTasksViewModel(
     private val courseId: String,
-    classroomRepository: ClassroomRepository,
+    private val classroomRepository: ClassroomRepository,
     private val labRepository: LabRepository,
 ) : ViewModel() {
 
     val uiState: StateFlow<CourseTasksUiState> = combine(
         classroomRepository.observeCourseTasks(courseId),
         labRepository.observeSubjects(),
-    ) { course, subjects ->
+        labRepository.observeArchivedSubjects(),
+    ) { course, subjects, archivedSubjects ->
         CourseTasksUiState(
             isLoading = false,
             isMissing = course == null,
             course = course,
-            linkedSubject = subjects.firstOrNull { it.classroomCourseId == courseId },
+            linkedSubject = (subjects + archivedSubjects).firstOrNull { it.classroomCourseId == courseId },
             subjects = subjects,
             now = System.currentTimeMillis(),
         )
@@ -54,6 +55,16 @@ class CourseTasksViewModel(
     fun linkSubject(subjectId: Long) {
         viewModelScope.launch {
             labRepository.linkSubjectToCourse(subjectId, courseId)
+        }
+    }
+
+    fun setArchived(archived: Boolean) {
+        val linked = uiState.value.linkedSubject
+        classroomRepository.setCourseArchived(courseId, archived)
+        if (linked != null) {
+            viewModelScope.launch {
+                labRepository.setSubjectArchived(linked.id, archived)
+            }
         }
     }
 

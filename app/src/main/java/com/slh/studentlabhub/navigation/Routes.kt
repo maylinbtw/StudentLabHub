@@ -12,6 +12,8 @@ object Routes {
 
     const val STATISTICS = "today/statistics"
 
+    const val ARCHIVE = "archive"
+
     const val ARG_SUBJECT_ID = "subjectId"
     const val SUBJECT = "subjects/{$ARG_SUBJECT_ID}"
 

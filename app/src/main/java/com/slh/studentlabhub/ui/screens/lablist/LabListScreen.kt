@@ -107,6 +107,8 @@ fun LabListRoute(
         onOpenCourse = onOpenCourse,
         onLinkCourse = viewModel::linkCourse,
         onUnlinkCourse = viewModel::unlinkCourse,
+        onArchive = { viewModel.setArchived(true) },
+        onRestore = { viewModel.setArchived(false) },
         modifier = modifier,
     )
 }
@@ -123,6 +125,8 @@ fun LabListScreen(
     modifier: Modifier = Modifier,
     onLinkCourse: (courseId: String) -> Unit = {},
     onUnlinkCourse: () -> Unit = {},
+    onArchive: () -> Unit = {},
+    onRestore: () -> Unit = {},
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     var showDeleteConfirm by rememberSaveable { mutableStateOf(false) }
@@ -130,6 +134,7 @@ fun LabListScreen(
     var showCoursePicker by rememberSaveable { mutableStateOf(false) }
     val details = state.details
     val linkedCourseId = details?.summary?.classroomCourseId
+    val isArchived = details?.summary?.archived == true
 
     Column(
         modifier = modifier
@@ -137,7 +142,11 @@ fun LabListScreen(
             .background(SlhBackground),
     ) {
         ScreenHeader(
-            overline = if (linkedCourseId != null) "Предмет · связан с Classroom" else "Предмет",
+            overline = when {
+                isArchived -> "Предмет · в архиве"
+                linkedCourseId != null -> "Предмет · связан с Classroom"
+                else -> "Предмет"
+            },
             title = details?.summary?.title?.uppercase(Locale.getDefault()) ?: "",
             onBackClick = onBack,
             actionIcon = SlhIcon.More,
@@ -195,6 +204,20 @@ fun LabListScreen(
                     DropdownMenuItem(
                         text = {
                             Text(
+                                text = if (isArchived) "Вернуть из архива" else "В архив",
+                                color = SlhWhite,
+                                fontFamily = SlhSans,
+                                fontSize = 14.sp,
+                            )
+                        },
+                        onClick = {
+                            menuExpanded = false
+                            if (isArchived) onRestore() else onArchive()
+                        },
+                    )
+                    DropdownMenuItem(
+                        text = {
+                            Text(
                                 text = "Удалить предмет",
                                 color = SlhDanger,
                                 fontFamily = SlhSans,
@@ -229,6 +252,18 @@ fun LabListScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 24.dp),
                 ) {
+                    if (isArchived) {
+                        item(key = "archived_banner") {
+                            LinkBanner(
+                                overline = "В АРХИВЕ",
+                                title = "Вернуть предмет в список",
+                                subtitle = "Сейчас он скрыт из «Сегодня» и «Предметов»",
+                                onClick = onRestore,
+                                accent = false,
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                    }
                     item(key = "stats") {
                         StatsRow(summary = details.summary)
                         Spacer(modifier = Modifier.height(14.dp))

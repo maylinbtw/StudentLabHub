@@ -31,6 +31,12 @@ class SessionStore(context: Context) {
             prefs.edit().putInt(KEY_REFERENCE_VERSION, value).apply()
         }
 
+    var archivedCourseIds: Set<String>
+        get() = prefs.getStringSet(KEY_ARCHIVED_COURSES, emptySet())?.toSet().orEmpty()
+        set(value) {
+            prefs.edit().putStringSet(KEY_ARCHIVED_COURSES, value.toSet()).apply()
+        }
+
     fun clear() {
         prefs.edit()
             .remove(KEY_EMAIL)
@@ -46,5 +52,6 @@ class SessionStore(context: Context) {
         private const val KEY_LAST_SYNC = "last_sync_at"
         private const val KEY_REDO_THRESHOLD = "redo_threshold"
         private const val KEY_REFERENCE_VERSION = "reference_version"
+        private const val KEY_ARCHIVED_COURSES = "archived_courses"
     }
 }

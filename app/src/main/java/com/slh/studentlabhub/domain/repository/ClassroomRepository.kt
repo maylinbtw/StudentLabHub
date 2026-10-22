@@ -15,6 +15,10 @@ interface ClassroomRepository {
 
     fun setRedoThreshold(value: Int)
 
+    fun setCourseArchived(courseId: String, archived: Boolean)
+
+    fun setCoursesArchived(courseIds: Collection<String>, archived: Boolean)
+
     fun observeCourses(): Flow<List<CourseOverview>>
 
     fun observeCourseTasks(courseId: String): Flow<CourseTasks?>

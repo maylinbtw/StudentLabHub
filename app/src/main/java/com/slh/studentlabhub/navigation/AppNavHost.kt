@@ -17,6 +17,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.slh.studentlabhub.SlhApplication
 import com.slh.studentlabhub.ui.components.SlhBottomBar
+import com.slh.studentlabhub.ui.screens.archive.ArchiveRoute
 import com.slh.studentlabhub.ui.screens.auth.LoginRoute
 import com.slh.studentlabhub.ui.screens.coursetasks.CourseTasksRoute
 import com.slh.studentlabhub.ui.screens.labdetails.LabDetailsRoute
@@ -103,6 +104,14 @@ fun SlhApp() {
                 SubjectsRoute(
                     onSubjectClick = { navController.navigate(Routes.subject(it)) },
                     onCourseClick = { navController.navigate(Routes.courseTasks(it)) },
+                    onOpenArchive = { navController.navigate(Routes.ARCHIVE) },
+                )
+            }
+            composable(Routes.ARCHIVE) {
+                ArchiveRoute(
+                    onBack = { navController.popBackStack() },
+                    onOpenSubject = { navController.navigate(Routes.subject(it)) },
+                    onOpenCourse = { navController.navigate(Routes.courseTasks(it)) },
                 )
             }
             composable(

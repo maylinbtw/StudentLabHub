@@ -24,7 +24,21 @@ class LabRepositoryImpl(
     private val labDao = database.labDao()
 
     override fun observeSubjects(): Flow<List<SubjectSummary>> =
-        subjectDao.observeSubjectsWithLabs().map { list -> list.map { it.toSummary() } }
+        subjectDao.observeSubjectsWithLabs(archived = false).map { list -> list.map { it.toSummary() } }
+
+    override fun observeArchivedSubjects(): Flow<List<SubjectSummary>> =
+        subjectDao.observeSubjectsWithLabs(archived = true).map { list -> list.map { it.toSummary() } }
+
+    override suspend fun setSubjectArchived(subjectId: Long, archived: Boolean) {
+        subjectDao.setArchived(subjectId, archived)
+    }
+
+    override suspend fun archiveSemester(semester: Int): List<String> =
+        database.withTransaction {
+            val courseIds = subjectDao.courseIdsInSemester(semester)
+            subjectDao.archiveSemester(semester)
+            courseIds
+        }
 
     override fun observeSubjectDetails(subjectId: Long): Flow<SubjectDetails?> =
         subjectDao.observeSubjectWithLabs(subjectId).map { subjectWithLabs ->
@@ -247,6 +261,7 @@ private fun SubjectWithLabs.toSummary(): SubjectSummary {
         defendedLabs = defended,
         averageScore = if (scores.isEmpty()) null else scores.average(),
         classroomCourseId = subject.classroomCourseId,
+        archived = subject.archived,
     )
 }
 

@@ -98,6 +98,8 @@ fun CourseTasksRoute(
         onLinkSubject = viewModel::linkSubject,
         onUnlinkSubject = viewModel::unlinkSubject,
         onCreateSubject = viewModel::createLinkedSubject,
+        onArchive = { viewModel.setArchived(true) },
+        onRestore = { viewModel.setArchived(false) },
         modifier = modifier,
     )
 }
@@ -112,6 +114,8 @@ fun CourseTasksScreen(
     onUnlinkSubject: () -> Unit,
     onCreateSubject: () -> Unit,
     modifier: Modifier = Modifier,
+    onArchive: () -> Unit = {},
+    onRestore: () -> Unit = {},
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     var showPicker by rememberSaveable { mutableStateOf(false) }
@@ -124,7 +128,7 @@ fun CourseTasksScreen(
             .background(SlhBackground),
     ) {
         ScreenHeader(
-            overline = "Задания курса",
+            overline = if (course?.archived == true) "Задания курса · в архиве" else "Задания курса",
             title = course?.title?.uppercase(Locale.getDefault()) ?: "",
             onBackClick = onBack,
             actionIcon = if (course != null) SlhIcon.More else null,
@@ -151,6 +155,15 @@ fun CourseTasksScreen(
                         onClick = {
                             menuExpanded = false
                             showPicker = true
+                        },
+                    )
+                    DropdownMenuItem(
+                        text = {
+                            MenuText(text = if (course?.archived == true) "Вернуть из архива" else "В архив")
+                        },
+                        onClick = {
+                            menuExpanded = false
+                            if (course?.archived == true) onRestore() else onArchive()
                         },
                     )
                     if (linked != null) {
@@ -189,6 +202,18 @@ fun CourseTasksScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 24.dp),
             ) {
+                if (course.archived) {
+                    item(key = "archived_banner") {
+                        LinkBanner(
+                            overline = "В АРХИВЕ",
+                            title = "Вернуть курс",
+                            subtitle = "Сейчас его задания не показываются на «Сегодня»",
+                            onClick = onRestore,
+                            accent = false,
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+                }
                 item(key = "subject_link") {
                     if (linked != null) {
                         LinkBanner(

@@ -30,6 +30,7 @@ data class SubjectsUiState(
     val isLoading: Boolean = true,
     val groups: List<SemesterGroup> = emptyList(),
     val unlinkedCourses: List<CourseOverview> = emptyList(),
+    val archivedCount: Int = 0,
     val now: Long = System.currentTimeMillis(),
 ) {
     val isEmpty: Boolean
@@ -38,15 +39,16 @@ data class SubjectsUiState(
 
 class SubjectsViewModel(
     private val labRepository: LabRepository,
-    classroomRepository: ClassroomRepository,
+    private val classroomRepository: ClassroomRepository,
 ) : ViewModel() {
 
     val uiState: StateFlow<SubjectsUiState> = combine(
         labRepository.observeSubjects(),
+        labRepository.observeArchivedSubjects(),
         classroomRepository.observeCourses(),
-    ) { subjects, courses ->
+    ) { subjects, archivedSubjects, courses ->
         val coursesById = courses.associateBy { it.id }
-        val linkedIds = subjects.mapNotNull { it.classroomCourseId }.toSet()
+        val linkedIds = (subjects + archivedSubjects).mapNotNull { it.classroomCourseId }.toSet()
         SubjectsUiState(
             isLoading = false,
             groups = subjects
@@ -55,7 +57,8 @@ class SubjectsViewModel(
                 .entries
                 .sortedByDescending { it.key }
                 .map { SemesterGroup(semester = it.key, subjects = it.value) },
-            unlinkedCourses = courses.filter { it.id !in linkedIds },
+            unlinkedCourses = courses.filter { it.id !in linkedIds && !it.archived },
+            archivedCount = archivedSubjects.size + courses.count { it.archived && it.id !in linkedIds },
             now = System.currentTimeMillis(),
         )
     }.stateIn(
@@ -78,6 +81,17 @@ class SubjectsViewModel(
     fun addCourse(course: CourseOverview) {
         viewModelScope.launch {
             labRepository.createSubjectForCourse(course.title, course.id)
+        }
+    }
+
+    fun archiveCourse(course: CourseOverview) {
+        classroomRepository.setCourseArchived(course.id, archived = true)
+    }
+
+    fun archiveSemester(semester: Int) {
+        viewModelScope.launch {
+            val courseIds = labRepository.archiveSemester(semester)
+            classroomRepository.setCoursesArchived(courseIds, archived = true)
         }
     }
 

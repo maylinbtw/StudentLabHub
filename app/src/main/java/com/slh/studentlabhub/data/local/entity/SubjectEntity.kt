@@ -1,5 +1,6 @@
 package com.slh.studentlabhub.data.local.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -11,4 +12,6 @@ data class SubjectEntity(
     val semester: Int,
     val createdAt: Long = System.currentTimeMillis(),
     val classroomCourseId: String? = null,
+    @ColumnInfo(defaultValue = "0")
+    val archived: Boolean = false,
 )

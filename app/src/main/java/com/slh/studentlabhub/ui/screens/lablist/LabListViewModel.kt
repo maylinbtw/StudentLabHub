@@ -38,7 +38,7 @@ data class LabListUiState(
 class LabListViewModel(
     private val subjectId: Long,
     private val repository: LabRepository,
-    classroomRepository: ClassroomRepository,
+    private val classroomRepository: ClassroomRepository,
 ) : ViewModel() {
 
     private val details = repository.observeSubjectDetails(subjectId)
@@ -65,7 +65,10 @@ class LabListViewModel(
             isMissing = details == null,
             details = details,
             course = course,
-            availableCourses = courses.filter { it.id !in takenByOthers },
+            availableCourses = courses.filter { course ->
+                course.id !in takenByOthers &&
+                    (!course.archived || course.id == details?.summary?.classroomCourseId)
+            },
             now = System.currentTimeMillis(),
         )
     }.stateIn(
@@ -93,6 +96,14 @@ class LabListViewModel(
     fun deleteSubject() {
         viewModelScope.launch {
             repository.deleteSubject(subjectId)
+        }
+    }
+
+    fun setArchived(archived: Boolean) {
+        val courseId = uiState.value.details?.summary?.classroomCourseId
+        viewModelScope.launch {
+            repository.setSubjectArchived(subjectId, archived)
+            courseId?.let { classroomRepository.setCourseArchived(it, archived) }
         }
     }
 

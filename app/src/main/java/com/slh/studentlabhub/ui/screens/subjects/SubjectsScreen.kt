@@ -24,12 +24,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -66,6 +69,7 @@ import java.util.Locale
 fun SubjectsRoute(
     onSubjectClick: (subjectId: Long) -> Unit,
     onCourseClick: (courseId: String) -> Unit,
+    onOpenArchive: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SubjectsViewModel = viewModel(factory = SubjectsViewModel.Factory),
 ) {
@@ -79,6 +83,9 @@ fun SubjectsRoute(
         onCourseClick = onCourseClick,
         onAddCourse = viewModel::addCourse,
         onAddAllCourses = viewModel::addAllCourses,
+        onArchiveCourse = viewModel::archiveCourse,
+        onArchiveSemester = viewModel::archiveSemester,
+        onOpenArchive = onOpenArchive,
         modifier = modifier,
     )
 
@@ -102,6 +109,9 @@ fun SubjectsScreen(
     onAddCourse: (CourseOverview) -> Unit,
     onAddAllCourses: () -> Unit,
     modifier: Modifier = Modifier,
+    onArchiveCourse: (CourseOverview) -> Unit = {},
+    onArchiveSemester: (Int) -> Unit = {},
+    onOpenArchive: () -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -136,6 +146,12 @@ fun SubjectsScreen(
                 item(key = "empty") {
                     EmptyCard(onAddSubjectClick = onAddSubjectClick)
                 }
+                if (state.archivedCount > 0) {
+                    item(key = "archive") {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        ArchiveLink(count = state.archivedCount, onClick = onOpenArchive)
+                    }
+                }
                 return@LazyColumn
             }
 
@@ -167,12 +183,13 @@ fun SubjectsScreen(
                         course = course,
                         onClick = { onCourseClick(course.id) },
                         onAdd = { onAddCourse(course) },
+                        onArchive = { onArchiveCourse(course) },
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                 }
                 item(key = "import_hint") {
                     Text(
-                        text = "«Добавить» создаёт предмет, связанный с курсом. Связать с уже существующим предметом можно, открыв курс.",
+                        text = "«Добавить» создаёт предмет, связанный с курсом. × — убрать курс в архив, если он уже не ведётся.",
                         color = SlhTextMuted,
                         style = MaterialTheme.typography.bodySmall,
                     )
@@ -182,7 +199,10 @@ fun SubjectsScreen(
 
             state.groups.forEach { group ->
                 item(key = "semester_${group.semester}") {
-                    SectionLabel(text = "СЕМЕСТР ${group.semester}")
+                    SemesterHeader(
+                        semester = group.semester,
+                        onArchive = { onArchiveSemester(group.semester) },
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
                 items(items = group.subjects, key = { "subject_${it.summary.id}" }) { item ->
@@ -199,6 +219,12 @@ fun SubjectsScreen(
 
             item(key = "add_subject") {
                 OutlineAction(text = "добавить предмет вручную", onClick = onAddSubjectClick)
+            }
+            if (state.archivedCount > 0) {
+                item(key = "archive") {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    ArchiveLink(count = state.archivedCount, onClick = onOpenArchive)
+                }
             }
         }
     }
@@ -305,6 +331,7 @@ private fun ImportCourseRow(
     course: CourseOverview,
     onClick: () -> Unit,
     onAdd: () -> Unit,
+    onArchive: () -> Unit,
 ) {
     val shape = RoundedCornerShape(8.dp)
     Row(
@@ -353,6 +380,81 @@ private fun ImportCourseRow(
                 fontSize = 11.sp,
             )
         }
+        Spacer(modifier = Modifier.width(4.dp))
+        Box(
+            modifier = Modifier
+                .size(30.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .clickable(role = Role.Button, onClick = onArchive)
+                .semantics { contentDescription = "Убрать курс в архив" },
+            contentAlignment = Alignment.Center,
+        ) {
+            SlhIconView(icon = SlhIcon.Close, color = SlhTextMuted, size = 11.dp)
+        }
+    }
+}
+
+@Composable
+private fun SemesterHeader(
+    semester: Int,
+    onArchive: () -> Unit,
+) {
+    var confirm by remember(semester) { mutableStateOf(false) }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        SectionLabel(
+            text = "СЕМЕСТР $semester",
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = if (confirm) "весь семестр в архив?" else "в архив",
+            color = if (confirm) SlhDanger else SlhTextMuted,
+            fontFamily = SlhMono,
+            fontSize = 11.sp,
+            modifier = Modifier
+                .clip(RoundedCornerShape(4.dp))
+                .clickable(role = Role.Button) {
+                    if (confirm) {
+                        confirm = false
+                        onArchive()
+                    } else {
+                        confirm = true
+                    }
+                }
+                .padding(horizontal = 6.dp, vertical = 4.dp),
+        )
+    }
+}
+
+@Composable
+private fun ArchiveLink(
+    count: Int,
+    onClick: () -> Unit,
+) {
+    val shape = RoundedCornerShape(8.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(44.dp)
+            .clip(shape)
+            .background(SlhSurface)
+            .border(1.dp, SlhOutline, shape)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = "Архив",
+            color = SlhTextSecondary,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = "$count ›",
+            color = SlhTextMuted,
+            fontFamily = SlhMono,
+            fontWeight = FontWeight.Bold,
+            fontSize = 12.sp,
+        )
     }
 }
 

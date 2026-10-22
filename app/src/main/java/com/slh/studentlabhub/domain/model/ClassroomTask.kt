@@ -21,6 +21,7 @@ data class CourseTasks(
     val teacherName: String?,
     val link: String?,
     val tasks: List<ClassroomTask>,
+    val archived: Boolean = false,
 )
 
 data class UpcomingTask(

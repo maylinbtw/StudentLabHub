@@ -22,7 +22,7 @@ interface LabDao {
     @Query(
         "SELECT labs.*, subjects.title AS subjectTitle FROM labs " +
             "INNER JOIN subjects ON subjects.id = labs.subjectId " +
-            "WHERE labs.deadline IS NOT NULL AND labs.status = 'NOT_DONE' " +
+            "WHERE labs.deadline IS NOT NULL AND labs.status = 'NOT_DONE' AND subjects.archived = 0 " +
             "ORDER BY labs.deadline ASC",
     )
     fun observePendingDeadlines(): Flow<List<LabWithSubjectTitle>>

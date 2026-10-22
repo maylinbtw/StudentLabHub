@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface SubjectDao {
     @Transaction
-    @Query("SELECT * FROM subjects ORDER BY semester DESC, createdAt ASC")
-    fun observeSubjectsWithLabs(): Flow<List<SubjectWithLabs>>
+    @Query("SELECT * FROM subjects WHERE archived = :archived ORDER BY semester DESC, createdAt ASC")
+    fun observeSubjectsWithLabs(archived: Boolean): Flow<List<SubjectWithLabs>>
 
     @Transaction
     @Query("SELECT * FROM subjects WHERE id = :id")
@@ -32,6 +32,15 @@ interface SubjectDao {
 
     @Query("UPDATE subjects SET classroomCourseId = :courseId WHERE id = :subjectId")
     suspend fun setCourseLink(subjectId: Long, courseId: String)
+
+    @Query("UPDATE subjects SET archived = :archived WHERE id = :id")
+    suspend fun setArchived(id: Long, archived: Boolean)
+
+    @Query("UPDATE subjects SET archived = 1 WHERE semester = :semester")
+    suspend fun archiveSemester(semester: Int)
+
+    @Query("SELECT classroomCourseId FROM subjects WHERE semester = :semester AND classroomCourseId IS NOT NULL")
+    suspend fun courseIdsInSemester(semester: Int): List<String>
 
     @Query("SELECT MAX(semester) FROM subjects")
     suspend fun maxSemester(): Int?

@@ -11,6 +11,12 @@ import kotlinx.coroutines.flow.Flow
 interface LabRepository {
     fun observeSubjects(): Flow<List<SubjectSummary>>
 
+    fun observeArchivedSubjects(): Flow<List<SubjectSummary>>
+
+    suspend fun setSubjectArchived(subjectId: Long, archived: Boolean)
+
+    suspend fun archiveSemester(semester: Int): List<String>
+
     fun observeSubjectDetails(subjectId: Long): Flow<SubjectDetails?>
 
     fun observePendingDeadlines(): Flow<List<LabDeadline>>

@@ -34,6 +34,8 @@ class ClassroomRepositoryImpl(
 
     private val threshold = MutableStateFlow(session.redoThreshold)
 
+    private val archivedCourses = MutableStateFlow(session.archivedCourseIds)
+
     override val signedInEmail: String?
         get() = session.email
 
@@ -48,14 +50,29 @@ class ClassroomRepositoryImpl(
         threshold.value = safeValue
     }
 
+    override fun setCourseArchived(courseId: String, archived: Boolean) {
+        setCoursesArchived(listOf(courseId), archived)
+    }
+
+    override fun setCoursesArchived(courseIds: Collection<String>, archived: Boolean) {
+        if (courseIds.isEmpty()) return
+        val updated = if (archived) {
+            archivedCourses.value + courseIds
+        } else {
+            archivedCourses.value - courseIds.toSet()
+        }
+        session.archivedCourseIds = updated
+        archivedCourses.value = updated
+    }
+
     override fun observeCourses(): Flow<List<CourseOverview>> =
-        combine(dao.observeCoursesWithTasks(), threshold) { courses, redoLimit ->
+        combine(dao.observeCoursesWithTasks(), threshold, archivedCourses) { courses, redoLimit, archived ->
             val now = System.currentTimeMillis()
-            courses.map { it.toOverview(now, redoLimit) }
+            courses.map { it.toOverview(now, redoLimit, it.course.id in archived) }
         }
 
     override fun observeCourseTasks(courseId: String): Flow<CourseTasks?> =
-        combine(dao.observeCourseWithTasks(courseId), threshold) { course, redoLimit ->
+        combine(dao.observeCourseWithTasks(courseId), threshold, archivedCourses) { course, redoLimit, archived ->
             course?.let {
                 CourseTasks(
                     id = it.course.id,
@@ -63,14 +80,16 @@ class ClassroomRepositoryImpl(
                     teacherName = it.course.teacherName,
                     link = it.course.link,
                     tasks = it.tasks.map { task -> task.toDomain(redoLimit) },
+                    archived = it.course.id in archived,
                 )
             }
         }
 
     override fun observeUpcomingTasks(): Flow<List<UpcomingTask>> =
-        combine(dao.observeCoursesWithTasks(), threshold) { courses, redoLimit ->
+        combine(dao.observeCoursesWithTasks(), threshold, archivedCourses) { courses, redoLimit, archived ->
             val from = System.currentTimeMillis() - RECENT_OVERDUE_MS
             courses
+                .filter { it.course.id !in archived }
                 .flatMap { course ->
                     course.tasks
                         .map { it.toDomain(redoLimit) }
@@ -216,7 +235,7 @@ private fun ClassroomTaskEntity.gradeText(): String? {
 private fun formatNumber(value: Double): String =
     if (value % 1.0 == 0.0) value.toLong().toString() else String.format(Locale.US, "%.1f", value)
 
-private fun ClassroomCourseWithTasks.toOverview(now: Long, redoLimit: Int): CourseOverview {
+private fun ClassroomCourseWithTasks.toOverview(now: Long, redoLimit: Int, archived: Boolean): CourseOverview {
     val states = tasks.associateWith { it.stateFor(redoLimit) }
     val completed = states.count { it.value == TaskState.COMPLETED }
     val redo = states.count { it.value == TaskState.REDO }
@@ -239,5 +258,6 @@ private fun ClassroomCourseWithTasks.toOverview(now: Long, redoLimit: Int): Cour
         redoCount = redo,
         nearestDeadline = nearest,
         averageScore = if (scores.isEmpty()) null else scores.average(),
+        archived = archived,
     )
 }

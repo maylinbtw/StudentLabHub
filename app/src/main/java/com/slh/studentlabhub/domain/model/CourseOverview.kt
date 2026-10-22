@@ -9,4 +9,5 @@ data class CourseOverview(
     val redoCount: Int,
     val nearestDeadline: Long?,
     val averageScore: Double?,
+    val archived: Boolean = false,
 )
