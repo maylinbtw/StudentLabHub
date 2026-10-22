@@ -16,6 +16,8 @@ interface LabRepository {
 
     suspend fun addSubject(title: String, semester: Int, labsCount: Int, practiceCount: Int)
 
+    suspend fun updateSubject(subjectId: Long, title: String, semester: Int)
+
     suspend fun deleteSubject(subjectId: Long)
 
     suspend fun addWork(subjectId: Long, type: WorkType)

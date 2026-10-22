@@ -77,6 +77,10 @@ class LabRepositoryImpl(
         }
     }
 
+    override suspend fun updateSubject(subjectId: Long, title: String, semester: Int) {
+        subjectDao.update(id = subjectId, title = title, semester = semester)
+    }
+
     override suspend fun deleteSubject(subjectId: Long) {
         subjectDao.deleteById(subjectId)
     }

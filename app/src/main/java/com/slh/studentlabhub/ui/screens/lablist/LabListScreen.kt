@@ -93,6 +93,7 @@ fun LabListRoute(
         onBack = onBack,
         onLabClick = onLabClick,
         onAddWork = viewModel::addWork,
+        onUpdateSubject = viewModel::updateSubject,
         onDeleteSubject = viewModel::deleteSubject,
         modifier = modifier,
     )
@@ -104,11 +105,13 @@ fun LabListScreen(
     onBack: () -> Unit,
     onLabClick: (Lab) -> Unit,
     onAddWork: (WorkType) -> Unit,
+    onUpdateSubject: (title: String, semester: Int) -> Unit,
     onDeleteSubject: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     var showDeleteConfirm by rememberSaveable { mutableStateOf(false) }
+    var showEditDialog by rememberSaveable { mutableStateOf(false) }
     val details = state.details
 
     Column(
@@ -128,6 +131,20 @@ fun LabListScreen(
                     onDismissRequest = { menuExpanded = false },
                     containerColor = SlhSurface,
                 ) {
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "Редактировать предмет",
+                                color = SlhWhite,
+                                fontFamily = SlhSans,
+                                fontSize = 14.sp,
+                            )
+                        },
+                        onClick = {
+                            menuExpanded = false
+                            showEditDialog = true
+                        },
+                    )
                     DropdownMenuItem(
                         text = {
                             Text(
@@ -216,6 +233,18 @@ fun LabListScreen(
                 }
             }
         }
+    }
+
+    if (showEditDialog && details != null) {
+        EditSubjectDialog(
+            initialTitle = details.summary.title,
+            initialSemester = details.summary.semester,
+            onDismiss = { showEditDialog = false },
+            onConfirm = { title, semester ->
+                onUpdateSubject(title, semester)
+                showEditDialog = false
+            },
+        )
     }
 
     if (showDeleteConfirm) {
@@ -457,6 +486,7 @@ private fun LabListScreenPreview() {
             onBack = {},
             onLabClick = {},
             onAddWork = {},
+            onUpdateSubject = { _, _ -> },
             onDeleteSubject = {},
         )
     }

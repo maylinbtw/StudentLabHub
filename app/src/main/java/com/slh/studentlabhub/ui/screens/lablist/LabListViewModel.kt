@@ -48,6 +48,16 @@ class LabListViewModel(
         }
     }
 
+    fun updateSubject(title: String, semester: Int) {
+        viewModelScope.launch {
+            repository.updateSubject(
+                subjectId = subjectId,
+                title = title.trim(),
+                semester = semester,
+            )
+        }
+    }
+
     fun deleteSubject() {
         viewModelScope.launch {
             repository.deleteSubject(subjectId)

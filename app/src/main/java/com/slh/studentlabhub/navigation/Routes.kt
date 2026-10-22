@@ -16,6 +16,8 @@ object Routes {
     const val ARG_LAB_ID = "labId"
     const val LAB_DETAILS = "labs/lab/{$ARG_LAB_ID}"
 
+    const val STATISTICS = "labs/statistics/summary"
+
     fun labList(subjectId: Long): String = "labs/$subjectId"
 
     fun labDetails(labId: Long): String = "labs/lab/$labId"

@@ -25,6 +25,7 @@ import com.slh.studentlabhub.ui.screens.labdetails.LabDetailsRoute
 import com.slh.studentlabhub.ui.screens.lablist.LabListRoute
 import com.slh.studentlabhub.ui.screens.labs.LabsRoute
 import com.slh.studentlabhub.ui.screens.placeholder.PlaceholderScreen
+import com.slh.studentlabhub.ui.screens.statistics.StatisticsRoute
 import com.slh.studentlabhub.ui.theme.SlhBlack
 import kotlinx.coroutines.delay
 
@@ -83,7 +84,14 @@ fun SlhApp() {
                     onSubjectClick = { subject ->
                         navController.navigate(Routes.labList(subject.id))
                     },
-                    onStatisticsClick = {},
+                    onStatisticsClick = {
+                        navController.navigate(Routes.STATISTICS)
+                    },
+                )
+            }
+            composable(Routes.STATISTICS) {
+                StatisticsRoute(
+                    onBack = { navController.popBackStack() },
                 )
             }
             composable(
