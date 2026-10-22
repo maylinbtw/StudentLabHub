@@ -62,7 +62,7 @@ import com.slh.studentlabhub.ui.theme.SlhAccent
 import com.slh.studentlabhub.ui.theme.SlhSans
 import com.slh.studentlabhub.ui.theme.SlhSurface
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
-import com.slh.studentlabhub.ui.theme.SlhWhite
+import com.slh.studentlabhub.ui.theme.SlhContent
 import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
 import java.time.Instant
 import java.time.ZoneId
@@ -305,7 +305,7 @@ fun CourseTasksScreen(
 @Composable
 private fun MenuText(
     text: String,
-    color: androidx.compose.ui.graphics.Color = SlhWhite,
+    color: androidx.compose.ui.graphics.Color = SlhContent,
 ) {
     Text(
         text = text,
@@ -361,7 +361,7 @@ private fun ActiveTaskCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = task.title,
-                    color = SlhWhite,
+                    color = SlhContent,
                     fontFamily = SlhMono,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
@@ -399,7 +399,7 @@ private fun CompletedTaskRow(
     ) {
         Text(
             text = task.title,
-            color = SlhWhite,
+            color = SlhContent,
             fontFamily = SlhSans,
             fontSize = 14.sp,
             maxLines = 1,

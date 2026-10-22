@@ -1,5 +1,13 @@
 package com.slh.studentlabhub.ui.screens.settings
 
+import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -60,13 +68,22 @@ import com.slh.studentlabhub.ui.theme.SlhOutline
 import com.slh.studentlabhub.ui.theme.SlhSurface
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
 import com.slh.studentlabhub.ui.theme.SlhTextSecondary
-import com.slh.studentlabhub.ui.theme.SlhWhite
+import com.slh.studentlabhub.ui.theme.SlhContent
 import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
 import com.slh.studentlabhub.ui.theme.color
 import com.slh.studentlabhub.ui.theme.label
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import com.slh.studentlabhub.ui.theme.SlhSurfaceVariant
+import com.slh.studentlabhub.domain.model.ThemeMode
+import com.slh.studentlabhub.domain.model.ReminderTiming
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.core.content.ContextCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Switch
 
 private val syncFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM HH:mm")
 
@@ -81,6 +98,35 @@ private val DotShape.title: String
         DotShape.ROUND -> "Круглые"
         DotShape.SQUARE -> "Квадратные"
     }
+
+private val ThemeMode.title: String
+    get() = when (this) {
+        ThemeMode.DARK -> "Тёмная"
+        ThemeMode.LIGHT -> "Светлая"
+        ThemeMode.SYSTEM -> "Как в системе"
+    }
+
+private val ReminderTiming.title: String
+    get() = when (this) {
+        ReminderTiming.DAY -> "За сутки"
+        ReminderTiming.HOURS -> "За 3 часа"
+        ReminderTiming.BOTH -> "Оба"
+    }
+
+private fun Context.notificationsAllowed(): Boolean {
+    val enabled = NotificationManagerCompat.from(this).areNotificationsEnabled()
+    val permitted = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+        ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+        PackageManager.PERMISSION_GRANTED
+    return enabled && permitted
+}
+
+private fun Context.openNotificationSettings() {
+    val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+        .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    runCatching { startActivity(intent) }
+}
 
 private val StartScreen.title: String
     get() = when (this) {
@@ -98,6 +144,31 @@ fun SettingsRoute(
     viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    var notificationsAllowed by remember { mutableStateOf(context.notificationsAllowed()) }
+
+    LifecycleResumeEffect(Unit) {
+        notificationsAllowed = context.notificationsAllowed()
+        onPauseOrDispose { }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        notificationsAllowed = granted && context.notificationsAllowed()
+        if (!granted) context.openNotificationSettings()
+    }
+
+    val requestNotifications = {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            context.openNotificationSettings()
+        }
+    }
 
     LaunchedEffect(state.isSignedOut) {
         if (state.isSignedOut) {
@@ -107,6 +178,19 @@ fun SettingsRoute(
 
     SettingsScreen(
         state = state,
+        notificationsAllowed = notificationsAllowed,
+        onThemeModeSelected = viewModel::onThemeModeSelected,
+        onRemindersChanged = { enabled ->
+            viewModel.onRemindersChanged(enabled)
+            if (enabled && !notificationsAllowed) requestNotifications()
+        },
+        onReminderTimingSelected = viewModel::onReminderTimingSelected,
+        onRedoAlertsChanged = { enabled ->
+            viewModel.onRedoAlertsChanged(enabled)
+            if (enabled && !notificationsAllowed) requestNotifications()
+        },
+        onBackgroundSyncChanged = viewModel::onBackgroundSyncChanged,
+        onAllowNotifications = requestNotifications,
         onAccentSelected = viewModel::onAccentSelected,
         onBackgroundSelected = viewModel::onBackgroundSelected,
         onDotShapeSelected = viewModel::onDotShapeSelected,
@@ -131,6 +215,13 @@ fun SettingsScreen(
     onSignOut: () -> Unit,
     modifier: Modifier = Modifier,
     onInsertDemo: () -> Unit = {},
+    notificationsAllowed: Boolean = true,
+    onThemeModeSelected: (ThemeMode) -> Unit = {},
+    onRemindersChanged: (Boolean) -> Unit = {},
+    onReminderTimingSelected: (ReminderTiming) -> Unit = {},
+    onRedoAlertsChanged: (Boolean) -> Unit = {},
+    onBackgroundSyncChanged: (Boolean) -> Unit = {},
+    onAllowNotifications: () -> Unit = {},
 ) {
     val settings = state.settings
 
@@ -159,9 +250,64 @@ fun SettingsScreen(
             )
 
             Spacer(modifier = Modifier.height(28.dp))
+            SectionLabel(text = "УВЕДОМЛЕНИЯ")
+            Spacer(modifier = Modifier.height(10.dp))
+            if ((settings.remindersEnabled || settings.redoAlerts) && !notificationsAllowed) {
+                WarningRow(
+                    text = "Уведомления запрещены в настройках Android",
+                    actionText = "РАЗРЕШИТЬ",
+                    onClick = onAllowNotifications,
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+            SettingsCard {
+                SwitchRow(
+                    title = "Напоминать о дедлайнах",
+                    subtitle = "Задания Classroom и лабы со сроком",
+                    checked = settings.remindersEnabled,
+                    onCheckedChange = onRemindersChanged,
+                )
+                HorizontalDivider(thickness = 1.dp, color = SlhOutline)
+                SwitchRow(
+                    title = "Сообщать о доработке",
+                    subtitle = "Когда в Classroom ставят отметку «переделать»",
+                    checked = settings.redoAlerts,
+                    onCheckedChange = onRedoAlertsChanged,
+                )
+                HorizontalDivider(thickness = 1.dp, color = SlhOutline)
+                SwitchRow(
+                    title = "Фоновая синхронизация",
+                    subtitle = "Проверять Classroom примерно раз в 6 часов",
+                    checked = settings.backgroundSync,
+                    onCheckedChange = onBackgroundSyncChanged,
+                )
+            }
+            if (settings.remindersEnabled) {
+                Spacer(modifier = Modifier.height(18.dp))
+                OptionTitle(text = "Когда напоминать")
+                Spacer(modifier = Modifier.height(8.dp))
+                SegmentedOptions(
+                    options = ReminderTiming.entries,
+                    selected = settings.reminderTiming,
+                    label = { it.title },
+                    onSelect = onReminderTimingSelected,
+                )
+                OptionHint(text = "Напоминание приходит за сутки и/или за 3 часа до срока сдачи.")
+            }
+
+            Spacer(modifier = Modifier.height(28.dp))
             SectionLabel(text = "ОФОРМЛЕНИЕ")
             Spacer(modifier = Modifier.height(10.dp))
             AppearancePreview(accent = settings.accent)
+            Spacer(modifier = Modifier.height(18.dp))
+            OptionTitle(text = "Тема")
+            Spacer(modifier = Modifier.height(8.dp))
+            SegmentedOptions(
+                options = ThemeMode.entries,
+                selected = settings.themeMode,
+                label = { it.title },
+                onSelect = onThemeModeSelected,
+            )
             Spacer(modifier = Modifier.height(18.dp))
             OptionTitle(text = "Акцентный цвет")
             Spacer(modifier = Modifier.height(10.dp))
@@ -170,7 +316,7 @@ fun SettingsScreen(
                 onSelect = onAccentSelected,
             )
             Spacer(modifier = Modifier.height(18.dp))
-            OptionTitle(text = "Фон")
+            OptionTitle(text = "Фон тёмной темы")
             Spacer(modifier = Modifier.height(8.dp))
             SegmentedOptions(
                 options = BackgroundStyle.entries,
@@ -297,7 +443,7 @@ private fun AccountCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = email ?: "Вход не выполнен",
-                    color = SlhWhite,
+                    color = SlhContent,
                     fontFamily = SlhMono,
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp,
@@ -356,7 +502,7 @@ private fun AppearancePreview(accent: AccentColor) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = "Средний балл",
-                color = SlhWhite,
+                color = SlhContent,
                 style = MaterialTheme.typography.titleMedium,
             )
             Spacer(modifier = Modifier.height(6.dp))
@@ -403,7 +549,7 @@ private fun AccentPicker(
                 modifier = Modifier
                     .size(34.dp)
                     .clip(CircleShape)
-                    .border(2.dp, if (isSelected) SlhWhite else SlhBackground, CircleShape)
+                    .border(2.dp, if (isSelected) SlhContent else SlhBackground, CircleShape)
                     .clickable(role = Role.RadioButton, onClick = { onSelect(option) })
                     .semantics { contentDescription = option.label },
                 contentAlignment = Alignment.Center,
@@ -474,6 +620,80 @@ private fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
 }
 
 @Composable
+private fun SwitchRow(
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(role = Role.Switch, onClick = { onCheckedChange(!checked) })
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                color = SlhContent,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = subtitle,
+                color = SlhTextMuted,
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = SlhOnAccent,
+                checkedTrackColor = SlhAccent,
+                checkedBorderColor = SlhAccent,
+                uncheckedThumbColor = SlhTextMuted,
+                uncheckedTrackColor = SlhSurfaceVariant,
+                uncheckedBorderColor = SlhOutline,
+            ),
+        )
+    }
+}
+
+@Composable
+private fun WarningRow(
+    text: String,
+    actionText: String,
+    onClick: () -> Unit,
+) {
+    val shape = RoundedCornerShape(10.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .border(1.dp, SlhDanger, shape)
+            .padding(start = 14.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = text,
+            color = SlhContent,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.weight(1f),
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        SmallButton(
+            text = actionText,
+            color = SlhDanger,
+            enabled = true,
+            onClick = onClick,
+        )
+    }
+}
+
+@Composable
 private fun InfoRow(
     title: String,
     value: String,
@@ -486,7 +706,7 @@ private fun InfoRow(
     ) {
         Text(
             text = title,
-            color = SlhWhite,
+            color = SlhContent,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.weight(1f),
         )
@@ -519,7 +739,7 @@ private fun ActionRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                color = SlhWhite,
+                color = SlhContent,
                 style = MaterialTheme.typography.bodyMedium,
             )
             Spacer(modifier = Modifier.height(2.dp))
@@ -577,7 +797,7 @@ private fun SmallButton(
 private fun OptionTitle(text: String) {
     Text(
         text = text,
-        color = SlhWhite,
+        color = SlhContent,
         style = MaterialTheme.typography.bodyMedium,
     )
 }

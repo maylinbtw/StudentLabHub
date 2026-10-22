@@ -66,7 +66,7 @@ import com.slh.studentlabhub.ui.components.formatDayMonth
 import com.slh.studentlabhub.ui.components.relativeDueLabel
 import com.slh.studentlabhub.ui.components.shortPrefix
 import com.slh.studentlabhub.ui.theme.SlhBackground
-import com.slh.studentlabhub.ui.theme.SlhInk
+import com.slh.studentlabhub.ui.theme.SlhOnContent
 import com.slh.studentlabhub.ui.theme.SlhMono
 import com.slh.studentlabhub.ui.theme.SlhOnAccent
 import com.slh.studentlabhub.ui.theme.SlhOutline
@@ -76,7 +76,7 @@ import com.slh.studentlabhub.ui.theme.SlhSurface
 import com.slh.studentlabhub.ui.theme.SlhTextDisabled
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
 import com.slh.studentlabhub.ui.theme.SlhTextSecondary
-import com.slh.studentlabhub.ui.theme.SlhWhite
+import com.slh.studentlabhub.ui.theme.SlhContent
 import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
 import java.util.Locale
 
@@ -93,16 +93,16 @@ private fun LabStatus.chipStyle(type: WorkType): StatusChipStyle = when (this) {
         leading = "○",
         label = "Не сдел.",
         selectedContainer = SlhOutline,
-        selectedContent = SlhWhite,
+        selectedContent = SlhContent,
         selectedBorder = SlhTextMuted,
     )
 
     LabStatus.DONE -> StatusChipStyle(
         leading = "✓",
         label = "Сделано",
-        selectedContainer = SlhWhite,
-        selectedContent = SlhInk,
-        selectedBorder = SlhWhite,
+        selectedContainer = SlhContent,
+        selectedContent = SlhOnContent,
+        selectedBorder = SlhContent,
     )
 
     LabStatus.DEFENDED -> StatusChipStyle(
@@ -201,7 +201,7 @@ fun LabDetailsScreen(
                 ) {
                     Text(
                         text = "$prefix №${state.number} · ${state.title}",
-                        color = SlhWhite,
+                        color = SlhContent,
                         fontFamily = SlhSans,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
@@ -318,7 +318,7 @@ fun LabDetailsScreen(
             title = {
                 Text(
                     text = "Удалить работу?",
-                    color = SlhWhite,
+                    color = SlhContent,
                     style = MaterialTheme.typography.titleMedium,
                 )
             },
@@ -377,7 +377,7 @@ private fun DeadlineField(
     ) {
         Text(
             text = deadline?.let { "до ${it.formatDayMonth()}" } ?: "Не задан — нажми, чтобы выбрать",
-            color = if (deadline != null) SlhWhite else SlhTextMuted,
+            color = if (deadline != null) SlhContent else SlhTextMuted,
             fontFamily = SlhMono,
             fontWeight = if (deadline != null) FontWeight.Bold else FontWeight.Normal,
             fontSize = 13.sp,
@@ -577,7 +577,7 @@ private fun SaveButton(
             .fillMaxWidth()
             .height(48.dp)
             .clip(shape)
-            .background(if (enabled || isSaving) SlhWhite else SlhOutline)
+            .background(if (enabled || isSaving) SlhContent else SlhOutline)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -596,13 +596,13 @@ private fun SaveButton(
             if (isSaving) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(18.dp),
-                    color = SlhInk,
+                    color = SlhOnContent,
                     strokeWidth = 2.dp,
                 )
             } else {
                 Text(
                     text = "СОХРАНИТЬ",
-                    color = if (enabled) SlhInk else SlhTextMuted,
+                    color = if (enabled) SlhOnContent else SlhTextMuted,
                     style = MaterialTheme.typography.labelLarge,
                 )
             }
@@ -626,7 +626,7 @@ private fun TitleEditDialog(
         title = {
             Text(
                 text = "Название работы",
-                color = SlhWhite,
+                color = SlhContent,
                 style = MaterialTheme.typography.titleMedium,
             )
         },
@@ -636,7 +636,7 @@ private fun TitleEditDialog(
                 onValueChange = { draft = it.take(80) },
                 singleLine = true,
                 textStyle = TextStyle(
-                    color = SlhWhite,
+                    color = SlhContent,
                     fontFamily = SlhSans,
                     fontSize = 15.sp,
                 ),

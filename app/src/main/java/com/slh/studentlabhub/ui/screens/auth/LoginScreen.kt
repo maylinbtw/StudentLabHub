@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.sp
 import com.slh.studentlabhub.ui.components.DotMatrixText
 import com.slh.studentlabhub.ui.theme.SlhBackground
 import com.slh.studentlabhub.ui.theme.SlhDanger
-import com.slh.studentlabhub.ui.theme.SlhInk
+import com.slh.studentlabhub.ui.theme.SlhOnContent
 import com.slh.studentlabhub.ui.theme.SlhMono
 import com.slh.studentlabhub.ui.theme.SlhOutline
 import com.slh.studentlabhub.ui.theme.SlhAccent
@@ -48,7 +48,7 @@ import com.slh.studentlabhub.ui.theme.SlhSurface
 import com.slh.studentlabhub.ui.theme.SlhTextDisabled
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
 import com.slh.studentlabhub.ui.theme.SlhTextSecondary
-import com.slh.studentlabhub.ui.theme.SlhWhite
+import com.slh.studentlabhub.ui.theme.SlhContent
 import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
 
 data class LoginUiState(
@@ -139,14 +139,14 @@ private fun SlhLogo() {
         Spacer(modifier = Modifier.height(30.dp))
         DotMatrixText(
             text = "SLH",
-            color = SlhWhite,
+            color = SlhContent,
             dotSize = 7.dp,
             dotGap = 2.dp,
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = "STUDENTLABHUB",
-            color = SlhWhite,
+            color = SlhContent,
             fontFamily = SlhMono,
             fontWeight = FontWeight.Bold,
             fontSize = 11.sp,
@@ -227,7 +227,7 @@ private fun GoogleSignInButton(
             .fillMaxWidth()
             .height(46.dp)
             .clip(shape)
-            .background(SlhWhite)
+            .background(SlhContent)
             .clickable(
                 enabled = !isLoading,
                 role = Role.Button,
@@ -250,13 +250,13 @@ private fun GoogleSignInButton(
             if (isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(18.dp),
-                    color = SlhInk,
+                    color = SlhOnContent,
                     strokeWidth = 2.dp,
                 )
             } else {
                 Text(
                     text = "ВОЙТИ ЧЕРЕЗ GOOGLE",
-                    color = SlhInk,
+                    color = SlhOnContent,
                     style = MaterialTheme.typography.labelLarge,
                 )
             }

@@ -10,11 +10,18 @@ import com.slh.studentlabhub.domain.model.CourseOverview
 import com.slh.studentlabhub.domain.model.SubjectSummary
 import com.slh.studentlabhub.domain.repository.ClassroomRepository
 import com.slh.studentlabhub.domain.repository.LabRepository
+import com.slh.studentlabhub.ui.auth.toUserMessage
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+
+private data class SyncState(
+    val isSyncing: Boolean = false,
+    val errorMessage: String? = null,
+)
 
 data class SubjectItem(
     val summary: SubjectSummary,
@@ -31,6 +38,8 @@ data class SubjectsUiState(
     val groups: List<SemesterGroup> = emptyList(),
     val unlinkedCourses: List<CourseOverview> = emptyList(),
     val archivedCount: Int = 0,
+    val isSyncing: Boolean = false,
+    val errorMessage: String? = null,
     val now: Long = System.currentTimeMillis(),
 ) {
     val isEmpty: Boolean
@@ -42,11 +51,14 @@ class SubjectsViewModel(
     private val classroomRepository: ClassroomRepository,
 ) : ViewModel() {
 
+    private val sync = MutableStateFlow(SyncState())
+
     val uiState: StateFlow<SubjectsUiState> = combine(
         labRepository.observeSubjects(),
         labRepository.observeArchivedSubjects(),
         classroomRepository.observeCourses(),
-    ) { subjects, archivedSubjects, courses ->
+        sync,
+    ) { subjects, archivedSubjects, courses, syncState ->
         val coursesById = courses.associateBy { it.id }
         val linkedIds = (subjects + archivedSubjects).mapNotNull { it.classroomCourseId }.toSet()
         SubjectsUiState(
@@ -59,6 +71,8 @@ class SubjectsViewModel(
                 .map { SemesterGroup(semester = it.key, subjects = it.value) },
             unlinkedCourses = courses.filter { it.id !in linkedIds && !it.archived },
             archivedCount = archivedSubjects.size + courses.count { it.archived && it.id !in linkedIds },
+            isSyncing = syncState.isSyncing,
+            errorMessage = syncState.errorMessage,
             now = System.currentTimeMillis(),
         )
     }.stateIn(
@@ -66,6 +80,25 @@ class SubjectsViewModel(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = SubjectsUiState(),
     )
+
+    fun onSyncStarted() {
+        sync.value = SyncState(isSyncing = true)
+    }
+
+    fun onAuthorizationFailed(message: String) {
+        sync.value = SyncState(errorMessage = message)
+    }
+
+    fun sync(accessToken: String) {
+        viewModelScope.launch {
+            sync.value = try {
+                classroomRepository.sync(accessToken)
+                SyncState()
+            } catch (error: Exception) {
+                SyncState(errorMessage = error.toUserMessage())
+            }
+        }
+    }
 
     fun addSubject(title: String, semester: Int, labsCount: Int, practiceCount: Int) {
         viewModelScope.launch {

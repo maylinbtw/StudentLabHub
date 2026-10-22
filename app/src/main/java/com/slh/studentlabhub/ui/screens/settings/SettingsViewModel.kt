@@ -10,7 +10,9 @@ import com.slh.studentlabhub.domain.model.AccentColor
 import com.slh.studentlabhub.domain.model.AppSettings
 import com.slh.studentlabhub.domain.model.BackgroundStyle
 import com.slh.studentlabhub.domain.model.DotShape
+import com.slh.studentlabhub.domain.model.ReminderTiming
 import com.slh.studentlabhub.domain.model.StartScreen
+import com.slh.studentlabhub.domain.model.ThemeMode
 import com.slh.studentlabhub.domain.repository.ClassroomRepository
 import com.slh.studentlabhub.domain.repository.LabRepository
 import com.slh.studentlabhub.domain.repository.ReferenceRepository
@@ -94,13 +96,23 @@ class SettingsViewModel(
         ),
     )
 
-    fun onAccentSelected(value: AccentColor) = settingsRepository.setAccent(value)
+    fun onAccentSelected(value: AccentColor) = settingsRepository.update { it.copy(accent = value) }
 
-    fun onBackgroundSelected(value: BackgroundStyle) = settingsRepository.setBackground(value)
+    fun onThemeModeSelected(value: ThemeMode) = settingsRepository.update { it.copy(themeMode = value) }
 
-    fun onDotShapeSelected(value: DotShape) = settingsRepository.setDotShape(value)
+    fun onBackgroundSelected(value: BackgroundStyle) = settingsRepository.update { it.copy(background = value) }
 
-    fun onStartScreenSelected(value: StartScreen) = settingsRepository.setStartScreen(value)
+    fun onDotShapeSelected(value: DotShape) = settingsRepository.update { it.copy(dotShape = value) }
+
+    fun onStartScreenSelected(value: StartScreen) = settingsRepository.update { it.copy(startScreen = value) }
+
+    fun onRemindersChanged(enabled: Boolean) = settingsRepository.update { it.copy(remindersEnabled = enabled) }
+
+    fun onReminderTimingSelected(value: ReminderTiming) = settingsRepository.update { it.copy(reminderTiming = value) }
+
+    fun onRedoAlertsChanged(enabled: Boolean) = settingsRepository.update { it.copy(redoAlerts = enabled) }
+
+    fun onBackgroundSyncChanged(enabled: Boolean) = settingsRepository.update { it.copy(backgroundSync = enabled) }
 
     fun onRedoThresholdSelected(value: Int) = classroomRepository.setRedoThreshold(value)
 

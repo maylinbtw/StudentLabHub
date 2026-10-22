@@ -40,14 +40,14 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.slh.studentlabhub.ui.components.SectionLabel
 import com.slh.studentlabhub.ui.theme.SlhBackground
-import com.slh.studentlabhub.ui.theme.SlhInk
+import com.slh.studentlabhub.ui.theme.SlhOnContent
 import com.slh.studentlabhub.ui.theme.SlhMono
 import com.slh.studentlabhub.ui.theme.SlhOutline
 import com.slh.studentlabhub.ui.theme.SlhAccent
 import com.slh.studentlabhub.ui.theme.SlhSurface
 import com.slh.studentlabhub.ui.theme.SlhTextDisabled
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
-import com.slh.studentlabhub.ui.theme.SlhWhite
+import com.slh.studentlabhub.ui.theme.SlhContent
 
 @Composable
 fun AddSubjectDialog(
@@ -86,7 +86,7 @@ fun AddSubjectDialog(
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "НОВЫЙ ПРЕДМЕТ",
-                color = SlhWhite,
+                color = SlhContent,
                 style = MaterialTheme.typography.titleLarge,
             )
             Spacer(modifier = Modifier.height(20.dp))
@@ -168,7 +168,7 @@ private fun SlhTextField(
             singleLine = true,
             interactionSource = interactionSource,
             textStyle = TextStyle(
-                color = SlhWhite,
+                color = SlhContent,
                 fontFamily = SlhMono,
                 fontSize = 14.sp,
             ),
@@ -228,7 +228,7 @@ private fun DialogPrimaryButton(
         modifier = modifier
             .height(44.dp)
             .clip(shape)
-            .background(if (enabled) SlhWhite else SlhOutline)
+            .background(if (enabled) SlhContent else SlhOutline)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -246,7 +246,7 @@ private fun DialogPrimaryButton(
         ) {
             Text(
                 text = text,
-                color = if (enabled) SlhInk else SlhTextMuted,
+                color = if (enabled) SlhOnContent else SlhTextMuted,
                 style = MaterialTheme.typography.labelLarge,
             )
         }

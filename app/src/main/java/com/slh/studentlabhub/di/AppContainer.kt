@@ -2,6 +2,7 @@ package com.slh.studentlabhub.di
 
 import android.content.Context
 import com.slh.studentlabhub.data.local.AppDatabase
+import com.slh.studentlabhub.data.local.ReminderStore
 import com.slh.studentlabhub.data.local.SessionStore
 import com.slh.studentlabhub.data.remote.ClassroomApi
 import com.slh.studentlabhub.data.remote.GoogleAuthManager
@@ -31,6 +32,8 @@ class AppContainer(context: Context) {
     private val classroomApi: ClassroomApi by lazy { ClassroomApi() }
 
     val googleAuthManager: GoogleAuthManager by lazy { GoogleAuthManager(appContext) }
+
+    val reminderStore: ReminderStore by lazy { ReminderStore(appContext) }
 
     val settingsRepository: SettingsRepository by lazy { SettingsRepositoryImpl(appContext) }
 

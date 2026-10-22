@@ -11,7 +11,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.slh.studentlabhub.ui.theme.SlhDotInactive
 import com.slh.studentlabhub.ui.theme.SlhDotShape
-import com.slh.studentlabhub.ui.theme.SlhWhite
+import com.slh.studentlabhub.ui.theme.SlhContent
 
 @Composable
 fun SlhProgressDots(
@@ -28,7 +28,7 @@ fun SlhProgressDots(
                 modifier = Modifier
                     .size(7.dp)
                     .clip(SlhDotShape)
-                    .background(if (index < filled) SlhWhite else SlhDotInactive),
+                    .background(if (index < filled) SlhContent else SlhDotInactive),
             )
         }
     }

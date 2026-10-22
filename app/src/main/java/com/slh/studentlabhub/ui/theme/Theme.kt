@@ -4,6 +4,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 
@@ -16,22 +17,43 @@ val SlhShapes = Shapes(
 
 @Composable
 fun StudentLabHubTheme(content: @Composable () -> Unit) {
-    val colorScheme = darkColorScheme(
-        primary = SlhAccent,
-        onPrimary = SlhOnAccent,
-        secondary = SlhWhite,
-        onSecondary = SlhInk,
-        background = SlhBackground,
-        onBackground = SlhWhite,
-        surface = SlhSurface,
-        onSurface = SlhWhite,
-        surfaceVariant = SlhSurfaceVariant,
-        onSurfaceVariant = SlhTextSecondary,
-        outline = SlhOutline,
-        outlineVariant = SlhDotInactive,
-        error = SlhDanger,
-        onError = SlhWhite,
-    )
+    val colorScheme = if (SlhPalette.isDark) {
+        darkColorScheme(
+            primary = SlhAccent,
+            onPrimary = SlhOnAccent,
+            secondary = SlhContent,
+            onSecondary = SlhOnContent,
+            background = SlhBackground,
+            onBackground = SlhContent,
+            surface = SlhSurface,
+            onSurface = SlhContent,
+            surfaceVariant = SlhSurfaceVariant,
+            onSurfaceVariant = SlhTextSecondary,
+            surfaceContainerHigh = SlhSurface,
+            outline = SlhOutline,
+            outlineVariant = SlhDotInactive,
+            error = SlhDanger,
+            onError = SlhContent,
+        )
+    } else {
+        lightColorScheme(
+            primary = SlhAccent,
+            onPrimary = SlhOnAccent,
+            secondary = SlhContent,
+            onSecondary = SlhOnContent,
+            background = SlhBackground,
+            onBackground = SlhContent,
+            surface = SlhSurface,
+            onSurface = SlhContent,
+            surfaceVariant = SlhSurfaceVariant,
+            onSurfaceVariant = SlhTextSecondary,
+            surfaceContainerHigh = SlhSurface,
+            outline = SlhOutline,
+            outlineVariant = SlhDotInactive,
+            error = SlhDanger,
+            onError = SlhOnContent,
+        )
+    }
     MaterialTheme(
         colorScheme = colorScheme,
         typography = SlhTypography,

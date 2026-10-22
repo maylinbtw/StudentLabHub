@@ -27,7 +27,7 @@ import com.slh.studentlabhub.ui.theme.SlhOutline
 import com.slh.studentlabhub.ui.theme.SlhAccent
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
 import com.slh.studentlabhub.ui.theme.SlhTextSecondary
-import com.slh.studentlabhub.ui.theme.SlhWhite
+import com.slh.studentlabhub.ui.theme.SlhContent
 
 @Composable
 fun ScreenHeader(
@@ -68,13 +68,13 @@ fun ScreenHeader(
                                 .clickable(role = Role.Button, onClick = onBackClick),
                             contentAlignment = Alignment.CenterStart,
                         ) {
-                            SlhIconView(icon = SlhIcon.Back, color = SlhWhite, size = 16.dp)
+                            SlhIconView(icon = SlhIcon.Back, color = SlhContent, size = 16.dp)
                         }
                         Spacer(modifier = Modifier.width(2.dp))
                     }
                     Text(
                         text = title,
-                        color = SlhWhite,
+                        color = SlhContent,
                         style = MaterialTheme.typography.titleLarge,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,

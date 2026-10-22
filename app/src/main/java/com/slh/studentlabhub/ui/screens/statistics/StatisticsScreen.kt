@@ -50,7 +50,7 @@ import com.slh.studentlabhub.ui.theme.SlhAccent
 import com.slh.studentlabhub.ui.theme.SlhSurface
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
 import com.slh.studentlabhub.ui.theme.SlhTextSecondary
-import com.slh.studentlabhub.ui.theme.SlhWhite
+import com.slh.studentlabhub.ui.theme.SlhContent
 import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -150,7 +150,7 @@ fun StatisticsScreen(
                         label = "Сделано (${state.doneWorks}/${state.totalWorks})",
                         filled = state.doneWorks,
                         total = state.totalWorks,
-                        color = SlhWhite,
+                        color = SlhContent,
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -260,7 +260,7 @@ private fun OverallCard(average: Double?) {
         ) {
             Text(
                 text = "Общий средний балл",
-                color = SlhWhite,
+                color = SlhContent,
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f),
             )
@@ -332,7 +332,7 @@ private fun Legend(
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
         LegendItem(symbol = "★", text = "Защ: $defended", symbolColor = SlhAccent)
-        LegendItem(symbol = "✓", text = "Сдел: $done", symbolColor = SlhWhite)
+        LegendItem(symbol = "✓", text = "Сдел: $done", symbolColor = SlhContent)
         LegendItem(symbol = "○", text = "Ост: $remaining", symbolColor = SlhTextMuted)
     }
 }

@@ -54,7 +54,7 @@ import com.slh.studentlabhub.ui.theme.SlhMono
 import com.slh.studentlabhub.ui.theme.SlhOutline
 import com.slh.studentlabhub.ui.theme.SlhAccent
 import com.slh.studentlabhub.ui.theme.SlhTextDisabled
-import com.slh.studentlabhub.ui.theme.SlhWhite
+import com.slh.studentlabhub.ui.theme.SlhContent
 import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
 
 @Composable
@@ -238,7 +238,7 @@ private fun MultilineField(
             onValueChange = onValueChange,
             interactionSource = interactionSource,
             textStyle = TextStyle(
-                color = SlhWhite,
+                color = SlhContent,
                 fontFamily = SlhMono,
                 fontSize = 13.sp,
                 lineHeight = 18.sp,

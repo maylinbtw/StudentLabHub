@@ -43,12 +43,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.slh.studentlabhub.domain.model.CourseOverview
 import com.slh.studentlabhub.domain.model.SubjectSummary
+import com.slh.studentlabhub.ui.auth.rememberGoogleAuthorization
 import com.slh.studentlabhub.ui.components.DotMatrixText
 import com.slh.studentlabhub.ui.components.ScreenHeader
 import com.slh.studentlabhub.ui.components.SectionLabel
 import com.slh.studentlabhub.ui.components.SlhIcon
 import com.slh.studentlabhub.ui.components.SlhIconView
 import com.slh.studentlabhub.ui.components.SlhProgressDots
+import com.slh.studentlabhub.ui.components.SlhPullRefresh
 import com.slh.studentlabhub.ui.components.relativeDueLabel
 import com.slh.studentlabhub.ui.theme.SlhAccent
 import com.slh.studentlabhub.ui.theme.SlhBackground
@@ -61,7 +63,7 @@ import com.slh.studentlabhub.ui.theme.SlhSurface
 import com.slh.studentlabhub.ui.theme.SlhTextDisabled
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
 import com.slh.studentlabhub.ui.theme.SlhTextSecondary
-import com.slh.studentlabhub.ui.theme.SlhWhite
+import com.slh.studentlabhub.ui.theme.SlhContent
 import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
 import java.util.Locale
 
@@ -75,6 +77,10 @@ fun SubjectsRoute(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddDialog by rememberSaveable { mutableStateOf(false) }
+    val authorize = rememberGoogleAuthorization(
+        onAuthorized = viewModel::sync,
+        onError = viewModel::onAuthorizationFailed,
+    )
 
     SubjectsScreen(
         state = state,
@@ -86,6 +92,12 @@ fun SubjectsRoute(
         onArchiveCourse = viewModel::archiveCourse,
         onArchiveSemester = viewModel::archiveSemester,
         onOpenArchive = onOpenArchive,
+        onRefresh = {
+            if (!state.isSyncing) {
+                viewModel.onSyncStarted()
+                authorize()
+            }
+        },
         modifier = modifier,
     )
 
@@ -112,6 +124,7 @@ fun SubjectsScreen(
     onArchiveCourse: (CourseOverview) -> Unit = {},
     onArchiveSemester: (Int) -> Unit = {},
     onOpenArchive: () -> Unit = {},
+    onRefresh: () -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -138,92 +151,107 @@ fun SubjectsScreen(
             return@Column
         }
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 24.dp),
+        SlhPullRefresh(
+            isRefreshing = state.isSyncing,
+            onRefresh = onRefresh,
         ) {
-            if (state.isEmpty) {
-                item(key = "empty") {
-                    EmptyCard(onAddSubjectClick = onAddSubjectClick)
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 24.dp),
+            ) {
+                state.errorMessage?.let { message ->
+                    item(key = "sync_error") {
+                        Text(
+                            text = message,
+                            color = SlhDanger,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+                }
+                if (state.isEmpty) {
+                    item(key = "empty") {
+                        EmptyCard(onAddSubjectClick = onAddSubjectClick)
+                    }
+                    if (state.archivedCount > 0) {
+                        item(key = "archive") {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            ArchiveLink(count = state.archivedCount, onClick = onOpenArchive)
+                        }
+                    }
+                    return@LazyColumn
+                }
+
+                if (state.unlinkedCourses.isNotEmpty()) {
+                    item(key = "import_label") {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            SectionLabel(
+                                text = "ИЗ CLASSROOM · ЕЩЁ НЕ ДОБАВЛЕНЫ",
+                                modifier = Modifier.weight(1f),
+                            )
+                            if (state.unlinkedCourses.size > 1) {
+                                Text(
+                                    text = "добавить все",
+                                    color = SlhAccent,
+                                    fontFamily = SlhMono,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 11.sp,
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .clickable(role = Role.Button, onClick = onAddAllCourses)
+                                        .padding(horizontal = 6.dp, vertical = 4.dp),
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    items(items = state.unlinkedCourses, key = { "course_${it.id}" }) { course ->
+                        ImportCourseRow(
+                            course = course,
+                            onClick = { onCourseClick(course.id) },
+                            onAdd = { onAddCourse(course) },
+                            onArchive = { onArchiveCourse(course) },
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                    }
+                    item(key = "import_hint") {
+                        Text(
+                            text = "«Добавить» создаёт предмет, связанный с курсом. × — убрать курс в архив, если он уже не ведётся.",
+                            color = SlhTextMuted,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+                }
+
+                state.groups.forEach { group ->
+                    item(key = "semester_${group.semester}") {
+                        SemesterHeader(
+                            semester = group.semester,
+                            onArchive = { onArchiveSemester(group.semester) },
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    items(items = group.subjects, key = { "subject_${it.summary.id}" }) { item ->
+                        SubjectCard(
+                            item = item,
+                            now = state.now,
+                            onClick = { onSubjectClick(item.summary.id) },
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        SlhProgressDots(total = item.summary.totalLabs, filled = item.summary.doneLabs)
+                        Spacer(modifier = Modifier.height(14.dp))
+                    }
+                }
+
+                item(key = "add_subject") {
+                    OutlineAction(text = "добавить предмет вручную", onClick = onAddSubjectClick)
                 }
                 if (state.archivedCount > 0) {
                     item(key = "archive") {
                         Spacer(modifier = Modifier.height(16.dp))
                         ArchiveLink(count = state.archivedCount, onClick = onOpenArchive)
                     }
-                }
-                return@LazyColumn
-            }
-
-            if (state.unlinkedCourses.isNotEmpty()) {
-                item(key = "import_label") {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        SectionLabel(
-                            text = "ИЗ CLASSROOM · ЕЩЁ НЕ ДОБАВЛЕНЫ",
-                            modifier = Modifier.weight(1f),
-                        )
-                        if (state.unlinkedCourses.size > 1) {
-                            Text(
-                                text = "добавить все",
-                                color = SlhAccent,
-                                fontFamily = SlhMono,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 11.sp,
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .clickable(role = Role.Button, onClick = onAddAllCourses)
-                                    .padding(horizontal = 6.dp, vertical = 4.dp),
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-                items(items = state.unlinkedCourses, key = { "course_${it.id}" }) { course ->
-                    ImportCourseRow(
-                        course = course,
-                        onClick = { onCourseClick(course.id) },
-                        onAdd = { onAddCourse(course) },
-                        onArchive = { onArchiveCourse(course) },
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                }
-                item(key = "import_hint") {
-                    Text(
-                        text = "«Добавить» создаёт предмет, связанный с курсом. × — убрать курс в архив, если он уже не ведётся.",
-                        color = SlhTextMuted,
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                    Spacer(modifier = Modifier.height(20.dp))
-                }
-            }
-
-            state.groups.forEach { group ->
-                item(key = "semester_${group.semester}") {
-                    SemesterHeader(
-                        semester = group.semester,
-                        onArchive = { onArchiveSemester(group.semester) },
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-                items(items = group.subjects, key = { "subject_${it.summary.id}" }) { item ->
-                    SubjectCard(
-                        item = item,
-                        now = state.now,
-                        onClick = { onSubjectClick(item.summary.id) },
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    SlhProgressDots(total = item.summary.totalLabs, filled = item.summary.doneLabs)
-                    Spacer(modifier = Modifier.height(14.dp))
-                }
-            }
-
-            item(key = "add_subject") {
-                OutlineAction(text = "добавить предмет вручную", onClick = onAddSubjectClick)
-            }
-            if (state.archivedCount > 0) {
-                item(key = "archive") {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    ArchiveLink(count = state.archivedCount, onClick = onOpenArchive)
                 }
             }
         }
@@ -253,7 +281,7 @@ private fun SubjectCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = subject.title,
-                    color = SlhWhite,
+                    color = SlhContent,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -346,7 +374,7 @@ private fun ImportCourseRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = course.title,
-                color = SlhWhite,
+                color = SlhContent,
                 fontFamily = SlhMono,
                 fontWeight = FontWeight.Bold,
                 fontSize = 13.sp,
@@ -490,7 +518,7 @@ private fun EmptyCard(onAddSubjectClick: () -> Unit) {
     ) {
         Text(
             text = "Пока нет предметов",
-            color = SlhWhite,
+            color = SlhContent,
             style = MaterialTheme.typography.titleMedium,
         )
         Spacer(modifier = Modifier.height(8.dp))

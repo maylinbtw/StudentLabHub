@@ -1,13 +1,20 @@
 package com.slh.studentlabhub.navigation
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -16,6 +23,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.slh.studentlabhub.SlhApplication
+import com.slh.studentlabhub.di.AppContainer
 import com.slh.studentlabhub.ui.components.SlhBottomBar
 import com.slh.studentlabhub.ui.screens.archive.ArchiveRoute
 import com.slh.studentlabhub.ui.screens.auth.LoginRoute
@@ -42,6 +50,11 @@ fun SlhApp() {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentTab = remember(backStackEntry) { navController.currentTab() }
+
+    NotificationPermissionPrompt(
+        active = currentTab != null,
+        container = container,
+    )
 
     Scaffold(
         containerColor = SlhBackground,
@@ -174,6 +187,30 @@ fun SlhApp() {
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun NotificationPermissionPrompt(
+    active: Boolean,
+    container: AppContainer,
+) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { }
+    LaunchedEffect(active) {
+        if (!active) return@LaunchedEffect
+        val repository = container.settingsRepository
+        val settings = repository.settings.value
+        if (!settings.remindersEnabled && !settings.redoAlerts) return@LaunchedEffect
+        if (repository.notificationPromptShown) return@LaunchedEffect
+        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        if (granted) return@LaunchedEffect
+        repository.notificationPromptShown = true
+        launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 }
 

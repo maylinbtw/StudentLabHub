@@ -57,7 +57,7 @@ import com.slh.studentlabhub.ui.theme.SlhSurface
 import com.slh.studentlabhub.ui.theme.SlhTextDisabled
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
 import com.slh.studentlabhub.ui.theme.SlhTextSecondary
-import com.slh.studentlabhub.ui.theme.SlhWhite
+import com.slh.studentlabhub.ui.theme.SlhContent
 
 @Composable
 fun ReferenceSearchField(
@@ -106,7 +106,7 @@ fun ReferenceSearchField(
                 singleLine = true,
                 interactionSource = interactionSource,
                 textStyle = TextStyle(
-                    color = SlhWhite,
+                    color = SlhContent,
                     fontFamily = SlhMono,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
@@ -151,7 +151,7 @@ fun TechTabs(
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = tech.label,
-                        color = if (isSelected) SlhWhite else SlhTextMuted,
+                        color = if (isSelected) SlhContent else SlhTextMuted,
                         fontFamily = SlhMono,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                         fontSize = 13.sp,
@@ -190,7 +190,7 @@ fun CategoryCard(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = category.title,
-                color = SlhWhite,
+                color = SlhContent,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -235,7 +235,7 @@ fun EntryCard(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = entry.title,
-                color = SlhWhite,
+                color = SlhContent,
                 fontFamily = SlhMono,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
@@ -347,7 +347,7 @@ fun SelectChip(
     ) {
         Text(
             text = text,
-            color = if (selected) SlhOnAccent else SlhWhite,
+            color = if (selected) SlhOnAccent else SlhContent,
             fontFamily = SlhMono,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
             fontSize = 12.sp,

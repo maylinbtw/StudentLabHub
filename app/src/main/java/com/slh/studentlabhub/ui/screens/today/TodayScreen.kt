@@ -47,6 +47,7 @@ import com.slh.studentlabhub.ui.components.ScreenHeader
 import com.slh.studentlabhub.ui.components.SectionLabel
 import com.slh.studentlabhub.ui.components.SlhIcon
 import com.slh.studentlabhub.ui.components.SlhProgressDots
+import com.slh.studentlabhub.ui.components.SlhPullRefresh
 import com.slh.studentlabhub.ui.components.daysUntil
 import com.slh.studentlabhub.ui.components.relativeDueLabel
 import com.slh.studentlabhub.ui.theme.SlhAccent
@@ -61,7 +62,7 @@ import com.slh.studentlabhub.ui.theme.SlhSurface
 import com.slh.studentlabhub.ui.theme.SlhTextDisabled
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
 import com.slh.studentlabhub.ui.theme.SlhTextSecondary
-import com.slh.studentlabhub.ui.theme.SlhWhite
+import com.slh.studentlabhub.ui.theme.SlhContent
 import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -158,122 +159,127 @@ fun TodayScreen(
             return@Column
         }
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 24.dp),
+        SlhPullRefresh(
+            isRefreshing = state.isSyncing,
+            onRefresh = onSyncClick,
         ) {
-            item(key = "sync_status") {
-                SyncStatus(
-                    isSyncing = state.isSyncing,
-                    lastSyncAt = state.lastSyncAt,
-                    errorMessage = state.errorMessage,
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-
-            if (state.isEmptyStart) {
-                item(key = "welcome") {
-                    WelcomeCard(
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 24.dp),
+            ) {
+                item(key = "sync_status") {
+                    SyncStatus(
                         isSyncing = state.isSyncing,
-                        onSyncClick = onSyncClick,
-                        onOpenSubjects = onOpenSubjects,
+                        lastSyncAt = state.lastSyncAt,
+                        errorMessage = state.errorMessage,
                     )
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
-                return@LazyColumn
-            }
 
-            if (state.unlinkedCourses > 0) {
-                item(key = "unlinked") {
-                    LinkBanner(
-                        overline = "GOOGLE CLASSROOM",
-                        title = "${state.unlinkedCourses} ${coursesWord(state.unlinkedCourses)} без предмета",
-                        subtitle = "Добавь их в «Предметы», чтобы вести лабы и оценки",
-                        onClick = onOpenSubjects,
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
+                if (state.isEmptyStart) {
+                    item(key = "welcome") {
+                        WelcomeCard(
+                            isSyncing = state.isSyncing,
+                            onSyncClick = onSyncClick,
+                            onOpenSubjects = onOpenSubjects,
+                        )
+                    }
+                    return@LazyColumn
                 }
-            }
 
-            item(key = "week") {
-                WeekStrip(
-                    state = state,
-                    onPreviousWeek = onPreviousWeek,
-                    onNextWeek = onNextWeek,
-                    onDayClick = onDayClick,
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            val selected = state.selectedDay
-            if (selected != null) {
-                item(key = "day_label") {
-                    SectionLabel(
-                        text = selected.format(dayTitleFormatter).uppercase(ruLocale) + " · ${state.dayItems.size}",
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-                if (state.dayItems.isEmpty()) {
-                    item(key = "day_empty") {
-                        EmptyLine(text = "В этот день сдавать нечего")
+                if (state.unlinkedCourses > 0) {
+                    item(key = "unlinked") {
+                        LinkBanner(
+                            overline = "GOOGLE CLASSROOM",
+                            title = "${state.unlinkedCourses} ${coursesWord(state.unlinkedCourses)} без предмета",
+                            subtitle = "Добавь их в «Предметы», чтобы вести лабы и оценки",
+                            onClick = onOpenSubjects,
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
-                items(items = state.dayItems, key = { "day_${it.key}" }) { item ->
-                    AgendaRow(item = item, now = state.now, onClick = { onItemClick(item) })
-                    Spacer(modifier = Modifier.height(6.dp))
-                }
-                item(key = "day_space") {
+
+                item(key = "week") {
+                    WeekStrip(
+                        state = state,
+                        onPreviousWeek = onPreviousWeek,
+                        onNextWeek = onNextWeek,
+                        onDayClick = onDayClick,
+                    )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
-            }
 
-            if (state.redo.isNotEmpty()) {
-                item(key = "redo_label") {
-                    SectionLabel(text = "НА ДОРАБОТКУ · ${state.redo.size}")
+                val selected = state.selectedDay
+                if (selected != null) {
+                    item(key = "day_label") {
+                        SectionLabel(
+                            text = selected.format(dayTitleFormatter).uppercase(ruLocale) + " · ${state.dayItems.size}",
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    if (state.dayItems.isEmpty()) {
+                        item(key = "day_empty") {
+                            EmptyLine(text = "В этот день сдавать нечего")
+                        }
+                    }
+                    items(items = state.dayItems, key = { "day_${it.key}" }) { item ->
+                        AgendaRow(item = item, now = state.now, onClick = { onItemClick(item) })
+                        Spacer(modifier = Modifier.height(6.dp))
+                    }
+                    item(key = "day_space") {
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                }
+
+                if (state.redo.isNotEmpty()) {
+                    item(key = "redo_label") {
+                        SectionLabel(text = "НА ДОРАБОТКУ · ${state.redo.size}")
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    items(items = state.redo, key = { "redo_${it.key}" }) { item ->
+                        AgendaRow(item = item, now = state.now, onClick = { onItemClick(item) })
+                        Spacer(modifier = Modifier.height(6.dp))
+                    }
+                    item(key = "redo_space") {
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                }
+
+                item(key = "upcoming_label") {
+                    SectionLabel(text = "БЛИЖАЙШИЕ ДЕДЛАЙНЫ · ${state.upcoming.size}")
                     Spacer(modifier = Modifier.height(8.dp))
                 }
-                items(items = state.redo, key = { "redo_${it.key}" }) { item ->
+                if (state.upcoming.isEmpty()) {
+                    item(key = "upcoming_empty") {
+                        EmptyLine(text = "Дедлайнов нет — можно выдохнуть")
+                    }
+                }
+                val visible = if (showAllUpcoming) state.upcoming else state.upcoming.take(UPCOMING_COLLAPSED)
+                items(items = visible, key = { "up_${it.key}" }) { item ->
                     AgendaRow(item = item, now = state.now, onClick = { onItemClick(item) })
                     Spacer(modifier = Modifier.height(6.dp))
                 }
-                item(key = "redo_space") {
-                    Spacer(modifier = Modifier.height(16.dp))
+                if (state.upcoming.size > UPCOMING_COLLAPSED) {
+                    item(key = "upcoming_toggle") {
+                        TextAction(
+                            text = if (showAllUpcoming) "свернуть" else "показать все (${state.upcoming.size})",
+                            onClick = { showAllUpcoming = !showAllUpcoming },
+                        )
+                    }
                 }
-            }
 
-            item(key = "upcoming_label") {
-                SectionLabel(text = "БЛИЖАЙШИЕ ДЕДЛАЙНЫ · ${state.upcoming.size}")
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-            if (state.upcoming.isEmpty()) {
-                item(key = "upcoming_empty") {
-                    EmptyLine(text = "Дедлайнов нет — можно выдохнуть")
-                }
-            }
-            val visible = if (showAllUpcoming) state.upcoming else state.upcoming.take(UPCOMING_COLLAPSED)
-            items(items = visible, key = { "up_${it.key}" }) { item ->
-                AgendaRow(item = item, now = state.now, onClick = { onItemClick(item) })
-                Spacer(modifier = Modifier.height(6.dp))
-            }
-            if (state.upcoming.size > UPCOMING_COLLAPSED) {
-                item(key = "upcoming_toggle") {
-                    TextAction(
-                        text = if (showAllUpcoming) "свернуть" else "показать все (${state.upcoming.size})",
-                        onClick = { showAllUpcoming = !showAllUpcoming },
+                item(key = "summary") {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    SectionLabel(text = "УСПЕВАЕМОСТЬ")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    SummaryCard(
+                        average = state.overallAverage,
+                        total = state.totalWorks,
+                        done = state.doneWorks,
+                        defended = state.defendedWorks,
+                        onClick = onOpenStatistics,
                     )
                 }
-            }
-
-            item(key = "summary") {
-                Spacer(modifier = Modifier.height(20.dp))
-                SectionLabel(text = "УСПЕВАЕМОСТЬ")
-                Spacer(modifier = Modifier.height(8.dp))
-                SummaryCard(
-                    average = state.overallAverage,
-                    total = state.totalWorks,
-                    done = state.doneWorks,
-                    defended = state.defendedWorks,
-                    onClick = onOpenStatistics,
-                )
             }
         }
     }
@@ -382,7 +388,7 @@ private fun DayCell(
     val numberColor = when {
         isSelected -> SlhOnAccent
         isPast -> SlhTextMuted
-        else -> SlhWhite
+        else -> SlhContent
     }
     Column(
         modifier = modifier
@@ -480,7 +486,7 @@ private fun AgendaRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = item.title,
-                color = SlhWhite,
+                color = SlhContent,
                 fontFamily = SlhMono,
                 fontWeight = FontWeight.Bold,
                 fontSize = 13.sp,
@@ -552,7 +558,7 @@ private fun SummaryCard(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = "Средний балл по практическим",
-                color = SlhWhite,
+                color = SlhContent,
                 style = MaterialTheme.typography.titleMedium,
             )
             Spacer(modifier = Modifier.height(6.dp))
@@ -610,7 +616,7 @@ private fun WelcomeCard(
         Spacer(modifier = Modifier.height(18.dp))
         Text(
             text = "С чего начать",
-            color = SlhWhite,
+            color = SlhContent,
             style = MaterialTheme.typography.titleMedium,
         )
         Spacer(modifier = Modifier.height(8.dp))

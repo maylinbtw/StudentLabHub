@@ -36,14 +36,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.slh.studentlabhub.ui.theme.SlhBackground
-import com.slh.studentlabhub.ui.theme.SlhInk
+import com.slh.studentlabhub.ui.theme.SlhOnContent
 import com.slh.studentlabhub.ui.theme.SlhMono
 import com.slh.studentlabhub.ui.theme.SlhOutline
 import com.slh.studentlabhub.ui.theme.SlhAccent
 import com.slh.studentlabhub.ui.theme.SlhSurface
 import com.slh.studentlabhub.ui.theme.SlhTextDisabled
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
-import com.slh.studentlabhub.ui.theme.SlhWhite
+import com.slh.studentlabhub.ui.theme.SlhContent
 
 @Composable
 fun SlhDialog(
@@ -70,7 +70,7 @@ fun SlhDialog(
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = title,
-                color = SlhWhite,
+                color = SlhContent,
                 style = MaterialTheme.typography.titleLarge,
             )
             Spacer(modifier = Modifier.height(20.dp))
@@ -102,7 +102,7 @@ fun SlhLabeledField(
             singleLine = true,
             interactionSource = interactionSource,
             textStyle = TextStyle(
-                color = SlhWhite,
+                color = SlhContent,
                 fontFamily = SlhMono,
                 fontSize = 14.sp,
             ),
@@ -162,7 +162,7 @@ fun SlhDialogPrimaryButton(
         modifier = modifier
             .height(44.dp)
             .clip(shape)
-            .background(if (enabled) SlhWhite else SlhOutline)
+            .background(if (enabled) SlhContent else SlhOutline)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -180,7 +180,7 @@ fun SlhDialogPrimaryButton(
         ) {
             Text(
                 text = text,
-                color = if (enabled) SlhInk else SlhTextMuted,
+                color = if (enabled) SlhOnContent else SlhTextMuted,
                 style = MaterialTheme.typography.labelLarge,
             )
         }

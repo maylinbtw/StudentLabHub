@@ -24,13 +24,22 @@ val SlhOutline: Color
 val SlhDotInactive: Color
     get() = SlhPalette.dotInactive
 
+val SlhContent: Color
+    get() = SlhPalette.content
+
+val SlhOnContent: Color
+    get() = SlhPalette.onContent
+
+val SlhTextSecondary: Color
+    get() = SlhPalette.textSecondary
+
+val SlhTextMuted: Color
+    get() = SlhPalette.textMuted
+
+val SlhTextDisabled: Color
+    get() = SlhPalette.textDisabled
+
 val SlhDotShape: Shape
     get() = SlhPalette.dotShape
 
-val SlhWhite = Color(0xFFFFFFFF)
-val SlhInk = Color(0xFF000000)
 val SlhDanger = Color(0xFFFF453A)
-
-val SlhTextSecondary = Color(0xFF939393)
-val SlhTextMuted = Color(0xFF595959)
-val SlhTextDisabled = Color(0xFF3A3A3A)

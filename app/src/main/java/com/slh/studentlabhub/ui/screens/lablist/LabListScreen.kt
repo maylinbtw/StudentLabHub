@@ -68,7 +68,7 @@ import com.slh.studentlabhub.ui.components.sectionTitle
 import com.slh.studentlabhub.ui.theme.SlhBackground
 import com.slh.studentlabhub.ui.theme.SlhDanger
 import com.slh.studentlabhub.ui.theme.SlhDotInactive
-import com.slh.studentlabhub.ui.theme.SlhInk
+import com.slh.studentlabhub.ui.theme.SlhOnContent
 import com.slh.studentlabhub.ui.theme.SlhMono
 import com.slh.studentlabhub.ui.theme.SlhOnAccent
 import com.slh.studentlabhub.ui.theme.SlhOutline
@@ -77,7 +77,7 @@ import com.slh.studentlabhub.ui.theme.SlhSans
 import com.slh.studentlabhub.ui.theme.SlhSurface
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
 import com.slh.studentlabhub.ui.theme.SlhTextSecondary
-import com.slh.studentlabhub.ui.theme.SlhWhite
+import com.slh.studentlabhub.ui.theme.SlhContent
 import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
 import java.util.Locale
 
@@ -161,7 +161,7 @@ fun LabListScreen(
                         text = {
                             Text(
                                 text = "Редактировать предмет",
-                                color = SlhWhite,
+                                color = SlhContent,
                                 fontFamily = SlhSans,
                                 fontSize = 14.sp,
                             )
@@ -175,7 +175,7 @@ fun LabListScreen(
                         text = {
                             Text(
                                 text = if (linkedCourseId == null) "Связать с курсом Classroom" else "Сменить курс Classroom",
-                                color = SlhWhite,
+                                color = SlhContent,
                                 fontFamily = SlhSans,
                                 fontSize = 14.sp,
                             )
@@ -190,7 +190,7 @@ fun LabListScreen(
                             text = {
                                 Text(
                                     text = "Отвязать курс Classroom",
-                                    color = SlhWhite,
+                                    color = SlhContent,
                                     fontFamily = SlhSans,
                                     fontSize = 14.sp,
                                 )
@@ -205,7 +205,7 @@ fun LabListScreen(
                         text = {
                             Text(
                                 text = if (isArchived) "Вернуть из архива" else "В архив",
-                                color = SlhWhite,
+                                color = SlhContent,
                                 fontFamily = SlhSans,
                                 fontSize = 14.sp,
                             )
@@ -360,7 +360,7 @@ fun LabListScreen(
             title = {
                 Text(
                     text = "Удалить предмет?",
-                    color = SlhWhite,
+                    color = SlhContent,
                     style = MaterialTheme.typography.titleMedium,
                 )
             },
@@ -507,7 +507,7 @@ private fun ClassroomTaskRow(
     ) {
         Text(
             text = task.title,
-            color = SlhWhite,
+            color = SlhContent,
             fontFamily = SlhMono,
             fontWeight = FontWeight.Bold,
             fontSize = 12.sp,
@@ -542,12 +542,12 @@ private fun StatsRow(summary: SubjectSummary) {
         StatColumn(
             value = "${summary.doneLabs}/${summary.totalLabs}",
             label = "СДЕЛАНО",
-            valueColor = SlhWhite,
+            valueColor = SlhContent,
         )
         StatColumn(
             value = "${summary.defendedLabs}/${summary.totalLabs}",
             label = "ЗАЩИЩЕНО",
-            valueColor = SlhWhite,
+            valueColor = SlhContent,
         )
     }
 }
@@ -592,7 +592,7 @@ private fun LabRow(
         Spacer(modifier = Modifier.width(12.dp))
         Text(
             text = lab.displayName,
-            color = if (isActive) SlhWhite else SlhTextMuted,
+            color = if (isActive) SlhContent else SlhTextMuted,
             fontFamily = SlhSans,
             fontSize = 14.sp,
             maxLines = 1,
@@ -624,10 +624,10 @@ private fun StatusBox(status: LabStatus) {
 
         LabStatus.DONE -> {
             Box(
-                modifier = baseModifier.background(SlhWhite),
+                modifier = baseModifier.background(SlhContent),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(text = "✓", color = SlhInk, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                Text(text = "✓", color = SlhOnContent, fontSize = 13.sp, fontWeight = FontWeight.Bold)
             }
         }
 
@@ -655,7 +655,7 @@ private fun ScoreChip(
     ) {
         Text(
             text = score.toString(),
-            color = if (completed) SlhOnAccent else SlhWhite,
+            color = if (completed) SlhOnAccent else SlhContent,
             fontFamily = SlhMono,
             fontWeight = FontWeight.Bold,
             fontSize = 12.sp,
