@@ -24,6 +24,15 @@ interface SubjectDao {
     @Insert
     suspend fun insert(subject: SubjectEntity): Long
 
+    @Insert
+    suspend fun insertAll(subjects: List<SubjectEntity>)
+
+    @Query("SELECT * FROM subjects")
+    suspend fun getAll(): List<SubjectEntity>
+
+    @Query("DELETE FROM subjects")
+    suspend fun deleteAll()
+
     @Query("UPDATE subjects SET title = :title, semester = :semester WHERE id = :id")
     suspend fun update(id: Long, title: String, semester: Int)
 

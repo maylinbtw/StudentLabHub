@@ -1,11 +1,15 @@
 package com.slh.studentlabhub.ui.screens.settings
 
+import android.content.ContentResolver
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.slh.studentlabhub.SlhApplication
+import com.slh.studentlabhub.data.backup.BackupException
+import com.slh.studentlabhub.data.backup.BackupManager
 import com.slh.studentlabhub.domain.model.AccentColor
 import com.slh.studentlabhub.domain.model.AppSettings
 import com.slh.studentlabhub.domain.model.BackgroundStyle
@@ -36,6 +40,13 @@ data class SettingsUiState(
     val versionName: String = "",
     val isSigningOut: Boolean = false,
     val isSignedOut: Boolean = false,
+    val backupMessage: String? = null,
+    val isBackupBusy: Boolean = false,
+)
+
+private data class BackupState(
+    val message: String? = null,
+    val isBusy: Boolean = false,
 )
 
 private data class Counts(
@@ -54,10 +65,18 @@ class SettingsViewModel(
     private val classroomRepository: ClassroomRepository,
     private val referenceRepository: ReferenceRepository,
     private val labRepository: LabRepository,
+    private val backupManager: BackupManager,
+    private val contentResolver: ContentResolver,
     private val versionName: String,
 ) : ViewModel() {
 
     private val account = MutableStateFlow(AccountState())
+
+    private val backup = MutableStateFlow(BackupState())
+
+    private val accountAndBackup = combine(account, backup) { accountState, backupState ->
+        accountState to backupState
+    }
 
     private val counts = combine(
         referenceRepository.observeTldrCount(),
@@ -69,8 +88,8 @@ class SettingsViewModel(
         settingsRepository.settings,
         classroomRepository.redoThreshold,
         counts,
-        account,
-    ) { settings, threshold, counts, accountState ->
+        accountAndBackup,
+    ) { settings, threshold, counts, (accountState, backupState) ->
         SettingsUiState(
             settings = settings,
             email = classroomRepository.signedInEmail,
@@ -82,6 +101,8 @@ class SettingsViewModel(
             versionName = versionName,
             isSigningOut = accountState.isSigningOut,
             isSignedOut = accountState.isSignedOut,
+            backupMessage = backupState.message,
+            isBackupBusy = backupState.isBusy,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -113,6 +134,39 @@ class SettingsViewModel(
     fun onRedoAlertsChanged(enabled: Boolean) = settingsRepository.update { it.copy(redoAlerts = enabled) }
 
     fun onBackgroundSyncChanged(enabled: Boolean) = settingsRepository.update { it.copy(backgroundSync = enabled) }
+
+    fun onLargeTextChanged(enabled: Boolean) = settingsRepository.update { it.copy(largeText = enabled) }
+
+    fun exportBackup(uri: Uri) {
+        runBackup {
+            val summary = contentResolver.openOutputStream(uri)?.use { backupManager.export(it) }
+                ?: throw BackupException("Не удалось создать файл")
+            "Сохранено: ${summary.subjects} предм., ${summary.works} работ, ${summary.articles} статей"
+        }
+    }
+
+    fun importBackup(uri: Uri) {
+        runBackup {
+            val summary = contentResolver.openInputStream(uri)?.use { backupManager.import(it) }
+                ?: throw BackupException("Не удалось открыть файл")
+            "Восстановлено: ${summary.subjects} предм., ${summary.works} работ, ${summary.articles} статей"
+        }
+    }
+
+    private fun runBackup(block: suspend () -> String) {
+        if (backup.value.isBusy) return
+        backup.value = BackupState(isBusy = true)
+        viewModelScope.launch {
+            val message = try {
+                block()
+            } catch (error: BackupException) {
+                error.message ?: "Ошибка резервной копии"
+            } catch (error: Exception) {
+                "Ошибка: ${error.message ?: "файл не подходит"}"
+            }
+            backup.value = BackupState(message = message)
+        }
+    }
 
     fun onRedoThresholdSelected(value: Int) = classroomRepository.setRedoThreshold(value)
 
@@ -149,6 +203,8 @@ class SettingsViewModel(
                     classroomRepository = app.container.classroomRepository,
                     referenceRepository = app.container.referenceRepository,
                     labRepository = app.container.labRepository,
+                    backupManager = app.container.backupManager,
+                    contentResolver = app.contentResolver,
                     versionName = versionName,
                 )
             }

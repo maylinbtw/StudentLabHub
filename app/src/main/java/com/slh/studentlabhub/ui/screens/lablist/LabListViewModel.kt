@@ -9,6 +9,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.slh.studentlabhub.SlhApplication
 import com.slh.studentlabhub.domain.model.CourseOverview
 import com.slh.studentlabhub.domain.model.CourseTasks
+import com.slh.studentlabhub.domain.model.Lab
+import com.slh.studentlabhub.domain.model.LabStatus
 import com.slh.studentlabhub.domain.model.SubjectDetails
 import com.slh.studentlabhub.domain.model.WorkType
 import com.slh.studentlabhub.domain.repository.ClassroomRepository
@@ -104,6 +106,12 @@ class LabListViewModel(
         viewModelScope.launch {
             repository.setSubjectArchived(subjectId, archived)
             courseId?.let { classroomRepository.setCourseArchived(it, archived) }
+        }
+    }
+
+    fun setLabStatus(lab: Lab, status: LabStatus) {
+        viewModelScope.launch {
+            repository.updateLab(lab.copy(status = status))
         }
     }
 

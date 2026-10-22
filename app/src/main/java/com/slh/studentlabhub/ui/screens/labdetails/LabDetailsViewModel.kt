@@ -1,5 +1,6 @@
 package com.slh.studentlabhub.ui.screens.labdetails
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
@@ -7,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.slh.studentlabhub.SlhApplication
+import com.slh.studentlabhub.data.local.LabPhotoStore
 import com.slh.studentlabhub.domain.model.Lab
 import com.slh.studentlabhub.domain.model.LabStatus
 import com.slh.studentlabhub.domain.model.WorkType
@@ -31,6 +33,8 @@ data class LabDetailsUiState(
     val scoreInput: String = "",
     val notes: String = "",
     val deadline: Long? = null,
+    val photos: List<String> = emptyList(),
+    val isAddingPhotos: Boolean = false,
 ) {
     val canSave: Boolean
         get() = !isLoading && !isSaving && title.isNotBlank()
@@ -42,6 +46,7 @@ data class LabDetailsUiState(
 class LabDetailsViewModel(
     private val labId: Long,
     private val repository: LabRepository,
+    private val photoStore: LabPhotoStore,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LabDetailsUiState())
@@ -66,6 +71,7 @@ class LabDetailsViewModel(
                     scoreInput = details.lab.score?.toString().orEmpty(),
                     notes = details.lab.notes,
                     deadline = details.lab.deadline,
+                    photos = photoStore.list(labId),
                 )
             }
         }
@@ -89,6 +95,22 @@ class LabDetailsViewModel(
 
     fun onDeadlineChange(value: Long?) {
         _uiState.update { it.copy(deadline = value) }
+    }
+
+    fun addPhotos(uris: List<Uri>) {
+        if (uris.isEmpty()) return
+        _uiState.update { it.copy(isAddingPhotos = true) }
+        viewModelScope.launch {
+            uris.forEach { uri -> runCatching { photoStore.add(labId, uri) } }
+            _uiState.update { it.copy(isAddingPhotos = false, photos = photoStore.list(labId)) }
+        }
+    }
+
+    fun deletePhoto(path: String) {
+        viewModelScope.launch {
+            photoStore.delete(path)
+            _uiState.update { it.copy(photos = photoStore.list(labId)) }
+        }
     }
 
     fun onNotesChange(value: String) {
@@ -117,6 +139,7 @@ class LabDetailsViewModel(
     fun delete() {
         viewModelScope.launch {
             repository.deleteLab(labId)
+            photoStore.deleteAll(labId)
             _uiState.update { it.copy(isFinished = true) }
         }
     }
@@ -132,6 +155,7 @@ class LabDetailsViewModel(
                 LabDetailsViewModel(
                     labId = labId,
                     repository = app.container.labRepository,
+                    photoStore = app.container.labPhotoStore,
                 )
             }
         }

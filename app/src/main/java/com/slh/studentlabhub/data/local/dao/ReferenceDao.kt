@@ -25,6 +25,12 @@ interface ReferenceDao {
     @Query("SELECT COUNT(*) FROM ref_entries WHERE source = 'custom'")
     fun observeCustomCount(): Flow<Int>
 
+    @Query("SELECT * FROM ref_entries WHERE source = 'custom'")
+    suspend fun getCustomEntries(): List<RefEntryEntity>
+
+    @Query("SELECT * FROM ref_categories WHERE id LIKE 'custom_%'")
+    suspend fun getCustomCategories(): List<RefCategoryEntity>
+
     @Query("SELECT * FROM ref_categories WHERE id = :id")
     suspend fun getCategory(id: String): RefCategoryEntity?
 

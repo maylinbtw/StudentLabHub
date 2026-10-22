@@ -16,6 +16,9 @@ interface LabDao {
     @Insert
     suspend fun insertAll(labs: List<LabEntity>)
 
+    @Query("SELECT * FROM labs")
+    suspend fun getAll(): List<LabEntity>
+
     @Query("SELECT * FROM labs WHERE subjectId = :subjectId ORDER BY type ASC, number ASC")
     fun observeLabs(subjectId: Long): Flow<List<LabEntity>>
 

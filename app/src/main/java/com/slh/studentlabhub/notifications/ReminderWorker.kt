@@ -5,6 +5,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.slh.studentlabhub.SlhApplication
 import com.slh.studentlabhub.data.remote.AuthState
+import com.slh.studentlabhub.widget.DeadlinesWidget
 import kotlinx.coroutines.CancellationException
 
 class ReminderWorker(
@@ -35,6 +36,7 @@ class ReminderWorker(
         if (settings.remindersEnabled || settings.redoAlerts) {
             ReminderChecker(applicationContext, container).run(settings)
         }
+        DeadlinesWidget.refresh(applicationContext)
         return Result.success()
     }
 

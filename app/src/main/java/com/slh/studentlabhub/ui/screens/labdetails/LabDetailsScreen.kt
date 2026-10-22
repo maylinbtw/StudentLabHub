@@ -1,5 +1,8 @@
 package com.slh.studentlabhub.ui.screens.labdetails
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -121,6 +124,9 @@ fun LabDetailsRoute(
     viewModel: LabDetailsViewModel = viewModel(factory = LabDetailsViewModel.Factory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val photoPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 6),
+    ) { uris -> viewModel.addPhotos(uris) }
 
     LaunchedEffect(state.isFinished, state.isMissing) {
         if (state.isFinished || state.isMissing) {
@@ -136,6 +142,10 @@ fun LabDetailsRoute(
         onScoreChange = viewModel::onScoreChange,
         onNotesChange = viewModel::onNotesChange,
         onDeadlineChange = viewModel::onDeadlineChange,
+        onAddPhotos = {
+            photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        },
+        onDeletePhoto = viewModel::deletePhoto,
         onSave = viewModel::save,
         onDelete = viewModel::delete,
         modifier = modifier,
@@ -154,6 +164,8 @@ fun LabDetailsScreen(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
     onDeadlineChange: (Long?) -> Unit = {},
+    onAddPhotos: () -> Unit = {},
+    onDeletePhoto: (String) -> Unit = {},
 ) {
     var showDeleteConfirm by rememberSaveable { mutableStateOf(false) }
     var showDeadlinePicker by rememberSaveable { mutableStateOf(false) }
@@ -268,6 +280,23 @@ fun LabDetailsScreen(
                 NotesField(
                     value = state.notes,
                     onValueChange = onNotesChange,
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+                SectionLabel(text = "ФОТО · ОТЧЁТ, ДОСКА, ЗАДАНИЕ · ${state.photos.size}")
+                Spacer(modifier = Modifier.height(10.dp))
+                LabPhotosRow(
+                    photos = state.photos,
+                    isAdding = state.isAddingPhotos,
+                    onAddClick = onAddPhotos,
+                    onDelete = onDeletePhoto,
+                )
+                Text(
+                    text = "Фото сохраняются сразу, без кнопки «Сохранить»",
+                    color = SlhTextMuted,
+                    fontFamily = SlhSans,
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(top = 6.dp),
                 )
 
                 Spacer(modifier = Modifier.height(28.dp))

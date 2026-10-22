@@ -6,6 +6,9 @@ import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 
 val SlhShapes = Shapes(
@@ -54,10 +57,17 @@ fun StudentLabHubTheme(content: @Composable () -> Unit) {
             onError = SlhOnContent,
         )
     }
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = SlhTypography,
-        shapes = SlhShapes,
-        content = content,
+    val density = LocalDensity.current
+    val scaledDensity = Density(
+        density = density.density,
+        fontScale = density.fontScale * SlhPalette.fontScale,
     )
+    CompositionLocalProvider(LocalDensity provides scaledDensity) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = SlhTypography,
+            shapes = SlhShapes,
+            content = content,
+        )
+    }
 }

@@ -1,5 +1,6 @@
 package com.slh.studentlabhub
 
+import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
@@ -10,9 +11,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.lifecycleScope
 import com.slh.studentlabhub.domain.model.AppSettings
 import com.slh.studentlabhub.domain.model.ThemeMode
+import com.slh.studentlabhub.navigation.LaunchActions
 import com.slh.studentlabhub.navigation.SlhApp
 import com.slh.studentlabhub.ui.theme.SlhPalette
 import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
+import com.slh.studentlabhub.widget.DeadlinesWidget
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -20,6 +23,9 @@ class MainActivity : ComponentActivity() {
         val settingsRepository = (application as SlhApplication).container.settingsRepository
         applyAppearance(settingsRepository.settings.value)
         super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) {
+            LaunchActions.submit(intent?.action)
+        }
 
         lifecycleScope.launch {
             settingsRepository.settings.collect { settings ->
@@ -31,6 +37,19 @@ class MainActivity : ComponentActivity() {
             StudentLabHubTheme {
                 SlhApp()
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        LaunchActions.submit(intent.action)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        val container = (application as SlhApplication).container
+        container.applicationScope.launch {
+            DeadlinesWidget.refresh(applicationContext)
         }
     }
 

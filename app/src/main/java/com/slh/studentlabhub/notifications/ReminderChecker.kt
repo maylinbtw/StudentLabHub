@@ -21,7 +21,7 @@ class ReminderChecker(
     suspend fun run(settings: AppSettings) {
         val store = container.reminderStore
         val now = System.currentTimeMillis()
-        val reminders = collectReminders()
+        val reminders = container.collectReminders()
         val notified = store.notifiedKeys.toMutableSet()
         val firstRun = !store.initialized
         val canPost = ReminderNotifications.canPost(context)
@@ -61,39 +61,39 @@ class ReminderChecker(
         store.notifiedKeys = notified.filter { it.substringBefore('@') in alive }.toSet()
         store.initialized = true
     }
+}
 
-    private suspend fun collectReminders(): List<Reminder> {
-        val classroom = container.classroomRepository
-        val labs = container.labRepository
-        val subjects = labs.observeSubjects().first()
-        val subjectByCourse = subjects
-            .filter { it.classroomCourseId != null }
-            .associateBy { it.classroomCourseId }
+suspend fun AppContainer.collectReminders(): List<Reminder> {
+    val classroom = classroomRepository
+    val labs = labRepository
+    val subjects = labs.observeSubjects().first()
+    val subjectByCourse = subjects
+        .filter { it.classroomCourseId != null }
+        .associateBy { it.classroomCourseId }
 
-        val classroomReminders = if (classroom.signedInEmail != null) {
-            classroom.observeUpcomingTasks().first().map { upcoming ->
-                Reminder(
-                    key = "gc_${upcoming.courseId}_${upcoming.task.id}",
-                    title = upcoming.task.title,
-                    subjectTitle = subjectByCourse[upcoming.courseId]?.title ?: upcoming.courseTitle,
-                    dueAt = upcoming.task.dueAt,
-                    isRedo = upcoming.task.state == TaskState.REDO,
-                )
-            }
-        } else {
-            emptyList()
-        }
-
-        val labReminders = labs.observePendingDeadlines().first().map { lab ->
+    val classroomReminders = if (classroom.signedInEmail != null) {
+        classroom.observeUpcomingTasks().first().map { upcoming ->
             Reminder(
-                key = "lab_${lab.labId}",
-                title = "${lab.type.shortPrefix} №${lab.number} · ${lab.title}",
-                subjectTitle = lab.subjectTitle,
-                dueAt = lab.deadline,
-                isRedo = false,
+                key = "gc_${upcoming.courseId}_${upcoming.task.id}",
+                title = upcoming.task.title,
+                subjectTitle = subjectByCourse[upcoming.courseId]?.title ?: upcoming.courseTitle,
+                dueAt = upcoming.task.dueAt,
+                isRedo = upcoming.task.state == TaskState.REDO,
             )
         }
-
-        return classroomReminders + labReminders
+    } else {
+        emptyList()
     }
+
+    val labReminders = labs.observePendingDeadlines().first().map { lab ->
+        Reminder(
+            key = "lab_${lab.labId}",
+            title = "${lab.type.shortPrefix} №${lab.number} · ${lab.title}",
+            subjectTitle = lab.subjectTitle,
+            dueAt = lab.deadline,
+            isRedo = false,
+        )
+    }
+
+    return classroomReminders + labReminders
 }

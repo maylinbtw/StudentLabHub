@@ -1,6 +1,7 @@
 package com.slh.studentlabhub.navigation
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -55,6 +57,26 @@ fun SlhApp() {
         active = currentTab != null,
         container = container,
     )
+
+    val pendingAction by LaunchActions.pending.collectAsState()
+    LaunchedEffect(pendingAction, currentTab != null) {
+        val action = pendingAction ?: return@LaunchedEffect
+        if (currentTab == null) return@LaunchedEffect
+        LaunchActions.pending.value = null
+        val target = when (action) {
+            LaunchActions.TODAY -> Routes.TODAY
+            LaunchActions.REFERENCE -> Routes.REFERENCE
+            else -> Routes.SUBJECTS
+        }
+        if (action == LaunchActions.ADD_SUBJECT) {
+            LaunchActions.addSubjectRequested.value = true
+        }
+        navController.navigate(target) {
+            popUpTo(homeRoute) { saveState = true }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
 
     Scaffold(
         containerColor = SlhBackground,
@@ -214,6 +236,7 @@ private fun NotificationPermissionPrompt(
     }
 }
 
+@SuppressLint("RestrictedApi")
 private fun NavHostController.currentTab(): BottomTab? =
     currentBackStack.value
         .asReversed()

@@ -18,7 +18,9 @@ private val PureWhite = Color(0xFFFFFFFF)
 private val PureBlack = Color(0xFF000000)
 
 val AccentColor.color: Color
-    get() = if (SlhPalette.isDark) darkVariant() else lightVariant()
+    get() = colorFor(SlhPalette.isDark)
+
+fun AccentColor.colorFor(dark: Boolean): Color = if (dark) darkVariant() else lightVariant()
 
 private fun AccentColor.darkVariant(): Color = when (this) {
     AccentColor.RED -> Color(0xFFFF3B30)
@@ -112,6 +114,8 @@ private val LightTones = Tones(
 
 private val SquareDot = RoundedCornerShape(1.dp)
 
+private const val LARGE_TEXT_SCALE = 1.15f
+
 object SlhPalette {
     var isDark by mutableStateOf(true)
         private set
@@ -143,6 +147,8 @@ object SlhPalette {
         private set
     var roundDots by mutableStateOf(true)
         private set
+    var fontScale by mutableStateOf(1f)
+        private set
 
     fun apply(settings: AppSettings, dark: Boolean) {
         val tones = if (dark) darkTones(settings.background) else LightTones
@@ -162,5 +168,6 @@ object SlhPalette {
         textDisabled = tones.textDisabled
         roundDots = settings.dotShape == DotShape.ROUND
         dotShape = if (roundDots) CircleShape else SquareDot
+        fontScale = if (settings.largeText) LARGE_TEXT_SCALE else 1f
     }
 }

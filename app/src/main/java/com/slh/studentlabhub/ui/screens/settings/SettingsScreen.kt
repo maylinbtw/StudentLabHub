@@ -84,6 +84,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Switch
+import java.time.LocalDate
 
 private val syncFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM HH:mm")
 
@@ -170,6 +171,14 @@ fun SettingsRoute(
         }
     }
 
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json"),
+    ) { uri -> uri?.let(viewModel::exportBackup) }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+    ) { uri -> uri?.let(viewModel::importBackup) }
+
     LaunchedEffect(state.isSignedOut) {
         if (state.isSignedOut) {
             onSignedOut()
@@ -191,6 +200,13 @@ fun SettingsRoute(
         },
         onBackgroundSyncChanged = viewModel::onBackgroundSyncChanged,
         onAllowNotifications = requestNotifications,
+        onLargeTextChanged = viewModel::onLargeTextChanged,
+        onExportBackup = {
+            exportLauncher.launch("studentlabhub-${LocalDate.now()}.json")
+        },
+        onImportBackup = {
+            importLauncher.launch(arrayOf("application/json", "text/plain", "application/octet-stream"))
+        },
         onAccentSelected = viewModel::onAccentSelected,
         onBackgroundSelected = viewModel::onBackgroundSelected,
         onDotShapeSelected = viewModel::onDotShapeSelected,
@@ -222,6 +238,9 @@ fun SettingsScreen(
     onRedoAlertsChanged: (Boolean) -> Unit = {},
     onBackgroundSyncChanged: (Boolean) -> Unit = {},
     onAllowNotifications: () -> Unit = {},
+    onLargeTextChanged: (Boolean) -> Unit = {},
+    onExportBackup: () -> Unit = {},
+    onImportBackup: () -> Unit = {},
 ) {
     val settings = state.settings
 
@@ -326,6 +345,15 @@ fun SettingsScreen(
             )
             OptionHint(text = "AMOLED — чистый чёрный, экономит заряд. Графит — мягче для глаз.")
             Spacer(modifier = Modifier.height(18.dp))
+            OptionTitle(text = "Размер текста")
+            Spacer(modifier = Modifier.height(8.dp))
+            SegmentedOptions(
+                options = listOf(false, true),
+                selected = settings.largeText,
+                label = { if (it) "Крупный" else "Обычный" },
+                onSelect = onLargeTextChanged,
+            )
+            Spacer(modifier = Modifier.height(18.dp))
             OptionTitle(text = "Точечные цифры")
             Spacer(modifier = Modifier.height(8.dp))
             SegmentedOptions(
@@ -370,6 +398,23 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(10.dp))
             SettingsCard {
                 ActionRow(
+                    title = "Резервная копия",
+                    value = "предметы, работы, мои статьи, настройки",
+                    actionText = if (state.isBackupBusy) "…" else "СОХРАНИТЬ",
+                    enabled = !state.isBackupBusy,
+                    onConfirmed = onExportBackup,
+                    requireConfirm = false,
+                )
+                HorizontalDivider(thickness = 1.dp, color = SlhOutline)
+                ActionRow(
+                    title = "Восстановить из файла",
+                    value = "заменит текущие предметы и работы",
+                    actionText = "ОТКРЫТЬ",
+                    enabled = !state.isBackupBusy,
+                    onConfirmed = onImportBackup,
+                )
+                HorizontalDivider(thickness = 1.dp, color = SlhOutline)
+                ActionRow(
                     title = "Загружено из tldr-pages",
                     value = "${state.tldrCount} ${articlesWord(state.tldrCount)}",
                     actionText = "ОЧИСТИТЬ",
@@ -392,7 +437,18 @@ fun SettingsScreen(
                     )
                 }
             }
-            OptionHint(text = "Все данные хранятся только на этом устройстве.")
+            state.backupMessage?.let { message ->
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = message,
+                    color = SlhAccent,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            OptionHint(
+                text = "Все данные хранятся только на этом устройстве. Сохрани копию перед сменой телефона — " +
+                    "фото к работам и данные Classroom в неё не входят (Classroom загрузится заново).",
+            )
 
             Spacer(modifier = Modifier.height(28.dp))
             SectionLabel(text = "О ПРИЛОЖЕНИИ")
@@ -728,6 +784,7 @@ private fun ActionRow(
     actionText: String,
     enabled: Boolean,
     onConfirmed: () -> Unit,
+    requireConfirm: Boolean = true,
 ) {
     var confirm by remember(enabled) { mutableStateOf(false) }
     Row(
@@ -755,7 +812,7 @@ private fun ActionRow(
             color = if (confirm) SlhDanger else SlhTextSecondary,
             enabled = enabled,
             onClick = {
-                if (confirm) {
+                if (confirm || !requireConfirm) {
                     confirm = false
                     onConfirmed()
                 } else {

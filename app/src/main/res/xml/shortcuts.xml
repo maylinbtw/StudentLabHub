@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutId="today"
+        android:shortcutLongLabel="@string/shortcut_today_long"
+        android:shortcutShortLabel="@string/shortcut_today_short">
+        <intent
+            android:action="com.slh.studentlabhub.action.TODAY"
+            android:targetClass="com.slh.studentlabhub.MainActivity"
+            android:targetPackage="com.slh.studentlabhub" />
+    </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutId="subjects"
+        android:shortcutLongLabel="@string/shortcut_subjects_long"
+        android:shortcutShortLabel="@string/shortcut_subjects_short">
+        <intent
+            android:action="com.slh.studentlabhub.action.SUBJECTS"
+            android:targetClass="com.slh.studentlabhub.MainActivity"
+            android:targetPackage="com.slh.studentlabhub" />
+    </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutId="reference"
+        android:shortcutLongLabel="@string/shortcut_reference_long"
+        android:shortcutShortLabel="@string/shortcut_reference_short">
+        <intent
+            android:action="com.slh.studentlabhub.action.REFERENCE"
+            android:targetClass="com.slh.studentlabhub.MainActivity"
+            android:targetPackage="com.slh.studentlabhub" />
+    </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutId="add_subject"
+        android:shortcutLongLabel="@string/shortcut_add_subject_long"
+        android:shortcutShortLabel="@string/shortcut_add_subject_short">
+        <intent
+            android:action="com.slh.studentlabhub.action.ADD_SUBJECT"
+            android:targetClass="com.slh.studentlabhub.MainActivity"
+            android:targetPackage="com.slh.studentlabhub" />
+    </shortcut>
+</shortcuts>

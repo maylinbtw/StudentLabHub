@@ -42,6 +42,7 @@ class SettingsRepositoryImpl(context: Context) : SettingsRepository {
             .putString(KEY_REMINDER_TIMING, settings.reminderTiming.name)
             .putBoolean(KEY_REDO_ALERTS, settings.redoAlerts)
             .putBoolean(KEY_BACKGROUND_SYNC, settings.backgroundSync)
+            .putBoolean(KEY_LARGE_TEXT, settings.largeText)
             .apply()
     }
 
@@ -57,6 +58,7 @@ class SettingsRepositoryImpl(context: Context) : SettingsRepository {
             reminderTiming = prefs.readEnum(KEY_REMINDER_TIMING, defaults.reminderTiming),
             redoAlerts = prefs.getBoolean(KEY_REDO_ALERTS, defaults.redoAlerts),
             backgroundSync = prefs.getBoolean(KEY_BACKGROUND_SYNC, defaults.backgroundSync),
+            largeText = prefs.getBoolean(KEY_LARGE_TEXT, defaults.largeText),
         )
     }
 
@@ -72,6 +74,7 @@ class SettingsRepositoryImpl(context: Context) : SettingsRepository {
         const val KEY_REDO_ALERTS = "redo_alerts"
         const val KEY_BACKGROUND_SYNC = "background_sync"
         const val KEY_NOTIFICATION_PROMPT = "notification_prompt_shown"
+        const val KEY_LARGE_TEXT = "large_text"
     }
 }
 

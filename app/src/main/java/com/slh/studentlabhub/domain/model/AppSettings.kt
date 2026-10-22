@@ -49,6 +49,7 @@ data class AppSettings(
     val reminderTiming: ReminderTiming = ReminderTiming.BOTH,
     val redoAlerts: Boolean = true,
     val backgroundSync: Boolean = true,
+    val largeText: Boolean = false,
 ) {
     val needsBackgroundWork: Boolean
         get() = remindersEnabled || redoAlerts || backgroundSync

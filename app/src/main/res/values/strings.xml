@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">StudentLabHub</string>
+    <string name="widget_deadlines_name">Дедлайны</string>
+    <string name="widget_deadlines_description">Ближайшие сроки сдачи и работы на доработку</string>
+    <string name="shortcut_today_short">Сегодня</string>
+    <string name="shortcut_today_long">Что сдавать сегодня</string>
+    <string name="shortcut_subjects_short">Предметы</string>
+    <string name="shortcut_subjects_long">Список предметов</string>
+    <string name="shortcut_reference_short">Справка</string>
+    <string name="shortcut_reference_long">Справочник команд</string>
+    <string name="shortcut_add_subject_short">Новый предмет</string>
+    <string name="shortcut_add_subject_long">Добавить предмет</string>
 </resources>

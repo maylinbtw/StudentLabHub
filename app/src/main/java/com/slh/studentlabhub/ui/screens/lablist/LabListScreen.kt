@@ -61,6 +61,8 @@ import com.slh.studentlabhub.ui.components.ScreenHeader
 import com.slh.studentlabhub.ui.components.SectionLabel
 import com.slh.studentlabhub.ui.components.SlhIcon
 import com.slh.studentlabhub.ui.components.SlhIconView
+import com.slh.studentlabhub.ui.components.SlhSwipeRow
+import com.slh.studentlabhub.ui.components.completedLabel
 import com.slh.studentlabhub.ui.components.addButtonLabel
 import com.slh.studentlabhub.ui.components.displayName
 import com.slh.studentlabhub.ui.components.relativeDueLabel
@@ -108,6 +110,7 @@ fun LabListRoute(
         onLinkCourse = viewModel::linkCourse,
         onUnlinkCourse = viewModel::unlinkCourse,
         onArchive = { viewModel.setArchived(true) },
+        onSetStatus = viewModel::setLabStatus,
         onRestore = { viewModel.setArchived(false) },
         modifier = modifier,
     )
@@ -127,6 +130,7 @@ fun LabListScreen(
     onUnlinkCourse: () -> Unit = {},
     onArchive: () -> Unit = {},
     onRestore: () -> Unit = {},
+    onSetStatus: (Lab, LabStatus) -> Unit = { _, _ -> },
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     var showDeleteConfirm by rememberSaveable { mutableStateOf(false) }
@@ -303,12 +307,33 @@ fun LabListScreen(
                                 HorizontalDivider(thickness = 1.dp, color = SlhOutline)
                             }
                             items(items = works, key = { it.id }) { lab ->
-                                LabRow(
-                                    lab = lab,
-                                    onClick = { onLabClick(lab) },
-                                )
+                                val next = lab.status.next()
+                                val previous = lab.status.previous()
+                                SlhSwipeRow(
+                                    forwardLabel = next?.let { statusLabel(it, lab.type) },
+                                    backwardLabel = previous?.let { statusLabel(it, lab.type) },
+                                    onForward = { next?.let { onSetStatus(lab, it) } },
+                                    onBackward = { previous?.let { onSetStatus(lab, it) } },
+                                ) {
+                                    LabRow(
+                                        lab = lab,
+                                        onClick = { onLabClick(lab) },
+                                    )
+                                }
                                 HorizontalDivider(thickness = 1.dp, color = SlhOutline)
                             }
+                        }
+                    }
+                    if (details.labs.isNotEmpty()) {
+                        item(key = "swipe_hint") {
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(
+                                text = "Свайп вправо — следующий статус, влево — вернуть назад",
+                                color = SlhTextMuted,
+                                style = MaterialTheme.typography.bodySmall,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
                         }
                     }
                     item(key = "add_buttons") {
@@ -572,6 +597,24 @@ private fun StatColumn(
             style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.5.sp),
         )
     }
+}
+
+private fun LabStatus.next(): LabStatus? = when (this) {
+    LabStatus.NOT_DONE -> LabStatus.DONE
+    LabStatus.DONE -> LabStatus.DEFENDED
+    LabStatus.DEFENDED -> null
+}
+
+private fun LabStatus.previous(): LabStatus? = when (this) {
+    LabStatus.NOT_DONE -> null
+    LabStatus.DONE -> LabStatus.NOT_DONE
+    LabStatus.DEFENDED -> LabStatus.DONE
+}
+
+private fun statusLabel(status: LabStatus, type: WorkType): String = when (status) {
+    LabStatus.NOT_DONE -> "не сделано"
+    LabStatus.DONE -> "сделано"
+    LabStatus.DEFENDED -> type.completedLabel.lowercase()
 }
 
 @Composable
