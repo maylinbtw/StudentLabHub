@@ -24,7 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slh.studentlabhub.ui.theme.SlhOutline
-import com.slh.studentlabhub.ui.theme.SlhRed
+import com.slh.studentlabhub.ui.theme.SlhAccent
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
 import com.slh.studentlabhub.ui.theme.SlhTextSecondary
 import com.slh.studentlabhub.ui.theme.SlhWhite
@@ -53,7 +53,7 @@ fun ScreenHeader(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = overline,
-                    color = SlhRed,
+                    color = SlhAccent,
                     style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

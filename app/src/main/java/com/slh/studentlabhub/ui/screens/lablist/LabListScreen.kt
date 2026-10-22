@@ -61,11 +61,13 @@ import com.slh.studentlabhub.ui.components.SlhIconView
 import com.slh.studentlabhub.ui.components.addButtonLabel
 import com.slh.studentlabhub.ui.components.displayName
 import com.slh.studentlabhub.ui.components.sectionTitle
-import com.slh.studentlabhub.ui.theme.SlhBlack
+import com.slh.studentlabhub.ui.theme.SlhBackground
 import com.slh.studentlabhub.ui.theme.SlhDotInactive
+import com.slh.studentlabhub.ui.theme.SlhInk
 import com.slh.studentlabhub.ui.theme.SlhMono
+import com.slh.studentlabhub.ui.theme.SlhOnAccent
 import com.slh.studentlabhub.ui.theme.SlhOutline
-import com.slh.studentlabhub.ui.theme.SlhRed
+import com.slh.studentlabhub.ui.theme.SlhAccent
 import com.slh.studentlabhub.ui.theme.SlhSans
 import com.slh.studentlabhub.ui.theme.SlhSurface
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
@@ -121,7 +123,7 @@ fun LabListScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(SlhBlack),
+            .background(SlhBackground),
     ) {
         ScreenHeader(
             overline = "Лабораторные и практические",
@@ -153,7 +155,7 @@ fun LabListScreen(
                         text = {
                             Text(
                                 text = "Удалить предмет",
-                                color = SlhRed,
+                                color = SlhAccent,
                                 fontFamily = SlhSans,
                                 fontSize = 14.sp,
                             )
@@ -175,7 +177,7 @@ fun LabListScreen(
                 ) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = SlhRed,
+                        color = SlhAccent,
                         strokeWidth = 2.dp,
                     )
                 }
@@ -288,7 +290,7 @@ fun LabListScreen(
                 ) {
                     Text(
                         text = "УДАЛИТЬ",
-                        color = SlhRed,
+                        color = SlhAccent,
                         style = MaterialTheme.typography.labelLarge,
                     )
                 }
@@ -315,7 +317,7 @@ private fun StatsRow(summary: SubjectSummary) {
         StatColumn(
             value = summary.averageScore?.let { String.format(Locale.US, "%.1f", it) } ?: "—",
             label = "СР. БАЛЛ",
-            valueColor = SlhRed,
+            valueColor = SlhAccent,
         )
         StatColumn(
             value = "${summary.doneLabs}/${summary.totalLabs}",
@@ -393,10 +395,10 @@ private fun StatusBox(status: LabStatus) {
     when (status) {
         LabStatus.DEFENDED -> {
             Box(
-                modifier = baseModifier.background(SlhRed),
+                modifier = baseModifier.background(SlhAccent),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(text = "★", color = SlhWhite, fontSize = 12.sp)
+                Text(text = "★", color = SlhOnAccent, fontSize = 12.sp)
             }
         }
 
@@ -405,7 +407,7 @@ private fun StatusBox(status: LabStatus) {
                 modifier = baseModifier.background(SlhWhite),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(text = "✓", color = SlhBlack, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                Text(text = "✓", color = SlhInk, fontSize = 13.sp, fontWeight = FontWeight.Bold)
             }
         }
 
@@ -427,13 +429,13 @@ private fun ScoreChip(
             .defaultMinSize(minWidth = 30.dp)
             .height(22.dp)
             .clip(RoundedCornerShape(4.dp))
-            .background(if (completed) SlhRed else SlhDotInactive)
+            .background(if (completed) SlhAccent else SlhDotInactive)
             .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = score.toString(),
-            color = SlhWhite,
+            color = if (completed) SlhOnAccent else SlhWhite,
             fontFamily = SlhMono,
             fontWeight = FontWeight.Bold,
             fontSize = 12.sp,

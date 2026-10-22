@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -42,11 +41,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.slh.studentlabhub.ui.components.DotMatrixText
 import com.slh.studentlabhub.ui.components.ScreenHeader
 import com.slh.studentlabhub.ui.components.SectionLabel
-import com.slh.studentlabhub.ui.theme.SlhBlack
+import com.slh.studentlabhub.ui.theme.SlhBackground
 import com.slh.studentlabhub.ui.theme.SlhDotInactive
+import com.slh.studentlabhub.ui.theme.SlhDotShape
 import com.slh.studentlabhub.ui.theme.SlhMono
 import com.slh.studentlabhub.ui.theme.SlhOutline
-import com.slh.studentlabhub.ui.theme.SlhRed
+import com.slh.studentlabhub.ui.theme.SlhAccent
 import com.slh.studentlabhub.ui.theme.SlhSurface
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
 import com.slh.studentlabhub.ui.theme.SlhTextSecondary
@@ -81,7 +81,7 @@ fun StatisticsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(SlhBlack),
+            .background(SlhBackground),
     ) {
         ScreenHeader(
             overline = "Успеваемость",
@@ -97,7 +97,7 @@ fun StatisticsScreen(
                 ) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = SlhRed,
+                        color = SlhAccent,
                         strokeWidth = 2.dp,
                     )
                 }
@@ -143,7 +143,7 @@ fun StatisticsScreen(
                         label = "Защищено (${state.defendedWorks}/${state.totalWorks})",
                         filled = state.defendedWorks,
                         total = state.totalWorks,
-                        color = SlhRed,
+                        color = SlhAccent,
                     )
                     Spacer(modifier = Modifier.height(18.dp))
                     ProgressBlock(
@@ -210,8 +210,8 @@ private fun ScoreColumn(
                 Box(
                     modifier = Modifier
                         .size(12.dp)
-                        .clip(CircleShape)
-                        .background(if (isLit) SlhRed else SlhDotInactive),
+                        .clip(SlhDotShape)
+                        .background(if (isLit) SlhAccent else SlhDotInactive),
                 )
             }
         }
@@ -246,7 +246,7 @@ private fun OverallCard(average: Double?) {
             modifier = Modifier
                 .width(4.dp)
                 .fillMaxHeight()
-                .background(SlhRed),
+                .background(SlhAccent),
         )
         Spacer(modifier = Modifier.width(4.dp))
         Row(
@@ -267,7 +267,7 @@ private fun OverallCard(average: Double?) {
             Spacer(modifier = Modifier.width(12.dp))
             DotMatrixText(
                 text = average?.let { String.format(Locale.US, "%.1f", it) } ?: "—",
-                color = SlhRed,
+                color = SlhAccent,
                 dotSize = 4.5.dp,
                 dotGap = 1.dp,
             )
@@ -317,7 +317,7 @@ private fun DotBar(
             Box(
                 modifier = Modifier
                     .size(10.dp)
-                    .clip(CircleShape)
+                    .clip(SlhDotShape)
                     .background(if (index < litCount) color else SlhDotInactive),
             )
         }
@@ -331,7 +331,7 @@ private fun Legend(
     remaining: Int,
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
-        LegendItem(symbol = "★", text = "Защ: $defended", symbolColor = SlhRed)
+        LegendItem(symbol = "★", text = "Защ: $defended", symbolColor = SlhAccent)
         LegendItem(symbol = "✓", text = "Сдел: $done", symbolColor = SlhWhite)
         LegendItem(symbol = "○", text = "Ост: $remaining", symbolColor = SlhTextMuted)
     }

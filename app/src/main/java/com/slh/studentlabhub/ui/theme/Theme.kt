@@ -7,23 +7,6 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 
-private val SlhColorScheme = darkColorScheme(
-    primary = SlhRed,
-    onPrimary = SlhWhite,
-    secondary = SlhWhite,
-    onSecondary = SlhBlack,
-    background = SlhBlack,
-    onBackground = SlhWhite,
-    surface = SlhSurface,
-    onSurface = SlhWhite,
-    surfaceVariant = SlhSurfaceVariant,
-    onSurfaceVariant = SlhTextSecondary,
-    outline = SlhOutline,
-    outlineVariant = SlhDotInactive,
-    error = SlhRed,
-    onError = SlhWhite,
-)
-
 val SlhShapes = Shapes(
     extraSmall = RoundedCornerShape(4.dp),
     small = RoundedCornerShape(8.dp),
@@ -33,8 +16,24 @@ val SlhShapes = Shapes(
 
 @Composable
 fun StudentLabHubTheme(content: @Composable () -> Unit) {
+    val colorScheme = darkColorScheme(
+        primary = SlhAccent,
+        onPrimary = SlhOnAccent,
+        secondary = SlhWhite,
+        onSecondary = SlhInk,
+        background = SlhBackground,
+        onBackground = SlhWhite,
+        surface = SlhSurface,
+        onSurface = SlhWhite,
+        surfaceVariant = SlhSurfaceVariant,
+        onSurfaceVariant = SlhTextSecondary,
+        outline = SlhOutline,
+        outlineVariant = SlhDotInactive,
+        error = SlhDanger,
+        onError = SlhWhite,
+    )
     MaterialTheme(
-        colorScheme = SlhColorScheme,
+        colorScheme = colorScheme,
         typography = SlhTypography,
         shapes = SlhShapes,
         content = content,

@@ -37,10 +37,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slh.studentlabhub.ui.components.DotMatrixText
-import com.slh.studentlabhub.ui.theme.SlhBlack
+import com.slh.studentlabhub.ui.theme.SlhBackground
+import com.slh.studentlabhub.ui.theme.SlhDanger
+import com.slh.studentlabhub.ui.theme.SlhInk
 import com.slh.studentlabhub.ui.theme.SlhMono
 import com.slh.studentlabhub.ui.theme.SlhOutline
-import com.slh.studentlabhub.ui.theme.SlhRed
+import com.slh.studentlabhub.ui.theme.SlhAccent
 import com.slh.studentlabhub.ui.theme.SlhSans
 import com.slh.studentlabhub.ui.theme.SlhSurface
 import com.slh.studentlabhub.ui.theme.SlhTextDisabled
@@ -66,7 +68,7 @@ fun LoginScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(SlhBlack)
+            .background(SlhBackground)
             .statusBarsPadding()
             .navigationBarsPadding(),
     ) {
@@ -98,7 +100,7 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = state.errorMessage,
-                    color = SlhRed,
+                    color = SlhDanger,
                     style = MaterialTheme.typography.bodySmall,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
@@ -130,7 +132,7 @@ private fun SlhLogo() {
                     modifier = Modifier
                         .size(11.dp)
                         .clip(CircleShape)
-                        .background(SlhRed),
+                        .background(SlhAccent),
                 )
             }
         }
@@ -155,7 +157,7 @@ private fun SlhLogo() {
             modifier = Modifier
                 .width(80.dp)
                 .height(2.dp)
-                .background(SlhRed),
+                .background(SlhAccent),
         )
         Spacer(modifier = Modifier.height(14.dp))
         Text(
@@ -237,7 +239,7 @@ private fun GoogleSignInButton(
             modifier = Modifier
                 .width(6.dp)
                 .fillMaxHeight()
-                .background(SlhRed),
+                .background(SlhAccent),
         )
         Box(
             modifier = Modifier
@@ -248,13 +250,13 @@ private fun GoogleSignInButton(
             if (isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(18.dp),
-                    color = SlhBlack,
+                    color = SlhInk,
                     strokeWidth = 2.dp,
                 )
             } else {
                 Text(
                     text = "ВОЙТИ ЧЕРЕЗ GOOGLE",
-                    color = SlhBlack,
+                    color = SlhInk,
                     style = MaterialTheme.typography.labelLarge,
                 )
             }

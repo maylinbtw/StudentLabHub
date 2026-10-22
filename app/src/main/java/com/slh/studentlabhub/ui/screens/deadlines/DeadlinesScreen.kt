@@ -47,10 +47,10 @@ import com.slh.studentlabhub.ui.components.SectionLabel
 import com.slh.studentlabhub.ui.components.SlhIcon
 import com.slh.studentlabhub.ui.components.SlhIconView
 import com.slh.studentlabhub.ui.components.SlhProgressDots
-import com.slh.studentlabhub.ui.theme.SlhBlack
+import com.slh.studentlabhub.ui.theme.SlhBackground
 import com.slh.studentlabhub.ui.theme.SlhMono
 import com.slh.studentlabhub.ui.theme.SlhOutline
-import com.slh.studentlabhub.ui.theme.SlhRed
+import com.slh.studentlabhub.ui.theme.SlhAccent
 import com.slh.studentlabhub.ui.theme.SlhSans
 import com.slh.studentlabhub.ui.theme.SlhSurface
 import com.slh.studentlabhub.ui.theme.SlhTextDisabled
@@ -111,7 +111,7 @@ fun DeadlinesScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(SlhBlack),
+            .background(SlhBackground),
     ) {
         ScreenHeader(
             overline = "Google Classroom",
@@ -126,7 +126,7 @@ fun DeadlinesScreen(
             ) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(24.dp),
-                    color = SlhRed,
+                    color = SlhAccent,
                     strokeWidth = 2.dp,
                 )
             }
@@ -185,7 +185,7 @@ fun DeadlinesScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = message,
-                            color = SlhRed,
+                            color = SlhAccent,
                             style = MaterialTheme.typography.bodySmall,
                         )
                     }
@@ -243,7 +243,7 @@ private fun CourseCard(
                 modifier = Modifier
                     .width(4.dp)
                     .fillMaxHeight()
-                    .background(SlhRed),
+                    .background(SlhAccent),
             )
             Spacer(modifier = Modifier.width(4.dp))
         }
@@ -288,7 +288,7 @@ private fun CourseCard(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "${course.redoCount} на доработку",
-                        color = SlhRed,
+                        color = SlhAccent,
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
@@ -298,7 +298,7 @@ private fun CourseCard(
             if (average != null) {
                 DotMatrixText(
                     text = String.format(Locale.US, "%.1f", average),
-                    color = SlhRed,
+                    color = SlhAccent,
                 )
             } else {
                 Text(
@@ -336,7 +336,7 @@ private fun UpcomingRow(
             .fillMaxWidth()
             .clip(shape)
             .background(SlhSurface)
-            .border(1.dp, if (isUrgent) SlhRed else SlhOutline, shape)
+            .border(1.dp, if (isUrgent) SlhAccent else SlhOutline, shape)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -346,7 +346,7 @@ private fun UpcomingRow(
                 modifier = Modifier
                     .size(6.dp)
                     .clip(RoundedCornerShape(50))
-                    .background(SlhRed),
+                    .background(SlhAccent),
             )
             Spacer(modifier = Modifier.width(10.dp))
         }
@@ -372,7 +372,7 @@ private fun UpcomingRow(
         Spacer(modifier = Modifier.width(12.dp))
         Text(
             text = dueLabel,
-            color = if (isUrgent) SlhRed else SlhTextSecondary,
+            color = if (isUrgent) SlhAccent else SlhTextSecondary,
             fontFamily = SlhMono,
             fontWeight = FontWeight.Bold,
             fontSize = 12.sp,

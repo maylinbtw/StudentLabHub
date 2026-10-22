@@ -39,10 +39,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.slh.studentlabhub.ui.components.SectionLabel
-import com.slh.studentlabhub.ui.theme.SlhBlack
+import com.slh.studentlabhub.ui.theme.SlhBackground
+import com.slh.studentlabhub.ui.theme.SlhInk
 import com.slh.studentlabhub.ui.theme.SlhMono
 import com.slh.studentlabhub.ui.theme.SlhOutline
-import com.slh.studentlabhub.ui.theme.SlhRed
+import com.slh.studentlabhub.ui.theme.SlhAccent
 import com.slh.studentlabhub.ui.theme.SlhSurface
 import com.slh.studentlabhub.ui.theme.SlhTextDisabled
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
@@ -79,7 +80,7 @@ fun AddSubjectDialog(
         ) {
             Text(
                 text = "Лабораторные",
-                color = SlhRed,
+                color = SlhAccent,
                 style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp),
             )
             Spacer(modifier = Modifier.height(4.dp))
@@ -171,7 +172,7 @@ private fun SlhTextField(
                 fontFamily = SlhMono,
                 fontSize = 14.sp,
             ),
-            cursorBrush = SolidColor(SlhRed),
+            cursorBrush = SolidColor(SlhAccent),
             keyboardOptions = KeyboardOptions(
                 keyboardType = keyboardType,
                 imeAction = imeAction,
@@ -180,8 +181,8 @@ private fun SlhTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(shape)
-                .background(SlhBlack)
-                .border(1.dp, if (isFocused) SlhRed else SlhOutline, shape)
+                .background(SlhBackground)
+                .border(1.dp, if (isFocused) SlhAccent else SlhOutline, shape)
                 .padding(horizontal = 12.dp, vertical = 12.dp),
         )
     }
@@ -235,7 +236,7 @@ private fun DialogPrimaryButton(
             modifier = Modifier
                 .width(5.dp)
                 .fillMaxHeight()
-                .background(if (enabled) SlhRed else SlhTextDisabled),
+                .background(if (enabled) SlhAccent else SlhTextDisabled),
         )
         Box(
             modifier = Modifier
@@ -245,7 +246,7 @@ private fun DialogPrimaryButton(
         ) {
             Text(
                 text = text,
-                color = if (enabled) SlhBlack else SlhTextMuted,
+                color = if (enabled) SlhInk else SlhTextMuted,
                 style = MaterialTheme.typography.labelLarge,
             )
         }

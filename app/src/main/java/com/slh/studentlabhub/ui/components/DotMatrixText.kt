@@ -6,11 +6,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.slh.studentlabhub.ui.theme.SlhPalette
 
 private object DotMatrixFont {
     private val dash = listOf(".....", ".....", ".....", "#####", ".....", ".....", ".....")
@@ -56,6 +58,7 @@ fun DotMatrixText(
     val cell = dotSize + dotGap
     val width = if (columns == 0) 0.dp else cell * columns - dotGap
     val height = cell * GLYPH_ROWS - dotGap
+    val roundDots = SlhPalette.roundDots
 
     Canvas(
         modifier = modifier
@@ -70,14 +73,21 @@ fun DotMatrixText(
                 line.forEachIndexed { column, mark ->
                     val dotColor = if (mark == '#') color else offColor
                     if (dotColor.alpha > 0f) {
-                        drawCircle(
-                            color = dotColor,
-                            radius = radius,
-                            center = Offset(
-                                x = (startColumn + column) * cellPx + radius,
-                                y = row * cellPx + radius,
-                            ),
-                        )
+                        val left = (startColumn + column) * cellPx
+                        val top = row * cellPx
+                        if (roundDots) {
+                            drawCircle(
+                                color = dotColor,
+                                radius = radius,
+                                center = Offset(x = left + radius, y = top + radius),
+                            )
+                        } else {
+                            drawRect(
+                                color = dotColor,
+                                topLeft = Offset(x = left, y = top),
+                                size = Size(width = radius * 2f, height = radius * 2f),
+                            )
+                        }
                     }
                 }
             }

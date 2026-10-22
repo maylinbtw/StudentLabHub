@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.slh.studentlabhub.ui.components.ScreenHeader
-import com.slh.studentlabhub.ui.theme.SlhBlack
+import com.slh.studentlabhub.ui.theme.SlhBackground
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
 
 @Composable
@@ -22,7 +22,7 @@ fun PlaceholderScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(SlhBlack),
+            .background(SlhBackground),
     ) {
         ScreenHeader(overline = overline, title = title)
         Box(

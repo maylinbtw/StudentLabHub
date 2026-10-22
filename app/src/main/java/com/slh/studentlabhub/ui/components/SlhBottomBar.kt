@@ -23,9 +23,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slh.studentlabhub.navigation.BottomTab
-import com.slh.studentlabhub.ui.theme.SlhBlack
+import com.slh.studentlabhub.ui.theme.SlhBackground
 import com.slh.studentlabhub.ui.theme.SlhOutline
-import com.slh.studentlabhub.ui.theme.SlhRed
+import com.slh.studentlabhub.ui.theme.SlhAccent
 import com.slh.studentlabhub.ui.theme.SlhSans
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
 
@@ -39,7 +39,7 @@ fun SlhBottomBar(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(SlhBlack),
+            .background(SlhBackground),
     ) {
         HorizontalDivider(thickness = 1.dp, color = SlhOutline)
         Row(
@@ -50,7 +50,7 @@ fun SlhBottomBar(
         ) {
             tabs.forEach { tab ->
                 val isSelected = tab == selected
-                val color = if (isSelected) SlhRed else SlhTextMuted
+                val color = if (isSelected) SlhAccent else SlhTextMuted
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -63,7 +63,7 @@ fun SlhBottomBar(
                             modifier = Modifier
                                 .width(28.dp)
                                 .height(2.dp)
-                                .background(SlhRed),
+                                .background(SlhAccent),
                         )
                     }
                     Column(

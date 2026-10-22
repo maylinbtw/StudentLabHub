@@ -25,15 +25,17 @@ import com.slh.studentlabhub.ui.screens.labs.LabsRoute
 import com.slh.studentlabhub.ui.screens.placeholder.PlaceholderScreen
 import com.slh.studentlabhub.ui.screens.reference.ReferenceCategoryRoute
 import com.slh.studentlabhub.ui.screens.reference.ReferenceRoute
+import com.slh.studentlabhub.ui.screens.settings.SettingsRoute
 import com.slh.studentlabhub.ui.screens.statistics.StatisticsRoute
-import com.slh.studentlabhub.ui.theme.SlhBlack
+import com.slh.studentlabhub.ui.theme.SlhBackground
 
 @Composable
 fun SlhApp() {
     val context = LocalContext.current
+    val container = remember(context) { (context.applicationContext as SlhApplication).container }
+    val homeRoute = remember { container.settingsRepository.settings.value.startScreen.route }
     val startDestination = remember {
-        val container = (context.applicationContext as SlhApplication).container
-        if (container.classroomRepository.signedInEmail != null) Routes.DEADLINES else Routes.LOGIN
+        if (container.classroomRepository.signedInEmail != null) homeRoute else Routes.LOGIN
     }
 
     val navController = rememberNavController()
@@ -41,7 +43,7 @@ fun SlhApp() {
     val currentTab = BottomTab.fromRoute(backStackEntry?.destination?.route)
 
     Scaffold(
-        containerColor = SlhBlack,
+        containerColor = SlhBackground,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (currentTab != null) {
@@ -53,7 +55,7 @@ fun SlhApp() {
                             navController.popBackStack(tab.route, inclusive = false)
                         } else {
                             navController.navigate(tab.route) {
-                                popUpTo(Routes.DEADLINES) { saveState = true }
+                                popUpTo(homeRoute) { saveState = true }
                                 launchSingleTop = true
                                 restoreState = true
                             }
@@ -71,7 +73,7 @@ fun SlhApp() {
             composable(Routes.LOGIN) {
                 LoginRoute(
                     onLoggedIn = {
-                        navController.navigate(Routes.DEADLINES) {
+                        navController.navigate(homeRoute) {
                             popUpTo(Routes.LOGIN) { inclusive = true }
                         }
                     },
@@ -159,7 +161,13 @@ fun SlhApp() {
                 PlaceholderScreen(overline = "Дедлайны по датам", title = "КАЛЕНДАРЬ")
             }
             composable(Routes.SETTINGS) {
-                PlaceholderScreen(overline = "Аккаунт и приложение", title = "НАСТРОЙКИ")
+                SettingsRoute(
+                    onSignedOut = {
+                        navController.navigate(Routes.LOGIN) {
+                            popUpTo(navController.graph.id) { inclusive = true }
+                        }
+                    },
+                )
             }
         }
     }

@@ -45,9 +45,9 @@ import com.slh.studentlabhub.ui.components.SectionLabel
 import com.slh.studentlabhub.ui.components.SlhIcon
 import com.slh.studentlabhub.ui.components.SlhIconView
 import com.slh.studentlabhub.ui.components.SlhProgressDots
-import com.slh.studentlabhub.ui.theme.SlhBlack
+import com.slh.studentlabhub.ui.theme.SlhBackground
 import com.slh.studentlabhub.ui.theme.SlhOutline
-import com.slh.studentlabhub.ui.theme.SlhRed
+import com.slh.studentlabhub.ui.theme.SlhAccent
 import com.slh.studentlabhub.ui.theme.SlhSans
 import com.slh.studentlabhub.ui.theme.SlhSurface
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
@@ -95,7 +95,7 @@ fun LabsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(SlhBlack),
+            .background(SlhBackground),
     ) {
         ScreenHeader(
             overline = "Учёт и оценки",
@@ -110,7 +110,7 @@ fun LabsScreen(
             ) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(24.dp),
-                    color = SlhRed,
+                    color = SlhAccent,
                     strokeWidth = 2.dp,
                 )
             }
@@ -196,7 +196,7 @@ private fun SubjectCard(
         Spacer(modifier = Modifier.width(12.dp))
         DotMatrixText(
             text = subject.averageScore?.let { String.format(Locale.US, "%.1f", it) } ?: "—",
-            color = SlhRed,
+            color = SlhAccent,
         )
     }
 }
@@ -232,16 +232,16 @@ private fun StatisticsButton(onClick: () -> Unit) {
             .fillMaxWidth()
             .height(44.dp)
             .clip(shape)
-            .border(1.dp, SlhRed, shape)
+            .border(1.dp, SlhAccent, shape)
             .clickable(role = Role.Button, onClick = onClick),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        SlhIconView(icon = SlhIcon.Menu, color = SlhRed, size = 14.dp)
+        SlhIconView(icon = SlhIcon.Menu, color = SlhAccent, size = 14.dp)
         Spacer(modifier = Modifier.width(12.dp))
         Text(
             text = "Статистика успеваемости",
-            color = SlhRed,
+            color = SlhAccent,
             fontFamily = SlhSans,
             fontWeight = FontWeight.Bold,
             fontSize = 12.sp,

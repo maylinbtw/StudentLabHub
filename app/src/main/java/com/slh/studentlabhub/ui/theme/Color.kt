@@ -1,15 +1,35 @@
 package com.slh.studentlabhub.ui.theme
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 
-val SlhBlack = Color(0xFF000000)
-val SlhSurface = Color(0xFF0D0D0D)
-val SlhSurfaceVariant = Color(0xFF151515)
-val SlhOutline = Color(0xFF262626)
-val SlhDotInactive = Color(0xFF1B1B1B)
+val SlhAccent: Color
+    get() = SlhPalette.accent
 
-val SlhRed = Color(0xFFFF3B30)
+val SlhOnAccent: Color
+    get() = SlhPalette.onAccent
+
+val SlhBackground: Color
+    get() = SlhPalette.background
+
+val SlhSurface: Color
+    get() = SlhPalette.surface
+
+val SlhSurfaceVariant: Color
+    get() = SlhPalette.surfaceVariant
+
+val SlhOutline: Color
+    get() = SlhPalette.outline
+
+val SlhDotInactive: Color
+    get() = SlhPalette.dotInactive
+
+val SlhDotShape: Shape
+    get() = SlhPalette.dotShape
+
 val SlhWhite = Color(0xFFFFFFFF)
+val SlhInk = Color(0xFF000000)
+val SlhDanger = Color(0xFFFF453A)
 
 val SlhTextSecondary = Color(0xFF939393)
 val SlhTextMuted = Color(0xFF595959)

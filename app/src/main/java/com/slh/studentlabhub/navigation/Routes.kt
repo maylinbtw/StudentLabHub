@@ -1,5 +1,6 @@
 package com.slh.studentlabhub.navigation
 
+import com.slh.studentlabhub.domain.model.StartScreen
 import com.slh.studentlabhub.ui.components.SlhIcon
 
 object Routes {
@@ -32,6 +33,13 @@ object Routes {
 
     fun referenceCategory(categoryId: String): String = "reference/category/$categoryId"
 }
+
+val StartScreen.route: String
+    get() = when (this) {
+        StartScreen.DEADLINES -> Routes.DEADLINES
+        StartScreen.LABS -> Routes.LABS
+        StartScreen.REFERENCE -> Routes.REFERENCE
+    }
 
 enum class BottomTab(
     val route: String,

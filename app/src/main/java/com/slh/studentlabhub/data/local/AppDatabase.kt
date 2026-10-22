@@ -82,7 +82,7 @@ abstract class AppDatabase : RoomDatabase() {
         fun create(context: Context): AppDatabase =
             Room.databaseBuilder(context, AppDatabase::class.java, "studentlabhub.db")
                 .addMigrations(MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
-                .fallbackToDestructiveMigration(dropAllTables = true)
+                .fallbackToDestructiveMigrationFrom(true, 1, 2)
                 .build()
     }
 }

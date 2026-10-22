@@ -61,10 +61,12 @@ import com.slh.studentlabhub.ui.components.SectionLabel
 import com.slh.studentlabhub.ui.components.SlhIcon
 import com.slh.studentlabhub.ui.components.completedLabel
 import com.slh.studentlabhub.ui.components.shortPrefix
-import com.slh.studentlabhub.ui.theme.SlhBlack
+import com.slh.studentlabhub.ui.theme.SlhBackground
+import com.slh.studentlabhub.ui.theme.SlhInk
 import com.slh.studentlabhub.ui.theme.SlhMono
+import com.slh.studentlabhub.ui.theme.SlhOnAccent
 import com.slh.studentlabhub.ui.theme.SlhOutline
-import com.slh.studentlabhub.ui.theme.SlhRed
+import com.slh.studentlabhub.ui.theme.SlhAccent
 import com.slh.studentlabhub.ui.theme.SlhSans
 import com.slh.studentlabhub.ui.theme.SlhSurface
 import com.slh.studentlabhub.ui.theme.SlhTextDisabled
@@ -95,16 +97,16 @@ private fun LabStatus.chipStyle(type: WorkType): StatusChipStyle = when (this) {
         leading = "✓",
         label = "Сделано",
         selectedContainer = SlhWhite,
-        selectedContent = SlhBlack,
+        selectedContent = SlhInk,
         selectedBorder = SlhWhite,
     )
 
     LabStatus.DEFENDED -> StatusChipStyle(
         leading = "★",
         label = type.completedLabel,
-        selectedContainer = SlhRed,
-        selectedContent = SlhBlack,
-        selectedBorder = SlhRed,
+        selectedContainer = SlhAccent,
+        selectedContent = SlhOnAccent,
+        selectedBorder = SlhAccent,
     )
 }
 
@@ -154,7 +156,7 @@ fun LabDetailsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(SlhBlack),
+            .background(SlhBackground),
     ) {
         ScreenHeader(
             overline = "Детали работы",
@@ -171,7 +173,7 @@ fun LabDetailsScreen(
             ) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(24.dp),
-                    color = SlhRed,
+                    color = SlhAccent,
                     strokeWidth = 2.dp,
                 )
             }
@@ -301,7 +303,7 @@ fun LabDetailsScreen(
                 ) {
                     Text(
                         text = "УДАЛИТЬ",
-                        color = SlhRed,
+                        color = SlhAccent,
                         style = MaterialTheme.typography.labelLarge,
                     )
                 }
@@ -378,7 +380,7 @@ private fun ScoreField(
                 .height(58.dp)
                 .clip(shape)
                 .background(SlhSurface)
-                .border(1.dp, if (isHighlighted) SlhRed else SlhOutline, shape),
+                .border(1.dp, if (isHighlighted) SlhAccent else SlhOutline, shape),
             contentAlignment = Alignment.Center,
         ) {
             if (value.isEmpty() && !isFocused) {
@@ -396,13 +398,13 @@ private fun ScoreField(
                 singleLine = true,
                 interactionSource = interactionSource,
                 textStyle = TextStyle(
-                    color = SlhRed,
+                    color = SlhAccent,
                     fontFamily = SlhMono,
                     fontWeight = FontWeight.Bold,
                     fontSize = 30.sp,
                     textAlign = TextAlign.Center,
                 ),
-                cursorBrush = SolidColor(SlhRed),
+                cursorBrush = SolidColor(SlhAccent),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Done,
@@ -438,7 +440,7 @@ private fun NotesField(
             modifier = Modifier
                 .width(4.dp)
                 .fillMaxHeight()
-                .background(SlhRed),
+                .background(SlhAccent),
         )
         Box(
             modifier = Modifier
@@ -464,7 +466,7 @@ private fun NotesField(
                     fontSize = 14.sp,
                     lineHeight = 22.sp,
                 ),
-                cursorBrush = SolidColor(SlhRed),
+                cursorBrush = SolidColor(SlhAccent),
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences,
                 ),
@@ -501,7 +503,7 @@ private fun SaveButton(
             modifier = Modifier
                 .width(6.dp)
                 .fillMaxHeight()
-                .background(SlhRed),
+                .background(SlhAccent),
         )
         Box(
             modifier = Modifier
@@ -512,13 +514,13 @@ private fun SaveButton(
             if (isSaving) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(18.dp),
-                    color = SlhBlack,
+                    color = SlhInk,
                     strokeWidth = 2.dp,
                 )
             } else {
                 Text(
                     text = "СОХРАНИТЬ",
-                    color = if (enabled) SlhBlack else SlhTextMuted,
+                    color = if (enabled) SlhInk else SlhTextMuted,
                     style = MaterialTheme.typography.labelLarge,
                 )
             }
@@ -556,7 +558,7 @@ private fun TitleEditDialog(
                     fontFamily = SlhSans,
                     fontSize = 15.sp,
                 ),
-                cursorBrush = SolidColor(SlhRed),
+                cursorBrush = SolidColor(SlhAccent),
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences,
                     imeAction = ImeAction.Done,
@@ -564,8 +566,8 @@ private fun TitleEditDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(shape)
-                    .background(SlhBlack)
-                    .border(1.dp, SlhRed, shape)
+                    .background(SlhBackground)
+                    .border(1.dp, SlhAccent, shape)
                     .padding(horizontal = 12.dp, vertical = 12.dp),
             )
         },
@@ -576,7 +578,7 @@ private fun TitleEditDialog(
             ) {
                 Text(
                     text = "ГОТОВО",
-                    color = if (draft.isNotBlank()) SlhRed else SlhTextDisabled,
+                    color = if (draft.isNotBlank()) SlhAccent else SlhTextDisabled,
                     style = MaterialTheme.typography.labelLarge,
                 )
             }

@@ -9,9 +9,11 @@ import com.slh.studentlabhub.data.remote.TldrApi
 import com.slh.studentlabhub.data.repository.ClassroomRepositoryImpl
 import com.slh.studentlabhub.data.repository.LabRepositoryImpl
 import com.slh.studentlabhub.data.repository.ReferenceRepositoryImpl
+import com.slh.studentlabhub.data.repository.SettingsRepositoryImpl
 import com.slh.studentlabhub.domain.repository.ClassroomRepository
 import com.slh.studentlabhub.domain.repository.LabRepository
 import com.slh.studentlabhub.domain.repository.ReferenceRepository
+import com.slh.studentlabhub.domain.repository.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -29,6 +31,8 @@ class AppContainer(context: Context) {
     private val classroomApi: ClassroomApi by lazy { ClassroomApi() }
 
     val googleAuthManager: GoogleAuthManager by lazy { GoogleAuthManager(appContext) }
+
+    val settingsRepository: SettingsRepository by lazy { SettingsRepositoryImpl(appContext) }
 
     val labRepository: LabRepository by lazy { LabRepositoryImpl(database) }
 
