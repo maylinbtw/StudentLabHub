@@ -21,11 +21,16 @@ object Routes {
 
     const val STATISTICS = "labs/statistics/summary"
 
+    const val ARG_REF_CATEGORY_ID = "refCategoryId"
+    const val REFERENCE_CATEGORY = "reference/category/{$ARG_REF_CATEGORY_ID}"
+
     fun courseTasks(courseId: String): String = "deadlines/course/$courseId"
 
     fun labList(subjectId: Long): String = "labs/$subjectId"
 
     fun labDetails(labId: Long): String = "labs/lab/$labId"
+
+    fun referenceCategory(categoryId: String): String = "reference/category/$categoryId"
 }
 
 enum class BottomTab(

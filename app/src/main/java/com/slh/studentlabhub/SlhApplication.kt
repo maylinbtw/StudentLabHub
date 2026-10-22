@@ -14,6 +14,7 @@ class SlhApplication : Application() {
         container = AppContainer(this)
         container.applicationScope.launch {
             container.labRepository.seedIfEmpty()
+            container.referenceRepository.ensureSeeded()
         }
     }
 }

@@ -85,6 +85,30 @@ class LabRepositoryImpl(
         subjectDao.deleteById(subjectId)
     }
 
+    override suspend fun linkSubjectToCourse(subjectId: Long, courseId: String) {
+        database.withTransaction {
+            subjectDao.clearCourseLink(courseId)
+            subjectDao.setCourseLink(subjectId, courseId)
+        }
+    }
+
+    override suspend fun unlinkCourse(courseId: String) {
+        subjectDao.clearCourseLink(courseId)
+    }
+
+    override suspend fun createSubjectForCourse(title: String, courseId: String): Long =
+        database.withTransaction {
+            subjectDao.clearCourseLink(courseId)
+            val semester = subjectDao.maxSemester() ?: 1
+            subjectDao.insert(
+                SubjectEntity(
+                    title = title,
+                    semester = semester,
+                    classroomCourseId = courseId,
+                ),
+            )
+        }
+
     override suspend fun addWork(subjectId: Long, type: WorkType) {
         database.withTransaction {
             val nextNumber = (labDao.maxNumber(subjectId, type.name) ?: 0) + 1
@@ -205,6 +229,7 @@ private fun SubjectWithLabs.toSummary(): SubjectSummary {
         doneLabs = done,
         defendedLabs = defended,
         averageScore = if (scores.isEmpty()) null else scores.average(),
+        classroomCourseId = subject.classroomCourseId,
     )
 }
 

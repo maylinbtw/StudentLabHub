@@ -23,6 +23,8 @@ import com.slh.studentlabhub.ui.screens.labdetails.LabDetailsRoute
 import com.slh.studentlabhub.ui.screens.lablist.LabListRoute
 import com.slh.studentlabhub.ui.screens.labs.LabsRoute
 import com.slh.studentlabhub.ui.screens.placeholder.PlaceholderScreen
+import com.slh.studentlabhub.ui.screens.reference.ReferenceCategoryRoute
+import com.slh.studentlabhub.ui.screens.reference.ReferenceRoute
 import com.slh.studentlabhub.ui.screens.statistics.StatisticsRoute
 import com.slh.studentlabhub.ui.theme.SlhBlack
 
@@ -77,8 +79,8 @@ fun SlhApp() {
             }
             composable(Routes.DEADLINES) {
                 DeadlinesRoute(
-                    onCourseClick = { course ->
-                        navController.navigate(Routes.courseTasks(course.id))
+                    onOpenCourse = { courseId ->
+                        navController.navigate(Routes.courseTasks(courseId))
                     },
                 )
             }
@@ -90,6 +92,9 @@ fun SlhApp() {
             ) {
                 CourseTasksRoute(
                     onBack = { navController.popBackStack() },
+                    onOpenSubject = { subjectId ->
+                        navController.navigate(Routes.labList(subjectId))
+                    },
                 )
             }
             composable(Routes.LABS) {
@@ -118,6 +123,9 @@ fun SlhApp() {
                     onLabClick = { lab ->
                         navController.navigate(Routes.labDetails(lab.id))
                     },
+                    onOpenCourse = { courseId ->
+                        navController.navigate(Routes.courseTasks(courseId))
+                    },
                 )
             }
             composable(
@@ -131,7 +139,21 @@ fun SlhApp() {
                 )
             }
             composable(Routes.REFERENCE) {
-                PlaceholderScreen(overline = "Работает без интернета", title = "СПРАВОЧНИК")
+                ReferenceRoute(
+                    onCategoryClick = { category ->
+                        navController.navigate(Routes.referenceCategory(category.id))
+                    },
+                )
+            }
+            composable(
+                route = Routes.REFERENCE_CATEGORY,
+                arguments = listOf(
+                    navArgument(Routes.ARG_REF_CATEGORY_ID) { type = NavType.StringType },
+                ),
+            ) {
+                ReferenceCategoryRoute(
+                    onBack = { navController.popBackStack() },
+                )
             }
             composable(Routes.CALENDAR) {
                 PlaceholderScreen(overline = "Дедлайны по датам", title = "КАЛЕНДАРЬ")

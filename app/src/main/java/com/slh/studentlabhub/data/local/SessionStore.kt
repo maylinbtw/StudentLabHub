@@ -25,6 +25,12 @@ class SessionStore(context: Context) {
             prefs.edit().putInt(KEY_REDO_THRESHOLD, value).apply()
         }
 
+    var referenceVersion: Int
+        get() = prefs.getInt(KEY_REFERENCE_VERSION, 0)
+        set(value) {
+            prefs.edit().putInt(KEY_REFERENCE_VERSION, value).apply()
+        }
+
     fun clear() {
         prefs.edit()
             .remove(KEY_EMAIL)
@@ -39,5 +45,6 @@ class SessionStore(context: Context) {
         private const val KEY_EMAIL = "email"
         private const val KEY_LAST_SYNC = "last_sync_at"
         private const val KEY_REDO_THRESHOLD = "redo_threshold"
+        private const val KEY_REFERENCE_VERSION = "reference_version"
     }
 }

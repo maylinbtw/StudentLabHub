@@ -2,6 +2,7 @@ package com.slh.studentlabhub.domain.repository
 
 import com.slh.studentlabhub.domain.model.CourseOverview
 import com.slh.studentlabhub.domain.model.CourseTasks
+import com.slh.studentlabhub.domain.model.UpcomingTask
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -17,6 +18,8 @@ interface ClassroomRepository {
     fun observeCourses(): Flow<List<CourseOverview>>
 
     fun observeCourseTasks(courseId: String): Flow<CourseTasks?>
+
+    fun observeUpcomingTasks(): Flow<List<UpcomingTask>>
 
     suspend fun completeSignIn(accessToken: String): String
 

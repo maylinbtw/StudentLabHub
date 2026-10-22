@@ -14,6 +14,7 @@ import com.slh.studentlabhub.domain.model.ClassroomTask
 import com.slh.studentlabhub.domain.model.CourseOverview
 import com.slh.studentlabhub.domain.model.CourseTasks
 import com.slh.studentlabhub.domain.model.TaskState
+import com.slh.studentlabhub.domain.model.UpcomingTask
 import com.slh.studentlabhub.domain.repository.ClassroomRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -64,6 +65,29 @@ class ClassroomRepositoryImpl(
                     tasks = it.tasks.map { task -> task.toDomain(redoLimit) },
                 )
             }
+        }
+
+    override fun observeUpcomingTasks(): Flow<List<UpcomingTask>> =
+        combine(dao.observeCoursesWithTasks(), threshold) { courses, redoLimit ->
+            val from = System.currentTimeMillis() - RECENT_OVERDUE_MS
+            courses
+                .flatMap { course ->
+                    course.tasks
+                        .map { it.toDomain(redoLimit) }
+                        .filter { task ->
+                            val due = task.dueAt
+                            task.state == TaskState.REDO ||
+                                (task.state == TaskState.ACTIVE && due != null && due >= from)
+                        }
+                        .map { task ->
+                            UpcomingTask(
+                                task = task,
+                                courseId = course.course.id,
+                                courseTitle = course.course.name,
+                            )
+                        }
+                }
+                .sortedBy { it.task.dueAt ?: Long.MAX_VALUE }
         }
 
     override suspend fun completeSignIn(accessToken: String): String {
@@ -149,6 +173,8 @@ class ClassroomRepositoryImpl(
             if (error.code == 403 || error.code == 404) emptyList() else throw error
         }
 }
+
+private const val RECENT_OVERDUE_MS = 3L * 24 * 60 * 60 * 1000
 
 private fun ClassroomTaskEntity.gradeOutOfTen(): Double? {
     val grade = assignedGrade ?: return null

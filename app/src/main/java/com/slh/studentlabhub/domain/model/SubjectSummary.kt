@@ -8,4 +8,5 @@ data class SubjectSummary(
     val doneLabs: Int,
     val defendedLabs: Int,
     val averageScore: Double?,
+    val classroomCourseId: String? = null,
 )

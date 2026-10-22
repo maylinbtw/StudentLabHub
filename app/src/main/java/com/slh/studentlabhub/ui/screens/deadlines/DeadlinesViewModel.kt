@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.slh.studentlabhub.SlhApplication
 import com.slh.studentlabhub.domain.model.CourseOverview
+import com.slh.studentlabhub.domain.model.UpcomingTask
 import com.slh.studentlabhub.domain.repository.ClassroomRepository
 import com.slh.studentlabhub.ui.auth.toUserMessage
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,8 @@ import kotlinx.coroutines.launch
 data class DeadlinesUiState(
     val isLoading: Boolean = true,
     val courses: List<CourseOverview> = emptyList(),
+    val upcoming: List<UpcomingTask> = emptyList(),
+    val now: Long = System.currentTimeMillis(),
     val isSyncing: Boolean = false,
     val errorMessage: String? = null,
     val lastSyncAt: Long? = null,
@@ -39,11 +42,14 @@ class DeadlinesViewModel(
 
     val uiState: StateFlow<DeadlinesUiState> = combine(
         repository.observeCourses(),
+        repository.observeUpcomingTasks(),
         syncState,
-    ) { courses, sync ->
+    ) { courses, upcoming, sync ->
         DeadlinesUiState(
             isLoading = false,
             courses = courses,
+            upcoming = upcoming,
+            now = System.currentTimeMillis(),
             isSyncing = sync.isSyncing,
             errorMessage = sync.errorMessage,
             lastSyncAt = sync.lastSyncAt,

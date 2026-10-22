@@ -38,6 +38,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.slh.studentlabhub.domain.model.CourseOverview
+import com.slh.studentlabhub.domain.model.TaskState
+import com.slh.studentlabhub.domain.model.UpcomingTask
 import com.slh.studentlabhub.ui.auth.rememberGoogleAuthorization
 import com.slh.studentlabhub.ui.components.DotMatrixText
 import com.slh.studentlabhub.ui.components.ScreenHeader
@@ -65,9 +67,12 @@ private val shortDateFormatter: DateTimeFormatter =
     DateTimeFormatter.ofPattern("EEE, dd.MM", Locale.forLanguageTag("ru"))
 private val syncTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM HH:mm")
 
+private const val URGENT_WINDOW_MS = 3L * 24 * 60 * 60 * 1000
+private const val UPCOMING_LIMIT = 5
+
 @Composable
 fun DeadlinesRoute(
-    onCourseClick: (CourseOverview) -> Unit,
+    onOpenCourse: (courseId: String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: DeadlinesViewModel = viewModel(factory = DeadlinesViewModel.Factory),
 ) {
@@ -80,7 +85,7 @@ fun DeadlinesRoute(
 
     DeadlinesScreen(
         state = state,
-        onCourseClick = onCourseClick,
+        onOpenCourse = onOpenCourse,
         onSyncClick = {
             if (!state.isSyncing) {
                 viewModel.onSyncStarted()
@@ -94,7 +99,7 @@ fun DeadlinesRoute(
 @Composable
 fun DeadlinesScreen(
     state: DeadlinesUiState,
-    onCourseClick: (CourseOverview) -> Unit,
+    onOpenCourse: (courseId: String) -> Unit,
     onSyncClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -130,6 +135,35 @@ fun DeadlinesScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 24.dp),
             ) {
+                if (state.upcoming.isNotEmpty()) {
+                    item(key = "upcoming_label") {
+                        SectionLabel(text = "БЛИЖАЙШИЕ ДЕДЛАЙНЫ")
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    items(
+                        items = state.upcoming.take(UPCOMING_LIMIT),
+                        key = { "upcoming_${it.task.id}" },
+                    ) { upcoming ->
+                        UpcomingRow(
+                            item = upcoming,
+                            now = state.now,
+                            onClick = { onOpenCourse(upcoming.courseId) },
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                    }
+                    if (state.upcoming.size > UPCOMING_LIMIT) {
+                        item(key = "upcoming_more") {
+                            Text(
+                                text = "и ещё ${state.upcoming.size - UPCOMING_LIMIT} — в курсах ниже",
+                                color = SlhTextMuted,
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                    }
+                    item(key = "upcoming_space") {
+                        Spacer(modifier = Modifier.height(18.dp))
+                    }
+                }
                 item(key = "header") {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -178,7 +212,7 @@ fun DeadlinesScreen(
                     CourseCard(
                         course = course,
                         highlighted = course.id == highlightedId,
-                        onClick = { onCourseClick(course) },
+                        onClick = { onOpenCourse(course.id) },
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     SlhProgressDots(total = course.tasksCount, filled = course.completedCount)
@@ -276,6 +310,73 @@ private fun CourseCard(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun UpcomingRow(
+    item: UpcomingTask,
+    now: Long,
+    onClick: () -> Unit,
+) {
+    val due = item.task.dueAt
+    val isRedo = item.task.state == TaskState.REDO
+    val isOverdue = due != null && due < now
+    val isUrgent = isRedo || (due != null && due - now <= URGENT_WINDOW_MS)
+    val shape = RoundedCornerShape(8.dp)
+    val dueLabel = when {
+        isRedo -> "переделать"
+        due == null -> "без срока"
+        isOverdue -> "просрочено"
+        else -> due.format(shortDateFormatter)
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(SlhSurface)
+            .border(1.dp, if (isUrgent) SlhRed else SlhOutline, shape)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (isUrgent) {
+            Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(SlhRed),
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = item.task.title,
+                color = SlhWhite,
+                fontFamily = SlhMono,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = item.courseTitle,
+                color = SlhTextMuted,
+                style = MaterialTheme.typography.bodySmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = dueLabel,
+            color = if (isUrgent) SlhRed else SlhTextSecondary,
+            fontFamily = SlhMono,
+            fontWeight = FontWeight.Bold,
+            fontSize = 12.sp,
+        )
     }
 }
 
@@ -380,7 +481,7 @@ private fun DeadlinesScreenPreview() {
                 courses = previewCourses,
                 lastSyncAt = 1_784_000_000_000,
             ),
-            onCourseClick = {},
+            onOpenCourse = {},
             onSyncClick = {},
         )
     }

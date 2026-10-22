@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-enum class SlhIcon { Grid, Diamond, Menu, Square, Gear, Refresh, Back, More, Plus, Trash }
+enum class SlhIcon { Grid, Diamond, Menu, Square, Gear, Refresh, Back, More, Plus, Trash, Search, Close }
 
 @Composable
 fun SlhIconView(
@@ -38,6 +38,8 @@ fun SlhIconView(
             SlhIcon.More -> drawMoreIcon(color, u)
             SlhIcon.Plus -> drawPlusIcon(color, u)
             SlhIcon.Trash -> drawTrashIcon(color, u)
+            SlhIcon.Search -> drawSearchIcon(color, u)
+            SlhIcon.Close -> drawCloseIcon(color, u)
         }
     }
 }
@@ -172,4 +174,21 @@ private fun DrawScope.drawTrashIcon(color: Color, u: Float) {
     drawPath(path = body, color = color, style = Stroke(width = w, join = StrokeJoin.Round))
     drawLine(color = color, start = Offset(7.4f * u, 7.5f * u), end = Offset(7.7f * u, 13f * u), strokeWidth = w, cap = StrokeCap.Round)
     drawLine(color = color, start = Offset(10.6f * u, 7.5f * u), end = Offset(10.3f * u, 13f * u), strokeWidth = w, cap = StrokeCap.Round)
+}
+
+private fun DrawScope.drawSearchIcon(color: Color, u: Float) {
+    val w = 1.5f * u
+    drawCircle(
+        color = color,
+        radius = 5f * u,
+        center = Offset(7.5f * u, 7.5f * u),
+        style = Stroke(width = w),
+    )
+    drawLine(color = color, start = Offset(11.2f * u, 11.2f * u), end = Offset(15.5f * u, 15.5f * u), strokeWidth = w, cap = StrokeCap.Round)
+}
+
+private fun DrawScope.drawCloseIcon(color: Color, u: Float) {
+    val w = 1.5f * u
+    drawLine(color = color, start = Offset(4f * u, 4f * u), end = Offset(14f * u, 14f * u), strokeWidth = w, cap = StrokeCap.Round)
+    drawLine(color = color, start = Offset(14f * u, 4f * u), end = Offset(4f * u, 14f * u), strokeWidth = w, cap = StrokeCap.Round)
 }

@@ -20,6 +20,12 @@ interface LabRepository {
 
     suspend fun deleteSubject(subjectId: Long)
 
+    suspend fun linkSubjectToCourse(subjectId: Long, courseId: String)
+
+    suspend fun unlinkCourse(courseId: String)
+
+    suspend fun createSubjectForCourse(title: String, courseId: String): Long
+
     suspend fun addWork(subjectId: Long, type: WorkType)
 
     suspend fun updateLab(lab: Lab)

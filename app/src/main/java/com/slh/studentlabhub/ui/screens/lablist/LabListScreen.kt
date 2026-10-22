@@ -53,6 +53,7 @@ import com.slh.studentlabhub.domain.model.SubjectDetails
 import com.slh.studentlabhub.domain.model.SubjectSummary
 import com.slh.studentlabhub.domain.model.WorkType
 import com.slh.studentlabhub.ui.components.DotMatrixText
+import com.slh.studentlabhub.ui.components.LinkBanner
 import com.slh.studentlabhub.ui.components.ScreenHeader
 import com.slh.studentlabhub.ui.components.SectionLabel
 import com.slh.studentlabhub.ui.components.SlhIcon
@@ -77,6 +78,7 @@ import java.util.Locale
 fun LabListRoute(
     onBack: () -> Unit,
     onLabClick: (Lab) -> Unit,
+    onOpenCourse: (courseId: String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LabListViewModel = viewModel(factory = LabListViewModel.Factory),
 ) {
@@ -95,6 +97,7 @@ fun LabListRoute(
         onAddWork = viewModel::addWork,
         onUpdateSubject = viewModel::updateSubject,
         onDeleteSubject = viewModel::deleteSubject,
+        onOpenCourse = onOpenCourse,
         modifier = modifier,
     )
 }
@@ -107,6 +110,7 @@ fun LabListScreen(
     onAddWork: (WorkType) -> Unit,
     onUpdateSubject: (title: String, semester: Int) -> Unit,
     onDeleteSubject: () -> Unit,
+    onOpenCourse: (courseId: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
@@ -186,6 +190,16 @@ fun LabListScreen(
                         StatsRow(summary = details.summary)
                         Spacer(modifier = Modifier.height(14.dp))
                         HorizontalDivider(thickness = 1.dp, color = SlhOutline)
+                    }
+                    details.summary.classroomCourseId?.let { courseId ->
+                        item(key = "classroom_link") {
+                            Spacer(modifier = Modifier.height(14.dp))
+                            LinkBanner(
+                                overline = "GOOGLE CLASSROOM",
+                                title = "Задания и дедлайны курса",
+                                onClick = { onOpenCourse(courseId) },
+                            )
+                        }
                     }
                     if (details.labs.isEmpty()) {
                         item(key = "empty") {
@@ -488,6 +502,7 @@ private fun LabListScreenPreview() {
             onAddWork = {},
             onUpdateSubject = { _, _ -> },
             onDeleteSubject = {},
+            onOpenCourse = {},
         )
     }
 }

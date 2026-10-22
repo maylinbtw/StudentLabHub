@@ -10,4 +10,5 @@ data class SubjectEntity(
     val title: String,
     val semester: Int,
     val createdAt: Long = System.currentTimeMillis(),
+    val classroomCourseId: String? = null,
 )
