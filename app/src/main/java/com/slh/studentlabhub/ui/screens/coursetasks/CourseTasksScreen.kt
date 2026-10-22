@@ -192,7 +192,7 @@ fun CourseTasksScreen(
                 item(key = "subject_link") {
                     if (linked != null) {
                         LinkBanner(
-                            overline = "ЛАБОРАТОРНЫЕ И ПРАКТИЧЕСКИЕ",
+                            overline = "ПРЕДМЕТ · ЛАБЫ И ПРАКТИКИ",
                             title = linked.title,
                             subtitle = "${linked.doneLabs}/${linked.totalLabs} сделано · ${linked.defendedLabs}/${linked.totalLabs} защищено",
                             onClick = { onOpenSubject(linked.id) },
@@ -200,8 +200,8 @@ fun CourseTasksScreen(
                     } else {
                         LinkBanner(
                             overline = "НЕ СВЯЗАН С ПРЕДМЕТОМ",
-                            title = "Связать с «Лабораторными»",
-                            subtitle = "Чтобы вести ЛР, ПР и оценки по этому курсу",
+                            title = "Добавить в «Предметы»",
+                            subtitle = "Чтобы вести лабы, практики и оценки по этому курсу",
                             onClick = { showPicker = true },
                             accent = false,
                         )

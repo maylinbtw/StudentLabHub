@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.slh.studentlabhub.data.local.entity.LabEntity
+import com.slh.studentlabhub.data.local.entity.LabWithSubjectTitle
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -17,6 +18,14 @@ interface LabDao {
 
     @Query("SELECT * FROM labs WHERE subjectId = :subjectId ORDER BY type ASC, number ASC")
     fun observeLabs(subjectId: Long): Flow<List<LabEntity>>
+
+    @Query(
+        "SELECT labs.*, subjects.title AS subjectTitle FROM labs " +
+            "INNER JOIN subjects ON subjects.id = labs.subjectId " +
+            "WHERE labs.deadline IS NOT NULL AND labs.status = 'NOT_DONE' " +
+            "ORDER BY labs.deadline ASC",
+    )
+    fun observePendingDeadlines(): Flow<List<LabWithSubjectTitle>>
 
     @Query("SELECT * FROM labs WHERE id = :id")
     suspend fun getById(id: Long): LabEntity?

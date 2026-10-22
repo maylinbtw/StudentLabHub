@@ -7,12 +7,20 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.slh.studentlabhub.SlhApplication
+import com.slh.studentlabhub.domain.model.CourseOverview
+import com.slh.studentlabhub.domain.model.CourseTasks
 import com.slh.studentlabhub.domain.model.SubjectDetails
 import com.slh.studentlabhub.domain.model.WorkType
+import com.slh.studentlabhub.domain.repository.ClassroomRepository
 import com.slh.studentlabhub.domain.repository.LabRepository
 import com.slh.studentlabhub.navigation.Routes
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -21,26 +29,50 @@ data class LabListUiState(
     val isLoading: Boolean = true,
     val isMissing: Boolean = false,
     val details: SubjectDetails? = null,
+    val course: CourseTasks? = null,
+    val availableCourses: List<CourseOverview> = emptyList(),
+    val now: Long = System.currentTimeMillis(),
 )
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class LabListViewModel(
     private val subjectId: Long,
     private val repository: LabRepository,
+    classroomRepository: ClassroomRepository,
 ) : ViewModel() {
 
-    val uiState: StateFlow<LabListUiState> = repository.observeSubjectDetails(subjectId)
-        .map { details ->
-            LabListUiState(
-                isLoading = false,
-                isMissing = details == null,
-                details = details,
-            )
+    private val details = repository.observeSubjectDetails(subjectId)
+
+    private val course = details
+        .map { it?.summary?.classroomCourseId }
+        .distinctUntilChanged()
+        .flatMapLatest { courseId ->
+            if (courseId == null) flowOf(null) else classroomRepository.observeCourseTasks(courseId)
         }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = LabListUiState(),
+
+    val uiState: StateFlow<LabListUiState> = combine(
+        details,
+        course,
+        classroomRepository.observeCourses(),
+        repository.observeSubjects(),
+    ) { details, course, courses, subjects ->
+        val takenByOthers = subjects
+            .filter { it.id != subjectId }
+            .mapNotNull { it.classroomCourseId }
+            .toSet()
+        LabListUiState(
+            isLoading = false,
+            isMissing = details == null,
+            details = details,
+            course = course,
+            availableCourses = courses.filter { it.id !in takenByOthers },
+            now = System.currentTimeMillis(),
         )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = LabListUiState(),
+    )
 
     fun addWork(type: WorkType) {
         viewModelScope.launch {
@@ -64,6 +96,19 @@ class LabListViewModel(
         }
     }
 
+    fun linkCourse(courseId: String) {
+        viewModelScope.launch {
+            repository.linkSubjectToCourse(subjectId, courseId)
+        }
+    }
+
+    fun unlinkCourse() {
+        val courseId = uiState.value.details?.summary?.classroomCourseId ?: return
+        viewModelScope.launch {
+            repository.unlinkCourse(courseId)
+        }
+    }
+
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
@@ -75,6 +120,7 @@ class LabListViewModel(
                 LabListViewModel(
                     subjectId = subjectId,
                     repository = app.container.labRepository,
+                    classroomRepository = app.container.classroomRepository,
                 )
             }
         }

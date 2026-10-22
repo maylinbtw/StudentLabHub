@@ -1,6 +1,7 @@
 package com.slh.studentlabhub.domain.repository
 
 import com.slh.studentlabhub.domain.model.Lab
+import com.slh.studentlabhub.domain.model.LabDeadline
 import com.slh.studentlabhub.domain.model.LabDetails
 import com.slh.studentlabhub.domain.model.SubjectDetails
 import com.slh.studentlabhub.domain.model.SubjectSummary
@@ -11,6 +12,8 @@ interface LabRepository {
     fun observeSubjects(): Flow<List<SubjectSummary>>
 
     fun observeSubjectDetails(subjectId: Long): Flow<SubjectDetails?>
+
+    fun observePendingDeadlines(): Flow<List<LabDeadline>>
 
     suspend fun getLabDetails(labId: Long): LabDetails?
 
@@ -32,5 +35,5 @@ interface LabRepository {
 
     suspend fun deleteLab(labId: Long)
 
-    suspend fun seedIfEmpty()
+    suspend fun insertDemoDataIfEmpty(): Boolean
 }

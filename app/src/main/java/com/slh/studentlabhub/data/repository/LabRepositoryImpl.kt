@@ -6,6 +6,7 @@ import com.slh.studentlabhub.data.local.entity.LabEntity
 import com.slh.studentlabhub.data.local.entity.SubjectEntity
 import com.slh.studentlabhub.data.local.entity.SubjectWithLabs
 import com.slh.studentlabhub.domain.model.Lab
+import com.slh.studentlabhub.domain.model.LabDeadline
 import com.slh.studentlabhub.domain.model.LabDetails
 import com.slh.studentlabhub.domain.model.LabStatus
 import com.slh.studentlabhub.domain.model.SubjectDetails
@@ -33,6 +34,22 @@ class LabRepositoryImpl(
                     labs = it.labs
                         .sortedWith(compareBy<LabEntity>({ lab -> lab.type.ordinal }, { lab -> lab.number }))
                         .map { lab -> lab.toDomain() },
+                )
+            }
+        }
+
+    override fun observePendingDeadlines(): Flow<List<LabDeadline>> =
+        labDao.observePendingDeadlines().map { rows ->
+            rows.mapNotNull { row ->
+                val deadline = row.lab.deadline ?: return@mapNotNull null
+                LabDeadline(
+                    labId = row.lab.id,
+                    subjectId = row.lab.subjectId,
+                    subjectTitle = row.subjectTitle,
+                    type = row.lab.type,
+                    number = row.lab.number,
+                    title = row.lab.title,
+                    deadline = deadline,
                 )
             }
         }
@@ -131,9 +148,9 @@ class LabRepositoryImpl(
         labDao.deleteById(labId)
     }
 
-    override suspend fun seedIfEmpty() {
+    override suspend fun insertDemoDataIfEmpty(): Boolean =
         database.withTransaction {
-            if (subjectDao.count() > 0) return@withTransaction
+            if (subjectDao.count() > 0) return@withTransaction false
 
             insertSubjectWithWorks(
                 title = "ТРПО",
@@ -173,8 +190,8 @@ class LabRepositoryImpl(
                     SeedWork(WorkType.PRACTICE, "Ввод-вывод", LabStatus.DEFENDED, 9),
                 ),
             )
+            true
         }
-    }
 
     private suspend fun insertSubjectWithWorks(
         title: String,

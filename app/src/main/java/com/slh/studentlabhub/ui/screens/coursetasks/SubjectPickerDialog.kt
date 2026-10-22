@@ -56,7 +56,7 @@ fun SubjectPickerDialog(
     }
 
     SlhDialog(
-        overline = "Лабораторные",
+        overline = "Предметы",
         title = "СВЯЗАТЬ С ПРЕДМЕТОМ",
         onDismissRequest = onDismiss,
     ) {
@@ -69,7 +69,7 @@ fun SubjectPickerDialog(
 
         if (sorted.isEmpty()) {
             Text(
-                text = "Во «Лабораторных» пока нет предметов. Создай новый — он сразу будет связан с курсом.",
+                text = "В «Предметах» пока ничего нет. Создай новый — он сразу будет связан с курсом.",
                 color = SlhTextMuted,
                 style = MaterialTheme.typography.bodySmall,
             )

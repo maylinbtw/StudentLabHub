@@ -1,4 +1,4 @@
-package com.slh.studentlabhub.ui.screens.labs
+package com.slh.studentlabhub.ui.screens.subjects
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

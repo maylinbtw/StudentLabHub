@@ -84,8 +84,8 @@ private val DotShape.title: String
 
 private val StartScreen.title: String
     get() = when (this) {
-        StartScreen.DEADLINES -> "Дедлайны"
-        StartScreen.LABS -> "Лабы"
+        StartScreen.TODAY -> "Сегодня"
+        StartScreen.SUBJECTS -> "Предметы"
         StartScreen.REFERENCE -> "Справка"
     }
 
@@ -114,6 +114,7 @@ fun SettingsRoute(
         onRedoThresholdSelected = viewModel::onRedoThresholdSelected,
         onClearTldr = viewModel::clearTldrDownloads,
         onSignOut = viewModel::signOut,
+        onInsertDemo = viewModel::insertDemoData,
         modifier = modifier,
     )
 }
@@ -129,6 +130,7 @@ fun SettingsScreen(
     onClearTldr: () -> Unit,
     onSignOut: () -> Unit,
     modifier: Modifier = Modifier,
+    onInsertDemo: () -> Unit = {},
 ) {
     val settings = state.settings
 
@@ -233,6 +235,16 @@ fun SettingsScreen(
                     title = "Мои статьи",
                     value = "${state.customCount} ${articlesWord(state.customCount)}",
                 )
+                if (state.subjectsCount == 0) {
+                    HorizontalDivider(thickness = 1.dp, color = SlhOutline)
+                    ActionRow(
+                        title = "Демо-предметы",
+                        value = "3 предмета с работами для показа",
+                        actionText = "ДОБАВИТЬ",
+                        enabled = true,
+                        onConfirmed = onInsertDemo,
+                    )
+                }
             }
             OptionHint(text = "Все данные хранятся только на этом устройстве.")
 

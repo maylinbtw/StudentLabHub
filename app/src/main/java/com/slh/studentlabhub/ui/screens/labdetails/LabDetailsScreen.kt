@@ -57,9 +57,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.slh.studentlabhub.domain.model.LabStatus
 import com.slh.studentlabhub.domain.model.WorkType
 import com.slh.studentlabhub.ui.components.ScreenHeader
+import com.slh.studentlabhub.ui.components.DeadlinePickerDialog
 import com.slh.studentlabhub.ui.components.SectionLabel
 import com.slh.studentlabhub.ui.components.SlhIcon
+import com.slh.studentlabhub.ui.components.SlhIconView
 import com.slh.studentlabhub.ui.components.completedLabel
+import com.slh.studentlabhub.ui.components.formatDayMonth
+import com.slh.studentlabhub.ui.components.relativeDueLabel
 import com.slh.studentlabhub.ui.components.shortPrefix
 import com.slh.studentlabhub.ui.theme.SlhBackground
 import com.slh.studentlabhub.ui.theme.SlhInk
@@ -131,6 +135,7 @@ fun LabDetailsRoute(
         onStatusChange = viewModel::onStatusChange,
         onScoreChange = viewModel::onScoreChange,
         onNotesChange = viewModel::onNotesChange,
+        onDeadlineChange = viewModel::onDeadlineChange,
         onSave = viewModel::save,
         onDelete = viewModel::delete,
         modifier = modifier,
@@ -148,8 +153,10 @@ fun LabDetailsScreen(
     onSave: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
+    onDeadlineChange: (Long?) -> Unit = {},
 ) {
     var showDeleteConfirm by rememberSaveable { mutableStateOf(false) }
+    var showDeadlinePicker by rememberSaveable { mutableStateOf(false) }
     var showTitleEditor by rememberSaveable { mutableStateOf(false) }
     val prefix = state.type.shortPrefix
 
@@ -236,6 +243,15 @@ fun LabDetailsScreen(
                     }
                 }
 
+                Spacer(modifier = Modifier.height(24.dp))
+                SectionLabel(text = "СРОК СДАЧИ")
+                Spacer(modifier = Modifier.height(10.dp))
+                DeadlineField(
+                    deadline = state.deadline,
+                    onClick = { showDeadlinePicker = true },
+                    onClear = { onDeadlineChange(null) },
+                )
+
                 if (state.hasScore) {
                     Spacer(modifier = Modifier.height(24.dp))
                     SectionLabel(text = "ОЦЕНКА (БАЛЛ) · ВВОД ВРУЧНУЮ")
@@ -263,6 +279,25 @@ fun LabDetailsScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
+    }
+
+    if (showDeadlinePicker) {
+        DeadlinePickerDialog(
+            initial = state.deadline,
+            onDismiss = { showDeadlinePicker = false },
+            onConfirm = { value ->
+                onDeadlineChange(value)
+                showDeadlinePicker = false
+            },
+            onClear = if (state.deadline != null) {
+                {
+                    onDeadlineChange(null)
+                    showDeadlinePicker = false
+                }
+            } else {
+                null
+            },
+        )
     }
 
     if (showTitleEditor) {
@@ -318,6 +353,53 @@ fun LabDetailsScreen(
                 }
             },
         )
+    }
+}
+
+@Composable
+private fun DeadlineField(
+    deadline: Long?,
+    onClick: () -> Unit,
+    onClear: () -> Unit,
+) {
+    val shape = RoundedCornerShape(8.dp)
+    val now = System.currentTimeMillis()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp)
+            .clip(shape)
+            .background(SlhSurface)
+            .border(1.dp, if (deadline != null) SlhAccent else SlhOutline, shape)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(start = 14.dp, end = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = deadline?.let { "до ${it.formatDayMonth()}" } ?: "Не задан — нажми, чтобы выбрать",
+            color = if (deadline != null) SlhWhite else SlhTextMuted,
+            fontFamily = SlhMono,
+            fontWeight = if (deadline != null) FontWeight.Bold else FontWeight.Normal,
+            fontSize = 13.sp,
+            modifier = Modifier.weight(1f),
+        )
+        if (deadline != null) {
+            Text(
+                text = relativeDueLabel(deadline, now),
+                color = SlhAccent,
+                fontFamily = SlhMono,
+                fontSize = 11.sp,
+            )
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(RoundedCornerShape(50))
+                    .clickable(role = Role.Button, onClick = onClear),
+                contentAlignment = Alignment.Center,
+            ) {
+                SlhIconView(icon = SlhIcon.Close, color = SlhTextMuted, size = 12.dp)
+            }
+        }
     }
 }
 

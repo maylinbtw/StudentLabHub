@@ -12,6 +12,7 @@ import com.slh.studentlabhub.domain.model.BackgroundStyle
 import com.slh.studentlabhub.domain.model.DotShape
 import com.slh.studentlabhub.domain.model.StartScreen
 import com.slh.studentlabhub.domain.repository.ClassroomRepository
+import com.slh.studentlabhub.domain.repository.LabRepository
 import com.slh.studentlabhub.domain.repository.ReferenceRepository
 import com.slh.studentlabhub.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,9 +30,16 @@ data class SettingsUiState(
     val redoThreshold: Int = 1,
     val tldrCount: Int = 0,
     val customCount: Int = 0,
+    val subjectsCount: Int = 0,
     val versionName: String = "",
     val isSigningOut: Boolean = false,
     val isSignedOut: Boolean = false,
+)
+
+private data class Counts(
+    val tldr: Int,
+    val custom: Int,
+    val subjects: Int,
 )
 
 private data class AccountState(
@@ -43,25 +51,32 @@ class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
     private val classroomRepository: ClassroomRepository,
     private val referenceRepository: ReferenceRepository,
+    private val labRepository: LabRepository,
     private val versionName: String,
 ) : ViewModel() {
 
     private val account = MutableStateFlow(AccountState())
 
+    private val counts = combine(
+        referenceRepository.observeTldrCount(),
+        referenceRepository.observeCustomCount(),
+        labRepository.observeSubjects(),
+    ) { tldr, custom, subjects -> Counts(tldr, custom, subjects.size) }
+
     val uiState: StateFlow<SettingsUiState> = combine(
         settingsRepository.settings,
         classroomRepository.redoThreshold,
-        referenceRepository.observeTldrCount(),
-        referenceRepository.observeCustomCount(),
+        counts,
         account,
-    ) { settings, threshold, tldrCount, customCount, accountState ->
+    ) { settings, threshold, counts, accountState ->
         SettingsUiState(
             settings = settings,
             email = classroomRepository.signedInEmail,
             lastSyncAt = classroomRepository.lastSyncAt,
             redoThreshold = threshold,
-            tldrCount = tldrCount,
-            customCount = customCount,
+            tldrCount = counts.tldr,
+            customCount = counts.custom,
+            subjectsCount = counts.subjects,
             versionName = versionName,
             isSigningOut = accountState.isSigningOut,
             isSignedOut = accountState.isSignedOut,
@@ -74,6 +89,7 @@ class SettingsViewModel(
             email = classroomRepository.signedInEmail,
             lastSyncAt = classroomRepository.lastSyncAt,
             redoThreshold = classroomRepository.redoThreshold.value,
+            subjectsCount = -1,
             versionName = versionName,
         ),
     )
@@ -91,6 +107,12 @@ class SettingsViewModel(
     fun clearTldrDownloads() {
         viewModelScope.launch {
             referenceRepository.clearTldrDownloads()
+        }
+    }
+
+    fun insertDemoData() {
+        viewModelScope.launch {
+            labRepository.insertDemoDataIfEmpty()
         }
     }
 
@@ -114,6 +136,7 @@ class SettingsViewModel(
                     settingsRepository = app.container.settingsRepository,
                     classroomRepository = app.container.classroomRepository,
                     referenceRepository = app.container.referenceRepository,
+                    labRepository = app.container.labRepository,
                     versionName = versionName,
                 )
             }

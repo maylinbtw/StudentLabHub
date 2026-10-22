@@ -22,8 +22,8 @@ enum class DotShape {
 }
 
 enum class StartScreen {
-    DEADLINES,
-    LABS,
+    TODAY,
+    SUBJECTS,
     REFERENCE,
 }
 
@@ -31,5 +31,5 @@ data class AppSettings(
     val accent: AccentColor = AccentColor.RED,
     val background: BackgroundStyle = BackgroundStyle.AMOLED,
     val dotShape: DotShape = DotShape.ROUND,
-    val startScreen: StartScreen = StartScreen.DEADLINES,
+    val startScreen: StartScreen = StartScreen.TODAY,
 )

@@ -30,6 +30,7 @@ data class LabDetailsUiState(
     val status: LabStatus = LabStatus.NOT_DONE,
     val scoreInput: String = "",
     val notes: String = "",
+    val deadline: Long? = null,
 ) {
     val canSave: Boolean
         get() = !isLoading && !isSaving && title.isNotBlank()
@@ -64,6 +65,7 @@ class LabDetailsViewModel(
                     status = details.lab.status,
                     scoreInput = details.lab.score?.toString().orEmpty(),
                     notes = details.lab.notes,
+                    deadline = details.lab.deadline,
                 )
             }
         }
@@ -85,6 +87,10 @@ class LabDetailsViewModel(
         }
     }
 
+    fun onDeadlineChange(value: Long?) {
+        _uiState.update { it.copy(deadline = value) }
+    }
+
     fun onNotesChange(value: String) {
         _uiState.update { it.copy(notes = value.take(2000)) }
     }
@@ -101,6 +107,7 @@ class LabDetailsViewModel(
                     status = state.status,
                     score = if (state.hasScore) state.scoreInput.toIntOrNull() else null,
                     notes = state.notes.trimEnd(),
+                    deadline = state.deadline,
                 ),
             )
             _uiState.update { it.copy(isSaving = false, isFinished = true) }
