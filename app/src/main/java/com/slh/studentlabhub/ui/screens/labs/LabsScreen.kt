@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.slh.studentlabhub.domain.model.SubjectSummary
+import com.slh.studentlabhub.ui.components.DotMatrixText
 import com.slh.studentlabhub.ui.components.ScreenHeader
 import com.slh.studentlabhub.ui.components.SectionLabel
 import com.slh.studentlabhub.ui.components.SlhIcon
@@ -193,10 +194,9 @@ private fun SubjectCard(
             )
         }
         Spacer(modifier = Modifier.width(12.dp))
-        Text(
+        DotMatrixText(
             text = subject.averageScore?.let { String.format(Locale.US, "%.1f", it) } ?: "—",
             color = SlhRed,
-            style = MaterialTheme.typography.displaySmall,
         )
     }
 }

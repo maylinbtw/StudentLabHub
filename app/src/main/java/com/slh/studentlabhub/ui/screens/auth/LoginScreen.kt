@@ -36,6 +36,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.slh.studentlabhub.ui.components.DotMatrixText
 import com.slh.studentlabhub.ui.theme.SlhBlack
 import com.slh.studentlabhub.ui.theme.SlhMono
 import com.slh.studentlabhub.ui.theme.SlhOutline
@@ -123,22 +124,24 @@ fun LoginScreen(
 @Composable
 private fun SlhLogo() {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             repeat(3) {
                 Box(
                     modifier = Modifier
-                        .size(10.dp)
+                        .size(11.dp)
+                        .clip(CircleShape)
                         .background(SlhRed),
                 )
             }
         }
-        Spacer(modifier = Modifier.height(18.dp))
-        Text(
+        Spacer(modifier = Modifier.height(30.dp))
+        DotMatrixText(
             text = "SLH",
             color = SlhWhite,
-            style = MaterialTheme.typography.headlineLarge,
+            dotSize = 7.dp,
+            dotGap = 2.dp,
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = "STUDENTLABHUB",
             color = SlhWhite,

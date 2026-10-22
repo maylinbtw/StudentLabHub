@@ -52,6 +52,7 @@ import com.slh.studentlabhub.domain.model.LabStatus
 import com.slh.studentlabhub.domain.model.SubjectDetails
 import com.slh.studentlabhub.domain.model.SubjectSummary
 import com.slh.studentlabhub.domain.model.WorkType
+import com.slh.studentlabhub.ui.components.DotMatrixText
 import com.slh.studentlabhub.ui.components.ScreenHeader
 import com.slh.studentlabhub.ui.components.SectionLabel
 import com.slh.studentlabhub.ui.components.SlhIcon
@@ -293,14 +294,13 @@ private fun StatColumn(
     valueColor: Color,
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
+        DotMatrixText(
             text = value,
             color = valueColor,
-            fontFamily = SlhMono,
-            fontWeight = FontWeight.Bold,
-            fontSize = 26.sp,
+            dotSize = 3.5.dp,
+            dotGap = 1.dp,
         )
-        Spacer(modifier = Modifier.height(2.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = label,
             color = SlhTextMuted,

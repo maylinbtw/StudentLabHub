@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.slh.studentlabhub.ui.components.DotMatrixText
 import com.slh.studentlabhub.ui.components.ScreenHeader
 import com.slh.studentlabhub.ui.components.SectionLabel
 import com.slh.studentlabhub.ui.components.SlhIcon
@@ -176,10 +177,9 @@ private fun CourseCard(
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
-            Text(
+            DotMatrixText(
                 text = String.format(Locale.US, "%.1f", course.averageScore),
                 color = SlhRed,
-                style = MaterialTheme.typography.displaySmall,
             )
         }
     }

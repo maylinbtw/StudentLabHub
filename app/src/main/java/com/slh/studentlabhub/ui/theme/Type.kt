@@ -2,17 +2,29 @@ package com.slh.studentlabhub.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.slh.studentlabhub.R
 
-val SlhMono: FontFamily = FontFamily.Monospace
-val SlhSans: FontFamily = FontFamily.SansSerif
+val SlhMono: FontFamily = FontFamily(
+    Font(R.font.jetbrains_mono_regular, FontWeight.Normal),
+    Font(R.font.jetbrains_mono_medium, FontWeight.Medium),
+    Font(R.font.jetbrains_mono_bold, FontWeight.Bold),
+)
+
+val SlhSans: FontFamily = FontFamily(
+    Font(R.font.manrope_regular, FontWeight.Normal),
+    Font(R.font.manrope_medium, FontWeight.Medium),
+    Font(R.font.manrope_bold, FontWeight.Bold),
+    Font(R.font.manrope_extrabold, FontWeight.ExtraBold),
+)
 
 val SlhTypography = Typography(
     headlineLarge = TextStyle(
         fontFamily = SlhSans,
-        fontWeight = FontWeight.Black,
+        fontWeight = FontWeight.ExtraBold,
         fontSize = 56.sp,
         lineHeight = 60.sp,
         letterSpacing = 1.sp,
@@ -25,7 +37,7 @@ val SlhTypography = Typography(
     ),
     titleLarge = TextStyle(
         fontFamily = SlhSans,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.ExtraBold,
         fontSize = 20.sp,
         lineHeight = 24.sp,
         letterSpacing = 1.sp,
