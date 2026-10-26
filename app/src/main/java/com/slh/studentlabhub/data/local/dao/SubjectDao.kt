@@ -51,6 +51,9 @@ interface SubjectDao {
     @Query("SELECT classroomCourseId FROM subjects WHERE semester = :semester AND classroomCourseId IS NOT NULL")
     suspend fun courseIdsInSemester(semester: Int): List<String>
 
+    @Query("SELECT * FROM subjects WHERE classroomCourseId = :courseId LIMIT 1")
+    suspend fun getByCourseId(courseId: String): SubjectEntity?
+
     @Query("SELECT MAX(semester) FROM subjects")
     suspend fun maxSemester(): Int?
 

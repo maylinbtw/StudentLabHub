@@ -10,7 +10,7 @@ object Routes {
     const val REFERENCE = "reference"
     const val SETTINGS = "settings"
 
-    const val STATISTICS = "today/statistics"
+    const val STATISTICS = "statistics"
 
     const val ARCHIVE = "archive"
 
@@ -20,8 +20,6 @@ object Routes {
     const val ARG_LAB_ID = "labId"
     const val LAB_DETAILS = "subjects/lab/{$ARG_LAB_ID}"
 
-    const val ARG_COURSE_ID = "courseId"
-    const val COURSE_TASKS = "subjects/course/{$ARG_COURSE_ID}"
 
     const val ARG_REF_CATEGORY_ID = "refCategoryId"
     const val REFERENCE_CATEGORY = "reference/category/{$ARG_REF_CATEGORY_ID}"
@@ -29,8 +27,6 @@ object Routes {
     fun subject(subjectId: Long): String = "subjects/$subjectId"
 
     fun labDetails(labId: Long): String = "subjects/lab/$labId"
-
-    fun courseTasks(courseId: String): String = "subjects/course/$courseId"
 
     fun referenceCategory(categoryId: String): String = "reference/category/$categoryId"
 }
@@ -55,5 +51,13 @@ enum class BottomTab(
     companion object {
         fun fromRoute(route: String?): BottomTab? =
             entries.firstOrNull { it.route == route }
+
+        fun fromPrefix(route: String): BottomTab? = when {
+            route.startsWith("today") -> Today
+            route.startsWith("subjects") || route == Routes.ARCHIVE || route == Routes.STATISTICS -> Subjects
+            route.startsWith("reference") -> Reference
+            route.startsWith("settings") -> Settings
+            else -> null
+        }
     }
 }

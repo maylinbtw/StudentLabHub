@@ -36,14 +36,15 @@ data class SemesterGroup(
 data class SubjectsUiState(
     val isLoading: Boolean = true,
     val groups: List<SemesterGroup> = emptyList(),
-    val unlinkedCourses: List<CourseOverview> = emptyList(),
     val archivedCount: Int = 0,
+    val overallAverage: Double? = null,
+    val totalWorks: Int = 0,
+    val doneWorks: Int = 0,
     val isSyncing: Boolean = false,
     val errorMessage: String? = null,
-    val now: Long = System.currentTimeMillis(),
 ) {
     val isEmpty: Boolean
-        get() = groups.isEmpty() && unlinkedCourses.isEmpty()
+        get() = groups.isEmpty()
 }
 
 class SubjectsViewModel(
@@ -51,16 +52,16 @@ class SubjectsViewModel(
     private val classroomRepository: ClassroomRepository,
 ) : ViewModel() {
 
-    private val sync = MutableStateFlow(SyncState())
+    private val syncFlow = MutableStateFlow(SyncState())
 
     val uiState: StateFlow<SubjectsUiState> = combine(
         labRepository.observeSubjects(),
         labRepository.observeArchivedSubjects(),
         classroomRepository.observeCourses(),
-        sync,
+        syncFlow,
     ) { subjects, archivedSubjects, courses, syncState ->
         val coursesById = courses.associateBy { it.id }
-        val linkedIds = (subjects + archivedSubjects).mapNotNull { it.classroomCourseId }.toSet()
+        val averages = subjects.mapNotNull { it.averageScore }
         SubjectsUiState(
             isLoading = false,
             groups = subjects
@@ -69,11 +70,12 @@ class SubjectsViewModel(
                 .entries
                 .sortedByDescending { it.key }
                 .map { SemesterGroup(semester = it.key, subjects = it.value) },
-            unlinkedCourses = courses.filter { it.id !in linkedIds && !it.archived },
-            archivedCount = archivedSubjects.size + courses.count { it.archived && it.id !in linkedIds },
+            archivedCount = archivedSubjects.size,
+            overallAverage = if (averages.isEmpty()) null else averages.average(),
+            totalWorks = subjects.sumOf { it.totalLabs },
+            doneWorks = subjects.sumOf { it.doneLabs },
             isSyncing = syncState.isSyncing,
             errorMessage = syncState.errorMessage,
-            now = System.currentTimeMillis(),
         )
     }.stateIn(
         scope = viewModelScope,
@@ -82,16 +84,16 @@ class SubjectsViewModel(
     )
 
     fun onSyncStarted() {
-        sync.value = SyncState(isSyncing = true)
+        syncFlow.value = SyncState(isSyncing = true)
     }
 
     fun onAuthorizationFailed(message: String) {
-        sync.value = SyncState(errorMessage = message)
+        syncFlow.value = SyncState(errorMessage = message)
     }
 
     fun sync(accessToken: String) {
         viewModelScope.launch {
-            sync.value = try {
+            syncFlow.value = try {
                 classroomRepository.sync(accessToken)
                 SyncState()
             } catch (error: Exception) {
@@ -111,29 +113,10 @@ class SubjectsViewModel(
         }
     }
 
-    fun addCourse(course: CourseOverview) {
-        viewModelScope.launch {
-            labRepository.createSubjectForCourse(course.title, course.id)
-        }
-    }
-
-    fun archiveCourse(course: CourseOverview) {
-        classroomRepository.setCourseArchived(course.id, archived = true)
-    }
-
     fun archiveSemester(semester: Int) {
         viewModelScope.launch {
             val courseIds = labRepository.archiveSemester(semester)
             classroomRepository.setCoursesArchived(courseIds, archived = true)
-        }
-    }
-
-    fun addAllCourses() {
-        val courses = uiState.value.unlinkedCourses
-        viewModelScope.launch {
-            courses.forEach { course ->
-                labRepository.createSubjectForCourse(course.title, course.id)
-            }
         }
     }
 

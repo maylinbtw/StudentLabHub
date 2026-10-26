@@ -18,6 +18,7 @@ class SlhApplication : Application() {
         ReminderNotifications.createChannels(this)
         container.applicationScope.launch {
             container.referenceRepository.ensureSeeded()
+            runCatching { container.classroomRepository.mergeIntoSubjects() }
         }
         container.applicationScope.launch {
             container.settingsRepository.settings

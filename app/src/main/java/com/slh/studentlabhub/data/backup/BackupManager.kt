@@ -146,6 +146,9 @@ private fun LabEntity.toJson(): JSONObject = JSONObject()
     .put("score", score ?: JSONObject.NULL)
     .put("notes", notes)
     .put("deadline", deadline ?: JSONObject.NULL)
+    .put("classroomTaskId", classroomTaskId ?: JSONObject.NULL)
+    .put("link", link ?: JSONObject.NULL)
+    .put("needsRedo", needsRedo)
 
 private fun JSONObject.toLab(): LabEntity = LabEntity(
     id = getLong("id"),
@@ -157,6 +160,9 @@ private fun JSONObject.toLab(): LabEntity = LabEntity(
     score = optIntOrNull("score"),
     notes = optString("notes", ""),
     deadline = optLongOrNull("deadline"),
+    classroomTaskId = optStringOrNull("classroomTaskId"),
+    link = optStringOrNull("link"),
+    needsRedo = optBoolean("needsRedo", false),
 )
 
 private fun RefCategoryEntity.toJson(): JSONObject = JSONObject()

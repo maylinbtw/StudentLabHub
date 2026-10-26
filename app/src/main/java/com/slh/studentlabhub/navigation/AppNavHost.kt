@@ -1,7 +1,6 @@
 package com.slh.studentlabhub.navigation
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -11,13 +10,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -29,7 +30,6 @@ import com.slh.studentlabhub.di.AppContainer
 import com.slh.studentlabhub.ui.components.SlhBottomBar
 import com.slh.studentlabhub.ui.screens.archive.ArchiveRoute
 import com.slh.studentlabhub.ui.screens.auth.LoginRoute
-import com.slh.studentlabhub.ui.screens.coursetasks.CourseTasksRoute
 import com.slh.studentlabhub.ui.screens.labdetails.LabDetailsRoute
 import com.slh.studentlabhub.ui.screens.lablist.LabListRoute
 import com.slh.studentlabhub.ui.screens.reference.ReferenceCategoryRoute
@@ -51,7 +51,15 @@ fun SlhApp() {
 
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentTab = remember(backStackEntry) { navController.currentTab() }
+    val currentRoute = backStackEntry?.destination?.route
+    var lastTab by remember { mutableStateOf<BottomTab?>(null) }
+    val currentTab = when (currentRoute) {
+        null, Routes.LOGIN -> null
+        else -> BottomTab.fromRoute(currentRoute) ?: lastTab ?: BottomTab.fromPrefix(currentRoute)
+    }
+    SideEffect {
+        if (lastTab != currentTab) lastTab = currentTab
+    }
 
     NotificationPermissionPrompt(
         active = currentTab != null,
@@ -117,8 +125,6 @@ fun SlhApp() {
             }
             composable(Routes.TODAY) {
                 TodayRoute(
-                    onOpenSubject = { navController.navigate(Routes.subject(it)) },
-                    onOpenCourse = { navController.navigate(Routes.courseTasks(it)) },
                     onOpenLab = { navController.navigate(Routes.labDetails(it)) },
                     onOpenSubjects = {
                         navController.navigate(Routes.SUBJECTS) {
@@ -127,7 +133,6 @@ fun SlhApp() {
                             restoreState = true
                         }
                     },
-                    onOpenStatistics = { navController.navigate(Routes.STATISTICS) },
                 )
             }
             composable(Routes.STATISTICS) {
@@ -138,7 +143,7 @@ fun SlhApp() {
             composable(Routes.SUBJECTS) {
                 SubjectsRoute(
                     onSubjectClick = { navController.navigate(Routes.subject(it)) },
-                    onCourseClick = { navController.navigate(Routes.courseTasks(it)) },
+                    onOpenStatistics = { navController.navigate(Routes.STATISTICS) },
                     onOpenArchive = { navController.navigate(Routes.ARCHIVE) },
                 )
             }
@@ -146,7 +151,7 @@ fun SlhApp() {
                 ArchiveRoute(
                     onBack = { navController.popBackStack() },
                     onOpenSubject = { navController.navigate(Routes.subject(it)) },
-                    onOpenCourse = { navController.navigate(Routes.courseTasks(it)) },
+                    onOpenCourse = { },
                 )
             }
             composable(
@@ -158,7 +163,6 @@ fun SlhApp() {
                 LabListRoute(
                     onBack = { navController.popBackStack() },
                     onLabClick = { lab -> navController.navigate(Routes.labDetails(lab.id)) },
-                    onOpenCourse = { courseId -> navController.openCourse(courseId) },
                 )
             }
             composable(
@@ -169,17 +173,6 @@ fun SlhApp() {
             ) {
                 LabDetailsRoute(
                     onBack = { navController.popBackStack() },
-                )
-            }
-            composable(
-                route = Routes.COURSE_TASKS,
-                arguments = listOf(
-                    navArgument(Routes.ARG_COURSE_ID) { type = NavType.StringType },
-                ),
-            ) {
-                CourseTasksRoute(
-                    onBack = { navController.popBackStack() },
-                    onOpenSubject = { subjectId -> navController.openSubject(subjectId) },
                 )
             }
             composable(Routes.REFERENCE) {
@@ -234,24 +227,4 @@ private fun NotificationPermissionPrompt(
         repository.notificationPromptShown = true
         launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
-}
-
-@SuppressLint("RestrictedApi")
-private fun NavHostController.currentTab(): BottomTab? =
-    currentBackStack.value
-        .asReversed()
-        .firstNotNullOfOrNull { entry -> BottomTab.fromRoute(entry.destination.route) }
-
-private fun NavHostController.openSubject(subjectId: Long) {
-    val previous = previousBackStackEntry
-    val cameFromSameSubject = previous?.destination?.route == Routes.SUBJECT &&
-        previous.arguments?.getLong(Routes.ARG_SUBJECT_ID) == subjectId
-    if (cameFromSameSubject) popBackStack() else navigate(Routes.subject(subjectId))
-}
-
-private fun NavHostController.openCourse(courseId: String) {
-    val previous = previousBackStackEntry
-    val cameFromSameCourse = previous?.destination?.route == Routes.COURSE_TASKS &&
-        previous.arguments?.getString(Routes.ARG_COURSE_ID) == courseId
-    if (cameFromSameCourse) popBackStack() else navigate(Routes.courseTasks(courseId))
 }

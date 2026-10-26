@@ -45,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -69,6 +70,7 @@ import com.slh.studentlabhub.ui.components.formatDayMonth
 import com.slh.studentlabhub.ui.components.relativeDueLabel
 import com.slh.studentlabhub.ui.components.shortPrefix
 import com.slh.studentlabhub.ui.theme.SlhBackground
+import com.slh.studentlabhub.ui.theme.SlhDanger
 import com.slh.studentlabhub.ui.theme.SlhOnContent
 import com.slh.studentlabhub.ui.theme.SlhMono
 import com.slh.studentlabhub.ui.theme.SlhOnAccent
@@ -124,6 +126,7 @@ fun LabDetailsRoute(
     viewModel: LabDetailsViewModel = viewModel(factory = LabDetailsViewModel.Factory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val uriHandler = LocalUriHandler.current
     val photoPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 6),
     ) { uris -> viewModel.addPhotos(uris) }
@@ -146,6 +149,7 @@ fun LabDetailsRoute(
             photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         },
         onDeletePhoto = viewModel::deletePhoto,
+        onOpenClassroom = { link -> runCatching { uriHandler.openUri(link) } },
         onSave = viewModel::save,
         onDelete = viewModel::delete,
         modifier = modifier,
@@ -166,6 +170,7 @@ fun LabDetailsScreen(
     onDeadlineChange: (Long?) -> Unit = {},
     onAddPhotos: () -> Unit = {},
     onDeletePhoto: (String) -> Unit = {},
+    onOpenClassroom: (String) -> Unit = {},
 ) {
     var showDeleteConfirm by rememberSaveable { mutableStateOf(false) }
     var showDeadlinePicker by rememberSaveable { mutableStateOf(false) }
@@ -235,6 +240,23 @@ fun LabDetailsScreen(
                     fontSize = 12.sp,
                     letterSpacing = 1.sp,
                 )
+
+                if (state.needsRedo) {
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Text(
+                        text = "Преподаватель вернул работу на доработку" +
+                            (state.scoreInput.takeIf { it.isNotEmpty() }?.let { " · отметка $it/10" } ?: ""),
+                        color = SlhDanger,
+                        fontFamily = SlhSans,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                    )
+                }
+
+                state.link?.let { link ->
+                    Spacer(modifier = Modifier.height(14.dp))
+                    ClassroomButton(onClick = { onOpenClassroom(link) })
+                }
 
                 Spacer(modifier = Modifier.height(22.dp))
                 SectionLabel(
@@ -381,6 +403,36 @@ fun LabDetailsScreen(
                     )
                 }
             },
+        )
+    }
+}
+
+@Composable
+private fun ClassroomButton(onClick: () -> Unit) {
+    val shape = RoundedCornerShape(8.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(42.dp)
+            .clip(shape)
+            .border(1.dp, SlhOutline, shape)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = "Открыть в Google Classroom",
+            color = SlhContent,
+            fontFamily = SlhSans,
+            fontSize = 14.sp,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = "↗",
+            color = SlhAccent,
+            fontFamily = SlhMono,
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp,
         )
     }
 }

@@ -1,16 +1,18 @@
 package com.slh.studentlabhub.widget
 
 import android.content.Context
+import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.LocalContext
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
-import androidx.glance.action.actionStartActivity
+import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.updateAll
@@ -28,7 +30,7 @@ import androidx.glance.text.FontFamily
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
-import androidx.glance.unit.ColorProvider
+import androidx.glance.color.ColorProvider
 import com.slh.studentlabhub.MainActivity
 import com.slh.studentlabhub.SlhApplication
 import com.slh.studentlabhub.notifications.Reminder
@@ -79,9 +81,12 @@ private fun WidgetContent(
     now: Long,
     accent: Color,
 ) {
-    val white = ColorProvider(Color(0xFFFFFFFF))
-    val muted = ColorProvider(Color(0xFF8A8A8A))
-    val accentColor = ColorProvider(accent)
+    val context = LocalContext.current
+    val white = fixedColor(Color(0xFFFFFFFF))
+    val muted = fixedColor(Color(0xFF8A8A8A))
+    val accentColor = fixedColor(accent)
+    val openApp = Intent(context, MainActivity::class.java)
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
 
     Column(
         modifier = GlanceModifier
@@ -89,7 +94,7 @@ private fun WidgetContent(
             .background(Color(0xFF000000))
             .cornerRadius(20.dp)
             .padding(14.dp)
-            .clickable(actionStartActivity<MainActivity>()),
+            .clickable(actionStartActivity(openApp)),
     ) {
         Row(
             modifier = GlanceModifier.fillMaxWidth(),
@@ -176,3 +181,5 @@ private fun WidgetContent(
         }
     }
 }
+
+private fun fixedColor(color: Color) = ColorProvider(day = color, night = color)

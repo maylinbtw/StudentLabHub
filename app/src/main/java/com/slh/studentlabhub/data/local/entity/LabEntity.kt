@@ -1,5 +1,6 @@
 package com.slh.studentlabhub.data.local.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -30,4 +31,8 @@ data class LabEntity(
     val score: Int? = null,
     val notes: String = "",
     val deadline: Long? = null,
+    val classroomTaskId: String? = null,
+    val link: String? = null,
+    @ColumnInfo(defaultValue = "0")
+    val needsRedo: Boolean = false,
 )

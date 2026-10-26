@@ -29,5 +29,7 @@ interface ClassroomRepository {
 
     suspend fun sync(accessToken: String)
 
+    suspend fun mergeIntoSubjects()
+
     suspend fun signOut()
 }

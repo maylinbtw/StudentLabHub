@@ -1,6 +1,7 @@
 package com.slh.studentlabhub.data.repository
 
 import androidx.room.withTransaction
+import com.slh.studentlabhub.data.classroom.ClassroomMerger
 import com.slh.studentlabhub.data.local.AppDatabase
 import com.slh.studentlabhub.data.local.SessionStore
 import com.slh.studentlabhub.data.local.entity.ClassroomCourseEntity
@@ -16,11 +17,13 @@ import com.slh.studentlabhub.domain.model.CourseTasks
 import com.slh.studentlabhub.domain.model.TaskState
 import com.slh.studentlabhub.domain.model.UpcomingTask
 import com.slh.studentlabhub.domain.repository.ClassroomRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 class ClassroomRepositoryImpl(
@@ -28,6 +31,8 @@ class ClassroomRepositoryImpl(
     private val api: ClassroomApi,
     private val session: SessionStore,
     private val authManager: GoogleAuthManager,
+    private val merger: ClassroomMerger,
+    private val scope: CoroutineScope,
 ) : ClassroomRepository {
 
     private val dao = database.classroomDao()
@@ -48,6 +53,11 @@ class ClassroomRepositoryImpl(
         val safeValue = value.coerceIn(0, 10)
         session.redoThreshold = safeValue
         threshold.value = safeValue
+        scope.launch { mergeIntoSubjects() }
+    }
+
+    override suspend fun mergeIntoSubjects() {
+        merger.merge(redoLimit = threshold.value, archivedCourseIds = archivedCourses.value)
     }
 
     override fun setCourseArchived(courseId: String, archived: Boolean) {
@@ -163,6 +173,7 @@ class ClassroomRepositoryImpl(
                 dao.insertCourses(courseEntities)
                 dao.insertTasks(taskEntities)
             }
+            mergeIntoSubjects()
             session.lastSyncAt = System.currentTimeMillis()
         } catch (error: UnauthorizedException) {
             authManager.clearToken(accessToken)

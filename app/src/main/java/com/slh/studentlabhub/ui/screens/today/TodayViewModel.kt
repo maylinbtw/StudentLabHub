@@ -6,13 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.slh.studentlabhub.SlhApplication
-import com.slh.studentlabhub.domain.model.AgendaItem
-import com.slh.studentlabhub.domain.model.AgendaSource
-import com.slh.studentlabhub.domain.model.CourseOverview
 import com.slh.studentlabhub.domain.model.LabDeadline
-import com.slh.studentlabhub.domain.model.SubjectSummary
-import com.slh.studentlabhub.domain.model.TaskState
-import com.slh.studentlabhub.domain.model.UpcomingTask
 import com.slh.studentlabhub.domain.repository.ClassroomRepository
 import com.slh.studentlabhub.domain.repository.LabRepository
 import com.slh.studentlabhub.ui.auth.toUserMessage
@@ -27,41 +21,46 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
-data class WeekDay(
-    val date: LocalDate,
-    val count: Int,
-    val hasRedo: Boolean,
+enum class AgendaGroup(val title: String) {
+    REDO("НА ДОРАБОТКУ"),
+    OVERDUE("ПРОСРОЧЕНО"),
+    TODAY("СЕГОДНЯ"),
+    TOMORROW("ЗАВТРА"),
+    WEEK("НА ЭТОЙ НЕДЕЛЕ"),
+    LATER("ПОЗЖЕ"),
+}
+
+data class AgendaRow(
+    val labId: Long,
+    val title: String,
+    val subjectTitle: String,
+    val dueAt: Long?,
+    val group: AgendaGroup,
+)
+
+data class AgendaSection(
+    val group: AgendaGroup,
+    val rows: List<AgendaRow>,
 )
 
 data class TodayUiState(
     val isLoading: Boolean = true,
     val now: Long = System.currentTimeMillis(),
     val today: LocalDate = LocalDate.now(),
-    val weekOffset: Int = 0,
-    val week: List<WeekDay> = emptyList(),
-    val selectedDay: LocalDate? = null,
-    val dayItems: List<AgendaItem> = emptyList(),
-    val redo: List<AgendaItem> = emptyList(),
-    val upcoming: List<AgendaItem> = emptyList(),
-    val overallAverage: Double? = null,
-    val totalWorks: Int = 0,
-    val doneWorks: Int = 0,
-    val defendedWorks: Int = 0,
-    val subjectsCount: Int = 0,
-    val coursesCount: Int = 0,
-    val unlinkedCourses: Int = 0,
+    val sections: List<AgendaSection> = emptyList(),
+    val overdueCount: Int = 0,
+    val todayCount: Int = 0,
+    val weekCount: Int = 0,
+    val redoCount: Int = 0,
+    val hasSubjects: Boolean = true,
     val isSyncing: Boolean = false,
     val errorMessage: String? = null,
     val lastSyncAt: Long? = null,
-) {
-    val isEmptyStart: Boolean
-        get() = subjectsCount == 0 && coursesCount == 0
-}
+)
 
-private data class LocalState(
-    val weekOffset: Int = 0,
-    val selectedDay: LocalDate? = null,
+private data class SyncState(
     val isSyncing: Boolean = false,
     val errorMessage: String? = null,
     val lastSyncAt: Long? = null,
@@ -72,148 +71,101 @@ class TodayViewModel(
     labRepository: LabRepository,
 ) : ViewModel() {
 
-    private val local = MutableStateFlow(LocalState(lastSyncAt = classroomRepository.lastSyncAt))
+    private val syncFlow = MutableStateFlow(SyncState(lastSyncAt = classroomRepository.lastSyncAt))
 
     val uiState: StateFlow<TodayUiState> = combine(
-        classroomRepository.observeUpcomingTasks(),
         labRepository.observePendingDeadlines(),
         labRepository.observeSubjects(),
-        classroomRepository.observeCourses(),
-        local,
-    ) { tasks, labDeadlines, subjects, courses, state ->
-        buildState(tasks, labDeadlines, subjects, courses, state)
+        syncFlow,
+    ) { works, subjects, syncState ->
+        buildState(works, subjects.isNotEmpty(), syncState)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = TodayUiState(),
     )
 
-    fun previousWeek() {
-        local.update { it.copy(weekOffset = it.weekOffset - 1, selectedDay = null) }
-    }
-
-    fun nextWeek() {
-        local.update { it.copy(weekOffset = it.weekOffset + 1, selectedDay = null) }
-    }
-
-    fun onDayClick(day: LocalDate) {
-        local.update { it.copy(selectedDay = if (it.selectedDay == day) null else day) }
-    }
-
     fun onSyncStarted() {
-        local.update { it.copy(isSyncing = true, errorMessage = null) }
+        syncFlow.update { it.copy(isSyncing = true, errorMessage = null) }
     }
 
     fun onAuthorizationFailed(message: String) {
-        local.update { it.copy(isSyncing = false, errorMessage = message) }
+        syncFlow.update { it.copy(isSyncing = false, errorMessage = message) }
     }
 
     fun sync(accessToken: String) {
         viewModelScope.launch {
             try {
                 classroomRepository.sync(accessToken)
-                local.update {
-                    it.copy(
-                        isSyncing = false,
-                        errorMessage = null,
-                        lastSyncAt = classroomRepository.lastSyncAt,
-                    )
+                syncFlow.update {
+                    it.copy(isSyncing = false, errorMessage = null, lastSyncAt = classroomRepository.lastSyncAt)
                 }
             } catch (error: Exception) {
-                local.update { it.copy(isSyncing = false, errorMessage = error.toUserMessage()) }
+                syncFlow.update { it.copy(isSyncing = false, errorMessage = error.toUserMessage()) }
             }
         }
     }
 
     private fun buildState(
-        tasks: List<UpcomingTask>,
-        labDeadlines: List<LabDeadline>,
-        subjects: List<SubjectSummary>,
-        courses: List<CourseOverview>,
-        state: LocalState,
+        works: List<LabDeadline>,
+        hasSubjects: Boolean,
+        syncState: SyncState,
     ): TodayUiState {
         val now = System.currentTimeMillis()
         val today = now.toLocalDate()
-        val subjectByCourse = subjects
-            .filter { it.classroomCourseId != null }
-            .associateBy { it.classroomCourseId }
+        val endOfWeek = today.with(DayOfWeek.SUNDAY)
 
-        val classroomItems = tasks.map { upcoming ->
-            val linked = subjectByCourse[upcoming.courseId]
-            AgendaItem(
-                key = "gc_${upcoming.courseId}_${upcoming.task.id}",
-                title = upcoming.task.title,
-                subjectTitle = linked?.title ?: upcoming.courseTitle,
-                dueAt = upcoming.task.dueAt,
-                isRedo = upcoming.task.state == TaskState.REDO,
-                source = AgendaSource.CLASSROOM,
-                subjectId = linked?.id,
-                courseId = upcoming.courseId,
+        val rows = works.mapNotNull { work ->
+            val due = work.deadline
+            val group = when {
+                work.needsRedo -> AgendaGroup.REDO
+                due == null -> null
+                else -> {
+                    val date = due.toLocalDate()
+                    val days = ChronoUnit.DAYS.between(today, date)
+                    when {
+                        due < now && days < -OVERDUE_WINDOW_DAYS -> null
+                        due < now -> AgendaGroup.OVERDUE
+                        days == 0L -> AgendaGroup.TODAY
+                        days == 1L -> AgendaGroup.TOMORROW
+                        !date.isAfter(endOfWeek) -> AgendaGroup.WEEK
+                        else -> AgendaGroup.LATER
+                    }
+                }
+            } ?: return@mapNotNull null
+            AgendaRow(
+                labId = work.labId,
+                title = "${work.type.shortPrefix} ${work.number} · ${work.title}",
+                subjectTitle = work.subjectTitle,
+                dueAt = due,
+                group = group,
             )
         }
-        val labItems = labDeadlines.map { lab ->
-            AgendaItem(
-                key = "lab_${lab.labId}",
-                title = "${lab.type.shortPrefix} №${lab.number} · ${lab.title}",
-                subjectTitle = lab.subjectTitle,
-                dueAt = lab.deadline,
-                isRedo = false,
-                source = AgendaSource.LAB,
-                subjectId = lab.subjectId,
-                labId = lab.labId,
-            )
-        }
-        val all = classroomItems + labItems
-        val dated = all
-            .filter { it.dueAt != null }
-            .sortedBy { it.dueAt }
 
-        val monday = today
-            .with(DayOfWeek.MONDAY)
-            .plusWeeks(state.weekOffset.toLong())
-        val week = (0L..6L).map { shift ->
-            val date = monday.plusDays(shift)
-            val onDay = dated.filter { it.dueAt?.toLocalDate() == date }
-            WeekDay(
-                date = date,
-                count = onDay.size,
-                hasRedo = onDay.any { it.isRedo },
-            )
+        val sections = AgendaGroup.entries.mapNotNull { group ->
+            val inGroup = rows.filter { it.group == group }.sortedBy { it.dueAt ?: Long.MAX_VALUE }
+            if (inGroup.isEmpty()) null else AgendaSection(group, inGroup)
         }
-        val selected = state.selectedDay
-        val dayItems = if (selected == null) {
-            emptyList()
-        } else {
-            dated.filter { it.dueAt?.toLocalDate() == selected }
-        }
-
-        val averages = subjects.mapNotNull { it.averageScore }
-        val linkedCourseIds = subjects.mapNotNull { it.classroomCourseId }.toSet()
 
         return TodayUiState(
             isLoading = false,
             now = now,
             today = today,
-            weekOffset = state.weekOffset,
-            week = week,
-            selectedDay = selected,
-            dayItems = dayItems,
-            redo = all.filter { it.isRedo },
-            upcoming = dated.filter { !it.isRedo },
-            overallAverage = if (averages.isEmpty()) null else averages.average(),
-            totalWorks = subjects.sumOf { it.totalLabs },
-            doneWorks = subjects.sumOf { it.doneLabs },
-            defendedWorks = subjects.sumOf { it.defendedLabs },
-            subjectsCount = subjects.size,
-            coursesCount = courses.count { !it.archived },
-            unlinkedCourses = courses.count { it.id !in linkedCourseIds && !it.archived },
-            isSyncing = state.isSyncing,
-            errorMessage = state.errorMessage,
-            lastSyncAt = state.lastSyncAt,
+            sections = sections,
+            overdueCount = rows.count { it.group == AgendaGroup.OVERDUE },
+            todayCount = rows.count { it.group == AgendaGroup.TODAY },
+            weekCount = rows.count { it.group == AgendaGroup.TOMORROW || it.group == AgendaGroup.WEEK },
+            redoCount = rows.count { it.group == AgendaGroup.REDO },
+            hasSubjects = hasSubjects,
+            isSyncing = syncState.isSyncing,
+            errorMessage = syncState.errorMessage,
+            lastSyncAt = syncState.lastSyncAt,
         )
     }
 
     companion object {
+        private const val OVERDUE_WINDOW_DAYS = 7L
+
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as SlhApplication

@@ -25,10 +25,14 @@ interface LabDao {
     @Query(
         "SELECT labs.*, subjects.title AS subjectTitle FROM labs " +
             "INNER JOIN subjects ON subjects.id = labs.subjectId " +
-            "WHERE labs.deadline IS NOT NULL AND labs.status = 'NOT_DONE' AND subjects.archived = 0 " +
+            "WHERE labs.status = 'NOT_DONE' AND subjects.archived = 0 " +
+            "AND (labs.deadline IS NOT NULL OR labs.needsRedo = 1) " +
             "ORDER BY labs.deadline ASC",
     )
     fun observePendingDeadlines(): Flow<List<LabWithSubjectTitle>>
+
+    @Query("SELECT * FROM labs WHERE subjectId = :subjectId")
+    suspend fun getForSubject(subjectId: Long): List<LabEntity>
 
     @Query("SELECT * FROM labs WHERE id = :id")
     suspend fun getById(id: Long): LabEntity?

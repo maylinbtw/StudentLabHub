@@ -20,6 +20,10 @@ interface ClassroomDao {
     @Query("SELECT * FROM classroom_courses WHERE id = :courseId")
     fun observeCourseWithTasks(courseId: String): Flow<ClassroomCourseWithTasks?>
 
+    @Transaction
+    @Query("SELECT * FROM classroom_courses ORDER BY position ASC")
+    suspend fun getCoursesWithTasks(): List<ClassroomCourseWithTasks>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCourses(courses: List<ClassroomCourseEntity>)
 

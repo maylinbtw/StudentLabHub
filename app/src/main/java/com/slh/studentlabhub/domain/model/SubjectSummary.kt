@@ -10,4 +10,5 @@ data class SubjectSummary(
     val averageScore: Double?,
     val classroomCourseId: String? = null,
     val archived: Boolean = false,
+    val redoCount: Int = 0,
 )

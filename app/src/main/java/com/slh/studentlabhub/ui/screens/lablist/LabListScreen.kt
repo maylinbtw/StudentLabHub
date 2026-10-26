@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -47,13 +48,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.slh.studentlabhub.domain.model.ClassroomTask
-import com.slh.studentlabhub.domain.model.CourseTasks
 import com.slh.studentlabhub.domain.model.Lab
 import com.slh.studentlabhub.domain.model.LabStatus
 import com.slh.studentlabhub.domain.model.SubjectDetails
 import com.slh.studentlabhub.domain.model.SubjectSummary
-import com.slh.studentlabhub.domain.model.TaskState
 import com.slh.studentlabhub.domain.model.WorkType
 import com.slh.studentlabhub.ui.components.DotMatrixText
 import com.slh.studentlabhub.ui.components.LinkBanner
@@ -87,11 +85,11 @@ import java.util.Locale
 fun LabListRoute(
     onBack: () -> Unit,
     onLabClick: (Lab) -> Unit,
-    onOpenCourse: (courseId: String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LabListViewModel = viewModel(factory = LabListViewModel.Factory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val uriHandler = LocalUriHandler.current
 
     LaunchedEffect(state.isMissing) {
         if (state.isMissing) {
@@ -106,9 +104,7 @@ fun LabListRoute(
         onAddWork = viewModel::addWork,
         onUpdateSubject = viewModel::updateSubject,
         onDeleteSubject = viewModel::deleteSubject,
-        onOpenCourse = onOpenCourse,
-        onLinkCourse = viewModel::linkCourse,
-        onUnlinkCourse = viewModel::unlinkCourse,
+        onOpenClassroom = { link -> runCatching { uriHandler.openUri(link) } },
         onArchive = { viewModel.setArchived(true) },
         onSetStatus = viewModel::setLabStatus,
         onRestore = { viewModel.setArchived(false) },
@@ -124,10 +120,8 @@ fun LabListScreen(
     onAddWork: (WorkType) -> Unit,
     onUpdateSubject: (title: String, semester: Int) -> Unit,
     onDeleteSubject: () -> Unit,
-    onOpenCourse: (courseId: String) -> Unit,
     modifier: Modifier = Modifier,
-    onLinkCourse: (courseId: String) -> Unit = {},
-    onUnlinkCourse: () -> Unit = {},
+    onOpenClassroom: (String) -> Unit = {},
     onArchive: () -> Unit = {},
     onRestore: () -> Unit = {},
     onSetStatus: (Lab, LabStatus) -> Unit = { _, _ -> },
@@ -135,7 +129,6 @@ fun LabListScreen(
     var menuExpanded by remember { mutableStateOf(false) }
     var showDeleteConfirm by rememberSaveable { mutableStateOf(false) }
     var showEditDialog by rememberSaveable { mutableStateOf(false) }
-    var showCoursePicker by rememberSaveable { mutableStateOf(false) }
     val details = state.details
     val linkedCourseId = details?.summary?.classroomCourseId
     val isArchived = details?.summary?.archived == true
@@ -148,7 +141,7 @@ fun LabListScreen(
         ScreenHeader(
             overline = when {
                 isArchived -> "Предмет · в архиве"
-                linkedCourseId != null -> "Предмет · связан с Classroom"
+                linkedCourseId != null -> "Предмет · Google Classroom"
                 else -> "Предмет"
             },
             title = details?.summary?.title?.uppercase(Locale.getDefault()) ?: "",
@@ -175,25 +168,11 @@ fun LabListScreen(
                             showEditDialog = true
                         },
                     )
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = if (linkedCourseId == null) "Связать с курсом Classroom" else "Сменить курс Classroom",
-                                color = SlhContent,
-                                fontFamily = SlhSans,
-                                fontSize = 14.sp,
-                            )
-                        },
-                        onClick = {
-                            menuExpanded = false
-                            showCoursePicker = true
-                        },
-                    )
-                    if (linkedCourseId != null) {
+                    state.course?.link?.let { link ->
                         DropdownMenuItem(
                             text = {
                                 Text(
-                                    text = "Отвязать курс Classroom",
+                                    text = "Открыть курс в Classroom",
                                     color = SlhContent,
                                     fontFamily = SlhSans,
                                     fontSize = 14.sp,
@@ -201,7 +180,7 @@ fun LabListScreen(
                             },
                             onClick = {
                                 menuExpanded = false
-                                onUnlinkCourse()
+                                onOpenClassroom(link)
                             },
                         )
                     }
@@ -273,16 +252,15 @@ fun LabListScreen(
                         Spacer(modifier = Modifier.height(14.dp))
                         HorizontalDivider(thickness = 1.dp, color = SlhOutline)
                     }
-                    item(key = "classroom") {
-                        Spacer(modifier = Modifier.height(14.dp))
-                        ClassroomSection(
-                            linkedCourseId = linkedCourseId,
-                            course = state.course,
-                            hasAvailableCourses = state.availableCourses.isNotEmpty(),
-                            now = state.now,
-                            onOpenCourse = onOpenCourse,
-                            onLinkClick = { showCoursePicker = true },
-                        )
+                    state.course?.teacherName?.let { teacher ->
+                        item(key = "teacher") {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = "Преподаватель: $teacher",
+                                color = SlhTextMuted,
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
                     }
                     if (details.labs.isEmpty()) {
                         item(key = "empty") {
@@ -365,19 +343,6 @@ fun LabListScreen(
         )
     }
 
-    if (showCoursePicker && details != null) {
-        CoursePickerDialog(
-            subjectTitle = details.summary.title,
-            courses = state.availableCourses,
-            currentCourseId = linkedCourseId,
-            onDismiss = { showCoursePicker = false },
-            onPick = { courseId ->
-                onLinkCourse(courseId)
-                showCoursePicker = false
-            },
-        )
-    }
-
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
@@ -423,135 +388,6 @@ fun LabListScreen(
     }
 }
 
-@Composable
-private fun ClassroomSection(
-    linkedCourseId: String?,
-    course: CourseTasks?,
-    hasAvailableCourses: Boolean,
-    now: Long,
-    onOpenCourse: (courseId: String) -> Unit,
-    onLinkClick: () -> Unit,
-) {
-    when {
-        linkedCourseId == null -> {
-            if (hasAvailableCourses) {
-                LinkBanner(
-                    overline = "GOOGLE CLASSROOM",
-                    title = "Связать с курсом",
-                    subtitle = "Задания и дедлайны курса появятся прямо здесь",
-                    onClick = onLinkClick,
-                    accent = false,
-                )
-            }
-        }
-
-        course == null -> {
-            Text(
-                text = "Курс Classroom не найден. Обнови данные на вкладке «Сегодня» или свяжи предмет заново через ⋮.",
-                color = SlhTextMuted,
-                style = MaterialTheme.typography.bodySmall,
-            )
-        }
-
-        else -> {
-            val active = course.tasks
-                .filter { it.state != TaskState.COMPLETED }
-                .sortedWith(compareBy<ClassroomTask>({ it.state != TaskState.REDO }, { it.dueAt ?: Long.MAX_VALUE }))
-            val completed = course.tasks.count { it.state == TaskState.COMPLETED }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                SectionLabel(
-                    text = "CLASSROOM · СДАНО $completed/${course.tasks.size}",
-                    modifier = Modifier.weight(1f),
-                )
-                Text(
-                    text = "все задания ›",
-                    color = SlhAccent,
-                    fontFamily = SlhMono,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 11.sp,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(4.dp))
-                        .clickable(role = Role.Button, onClick = { onOpenCourse(course.id) })
-                        .padding(horizontal = 6.dp, vertical = 4.dp),
-                )
-            }
-            course.teacherName?.let { teacher ->
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = teacher,
-                    color = SlhTextSecondary,
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            if (active.isEmpty()) {
-                Text(
-                    text = "Все задания курса сданы",
-                    color = SlhTextMuted,
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-            active.take(CLASSROOM_PREVIEW_COUNT).forEach { task ->
-                ClassroomTaskRow(
-                    task = task,
-                    now = now,
-                    onClick = { onOpenCourse(course.id) },
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-            }
-            if (active.size > CLASSROOM_PREVIEW_COUNT) {
-                Text(
-                    text = "и ещё ${active.size - CLASSROOM_PREVIEW_COUNT} — в «все задания»",
-                    color = SlhTextMuted,
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ClassroomTaskRow(
-    task: ClassroomTask,
-    now: Long,
-    onClick: () -> Unit,
-) {
-    val isRedo = task.state == TaskState.REDO
-    val due = task.dueAt
-    val isOverdue = due != null && due < now
-    val shape = RoundedCornerShape(8.dp)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(SlhSurface)
-            .border(1.dp, if (isRedo || isOverdue) SlhAccent else SlhOutline, shape)
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 11.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = task.title,
-            color = SlhContent,
-            fontFamily = SlhMono,
-            fontWeight = FontWeight.Bold,
-            fontSize = 12.sp,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f),
-        )
-        Spacer(modifier = Modifier.width(10.dp))
-        Text(
-            text = if (isRedo) "переделать" else relativeDueLabel(due, now),
-            color = if (isRedo || isOverdue) SlhDanger else SlhTextSecondary,
-            fontFamily = SlhMono,
-            fontWeight = FontWeight.Bold,
-            fontSize = 11.sp,
-        )
-    }
-}
-
-private const val CLASSROOM_PREVIEW_COUNT = 3
 
 @Composable
 private fun StatsRow(summary: SubjectSummary) {
@@ -623,7 +459,10 @@ private fun LabRow(
     onClick: () -> Unit,
 ) {
     val isActive = lab.status != LabStatus.NOT_DONE
-    val showScore = lab.type == WorkType.PRACTICE && lab.score != null && isActive
+    val showScore = lab.score != null && (isActive || lab.needsRedo)
+    val now = System.currentTimeMillis()
+    val dueText = if (!isActive && !lab.needsRedo) lab.deadline?.let { relativeDueLabel(it, now) } else null
+    val isLate = !isActive && lab.deadline != null && lab.deadline < now
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -633,15 +472,28 @@ private fun LabRow(
     ) {
         StatusBox(status = lab.status)
         Spacer(modifier = Modifier.width(12.dp))
-        Text(
-            text = lab.displayName,
-            color = if (isActive) SlhContent else SlhTextMuted,
-            fontFamily = SlhSans,
-            fontSize = 14.sp,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f),
-        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = lab.displayName,
+                color = if (isActive) SlhContent else SlhTextSecondary,
+                fontFamily = SlhSans,
+                fontSize = 14.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            when {
+                lab.needsRedo -> Text(
+                    text = "на доработку",
+                    color = SlhDanger,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                dueText != null -> Text(
+                    text = "срок: $dueText",
+                    color = if (isLate) SlhDanger else SlhTextMuted,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
         if (showScore && lab.score != null) {
             Spacer(modifier = Modifier.width(12.dp))
             ScoreChip(score = lab.score, completed = lab.status == LabStatus.DEFENDED)
@@ -767,7 +619,6 @@ private fun LabListScreenPreview() {
             onAddWork = {},
             onUpdateSubject = { _, _ -> },
             onDeleteSubject = {},
-            onOpenCourse = {},
         )
     }
 }

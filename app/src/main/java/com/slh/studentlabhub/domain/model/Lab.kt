@@ -10,4 +10,10 @@ data class Lab(
     val score: Int?,
     val notes: String,
     val deadline: Long?,
-)
+    val link: String? = null,
+    val needsRedo: Boolean = false,
+    val classroomTaskId: String? = null,
+) {
+    val fromClassroom: Boolean
+        get() = classroomTaskId != null
+}

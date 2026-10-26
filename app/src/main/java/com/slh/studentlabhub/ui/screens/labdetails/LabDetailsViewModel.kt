@@ -35,12 +35,15 @@ data class LabDetailsUiState(
     val deadline: Long? = null,
     val photos: List<String> = emptyList(),
     val isAddingPhotos: Boolean = false,
+    val link: String? = null,
+    val needsRedo: Boolean = false,
+    val fromClassroom: Boolean = false,
 ) {
     val canSave: Boolean
         get() = !isLoading && !isSaving && title.isNotBlank()
 
     val hasScore: Boolean
-        get() = type == WorkType.PRACTICE
+        get() = true
 }
 
 class LabDetailsViewModel(
@@ -72,6 +75,9 @@ class LabDetailsViewModel(
                     notes = details.lab.notes,
                     deadline = details.lab.deadline,
                     photos = photoStore.list(labId),
+                    link = details.lab.link,
+                    needsRedo = details.lab.needsRedo,
+                    fromClassroom = details.lab.fromClassroom,
                 )
             }
         }
@@ -130,6 +136,7 @@ class LabDetailsViewModel(
                     score = if (state.hasScore) state.scoreInput.toIntOrNull() else null,
                     notes = state.notes.trimEnd(),
                     deadline = state.deadline,
+                    needsRedo = lab.needsRedo && state.status == LabStatus.NOT_DONE,
                 ),
             )
             _uiState.update { it.copy(isSaving = false, isFinished = true) }

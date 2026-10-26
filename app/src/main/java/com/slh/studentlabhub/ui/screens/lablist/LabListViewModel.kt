@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.slh.studentlabhub.SlhApplication
-import com.slh.studentlabhub.domain.model.CourseOverview
 import com.slh.studentlabhub.domain.model.CourseTasks
 import com.slh.studentlabhub.domain.model.Lab
 import com.slh.studentlabhub.domain.model.LabStatus
@@ -32,7 +31,6 @@ data class LabListUiState(
     val isMissing: Boolean = false,
     val details: SubjectDetails? = null,
     val course: CourseTasks? = null,
-    val availableCourses: List<CourseOverview> = emptyList(),
     val now: Long = System.currentTimeMillis(),
 )
 
@@ -55,22 +53,12 @@ class LabListViewModel(
     val uiState: StateFlow<LabListUiState> = combine(
         details,
         course,
-        classroomRepository.observeCourses(),
-        repository.observeSubjects(),
-    ) { details, course, courses, subjects ->
-        val takenByOthers = subjects
-            .filter { it.id != subjectId }
-            .mapNotNull { it.classroomCourseId }
-            .toSet()
+    ) { details, course ->
         LabListUiState(
             isLoading = false,
             isMissing = details == null,
             details = details,
             course = course,
-            availableCourses = courses.filter { course ->
-                course.id !in takenByOthers &&
-                    (!course.archived || course.id == details?.summary?.classroomCourseId)
-            },
             now = System.currentTimeMillis(),
         )
     }.stateIn(
@@ -96,6 +84,8 @@ class LabListViewModel(
     }
 
     fun deleteSubject() {
+        val courseId = uiState.value.details?.summary?.classroomCourseId
+        courseId?.let { classroomRepository.setCourseArchived(it, archived = true) }
         viewModelScope.launch {
             repository.deleteSubject(subjectId)
         }
@@ -111,20 +101,12 @@ class LabListViewModel(
 
     fun setLabStatus(lab: Lab, status: LabStatus) {
         viewModelScope.launch {
-            repository.updateLab(lab.copy(status = status))
-        }
-    }
-
-    fun linkCourse(courseId: String) {
-        viewModelScope.launch {
-            repository.linkSubjectToCourse(subjectId, courseId)
-        }
-    }
-
-    fun unlinkCourse() {
-        val courseId = uiState.value.details?.summary?.classroomCourseId ?: return
-        viewModelScope.launch {
-            repository.unlinkCourse(courseId)
+            repository.updateLab(
+                lab.copy(
+                    status = status,
+                    needsRedo = lab.needsRedo && status == LabStatus.NOT_DONE,
+                ),
+            )
         }
     }
 

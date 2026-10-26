@@ -2,6 +2,7 @@ package com.slh.studentlabhub.di
 
 import android.content.Context
 import com.slh.studentlabhub.data.backup.BackupManager
+import com.slh.studentlabhub.data.classroom.ClassroomMerger
 import com.slh.studentlabhub.data.local.AppDatabase
 import com.slh.studentlabhub.data.local.LabPhotoStore
 import com.slh.studentlabhub.data.local.ReminderStore
@@ -66,6 +67,8 @@ class AppContainer(context: Context) {
             api = classroomApi,
             session = sessionStore,
             authManager = googleAuthManager,
+            merger = ClassroomMerger(database),
+            scope = applicationScope,
         )
     }
 }

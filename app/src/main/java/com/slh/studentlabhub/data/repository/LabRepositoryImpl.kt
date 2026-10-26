@@ -54,8 +54,7 @@ class LabRepositoryImpl(
 
     override fun observePendingDeadlines(): Flow<List<LabDeadline>> =
         labDao.observePendingDeadlines().map { rows ->
-            rows.mapNotNull { row ->
-                val deadline = row.lab.deadline ?: return@mapNotNull null
+            rows.map { row ->
                 LabDeadline(
                     labId = row.lab.id,
                     subjectId = row.lab.subjectId,
@@ -63,7 +62,8 @@ class LabRepositoryImpl(
                     type = row.lab.type,
                     number = row.lab.number,
                     title = row.lab.title,
-                    deadline = deadline,
+                    deadline = row.lab.deadline,
+                    needsRedo = row.lab.needsRedo,
                 )
             }
         }
@@ -250,7 +250,7 @@ private fun SubjectWithLabs.toSummary(): SubjectSummary {
     val done = labs.count { it.status != LabStatus.NOT_DONE }
     val defended = labs.count { it.status == LabStatus.DEFENDED }
     val scores = labs
-        .filter { it.type == WorkType.PRACTICE }
+        .filter { !it.needsRedo }
         .mapNotNull { it.score }
     return SubjectSummary(
         id = subject.id,
@@ -262,6 +262,7 @@ private fun SubjectWithLabs.toSummary(): SubjectSummary {
         averageScore = if (scores.isEmpty()) null else scores.average(),
         classroomCourseId = subject.classroomCourseId,
         archived = subject.archived,
+        redoCount = labs.count { it.needsRedo },
     )
 }
 
@@ -275,6 +276,9 @@ private fun LabEntity.toDomain(): Lab = Lab(
     score = score,
     notes = notes,
     deadline = deadline,
+    link = link,
+    needsRedo = needsRedo,
+    classroomTaskId = classroomTaskId,
 )
 
 private fun Lab.toEntity(): LabEntity = LabEntity(
@@ -287,4 +291,7 @@ private fun Lab.toEntity(): LabEntity = LabEntity(
     score = score,
     notes = notes,
     deadline = deadline,
+    classroomTaskId = classroomTaskId,
+    link = link,
+    needsRedo = needsRedo,
 )

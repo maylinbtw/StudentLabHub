@@ -26,7 +26,7 @@ import com.slh.studentlabhub.data.local.entity.SubjectEntity
         RefCategoryEntity::class,
         RefEntryEntity::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -85,9 +85,17 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `labs` ADD COLUMN `classroomTaskId` TEXT")
+                db.execSQL("ALTER TABLE `labs` ADD COLUMN `link` TEXT")
+                db.execSQL("ALTER TABLE `labs` ADD COLUMN `needsRedo` INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         fun create(context: Context): AppDatabase =
             Room.databaseBuilder(context, AppDatabase::class.java, "studentlabhub.db")
-                .addMigrations(MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
+                .addMigrations(MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
                 .fallbackToDestructiveMigrationFrom(true, 1, 2)
                 .build()
     }
