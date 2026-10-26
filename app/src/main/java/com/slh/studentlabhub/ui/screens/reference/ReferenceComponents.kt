@@ -58,6 +58,8 @@ import com.slh.studentlabhub.ui.theme.SlhTextDisabled
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
 import com.slh.studentlabhub.ui.theme.SlhTextSecondary
 import com.slh.studentlabhub.ui.theme.SlhContent
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
 
 @Composable
 fun ReferenceSearchField(
@@ -293,7 +295,7 @@ fun EntryCard(
             if (entry.source == RefSource.TLDR) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "источник: tldr-pages · CC BY 4.0",
+                    text = Strings.get(R.string.source_tldr),
                     color = SlhTextDisabled,
                     fontFamily = SlhMono,
                     fontSize = 10.sp,
@@ -307,7 +309,7 @@ fun EntryCard(
 private fun SourceBadge(source: RefSource) {
     val label = when (source) {
         RefSource.BUILTIN -> return
-        RefSource.CUSTOM -> "МОЁ"
+        RefSource.CUSTOM -> Strings.get(R.string.badge_mine)
         RefSource.TLDR -> "TLDR"
     }
     Spacer(modifier = Modifier.width(8.dp))
@@ -373,7 +375,7 @@ fun OfflineFooter(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = "OFFLINE · без интернета",
+            text = Strings.get(R.string.offline_badge),
             color = SlhTextDisabled,
             fontFamily = SlhMono,
             fontSize = 10.sp,
@@ -399,6 +401,6 @@ private fun copyToClipboard(context: Context, entry: RefEntry) {
     val clipboard = context.getSystemService(ClipboardManager::class.java) ?: return
     clipboard.setPrimaryClip(ClipData.newPlainText(entry.title, entry.example))
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-        Toast.makeText(context, "Пример скопирован", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, Strings.get(R.string.example_copied), Toast.LENGTH_SHORT).show()
     }
 }

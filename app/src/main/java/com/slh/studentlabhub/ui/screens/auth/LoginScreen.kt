@@ -50,6 +50,8 @@ import com.slh.studentlabhub.ui.theme.SlhTextMuted
 import com.slh.studentlabhub.ui.theme.SlhTextSecondary
 import com.slh.studentlabhub.ui.theme.SlhContent
 import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
 
 data class LoginUiState(
     val accountEmail: String? = null,
@@ -92,7 +94,7 @@ fun LoginScreen(
             HorizontalDivider(thickness = 1.dp, color = SlhOutline)
             Spacer(modifier = Modifier.height(16.dp))
             SecondaryOutlinedButton(
-                text = "Выбрать другой аккаунт",
+                text = Strings.get(R.string.choose_another_account),
                 enabled = !state.isLoading,
                 onClick = onChooseAnotherAccountClick,
             )
@@ -108,7 +110,7 @@ fun LoginScreen(
             }
             Spacer(modifier = Modifier.height(20.dp))
             Text(
-                text = "Принимаю условия использования",
+                text = Strings.get(R.string.accept_terms),
                 color = SlhTextDisabled,
                 fontFamily = SlhSans,
                 fontSize = 9.sp,
@@ -161,7 +163,7 @@ private fun SlhLogo() {
         )
         Spacer(modifier = Modifier.height(14.dp))
         Text(
-            text = "Управление учебным процессом",
+            text = Strings.get(R.string.app_tagline),
             color = SlhTextMuted,
             fontFamily = SlhSans,
             fontSize = 10.sp,
@@ -255,7 +257,7 @@ private fun GoogleSignInButton(
                 )
             } else {
                 Text(
-                    text = "ВОЙТИ ЧЕРЕЗ GOOGLE",
+                    text = Strings.get(R.string.sign_in_google),
                     color = SlhOnContent,
                     style = MaterialTheme.typography.labelLarge,
                 )

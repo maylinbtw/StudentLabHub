@@ -8,8 +8,10 @@ import java.net.URL
 import java.net.URLEncoder
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
 
-class UnauthorizedException : Exception("Токен доступа недействителен")
+class UnauthorizedException : Exception("Access token is invalid")
 
 class ClassroomApiException(
     val code: Int,
@@ -44,7 +46,7 @@ class ClassroomApi {
     suspend fun fetchUserEmail(accessToken: String): String {
         val json = get(USERINFO_URL, accessToken)
         val email = json.optStringOrNull("email")
-        return email ?: throw ClassroomApiException(0, "Google не вернул email")
+        return email ?: throw ClassroomApiException(0, "Google did not return an email")
     }
 
     suspend fun fetchCourses(accessToken: String): List<RemoteCourse> =
@@ -55,7 +57,7 @@ class ClassroomApi {
         ) { item ->
             RemoteCourse(
                 id = item.getString("id"),
-                name = item.optStringOrNull("name") ?: "Без названия",
+                name = item.optStringOrNull("name") ?: Strings.get(R.string.untitled),
                 section = item.optStringOrNull("section"),
                 link = item.optStringOrNull("alternateLink"),
             )
@@ -82,7 +84,7 @@ class ClassroomApi {
             RemoteCourseWork(
                 id = item.getString("id"),
                 courseId = courseId,
-                title = item.optStringOrNull("title") ?: "Задание",
+                title = item.optStringOrNull("title") ?: Strings.get(R.string.task_default_title),
                 dueAt = parseDue(item),
                 maxPoints = if (item.has("maxPoints")) item.optDouble("maxPoints") else null,
                 link = item.optStringOrNull("alternateLink"),

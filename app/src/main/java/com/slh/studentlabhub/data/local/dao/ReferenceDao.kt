@@ -58,6 +58,12 @@ interface ReferenceDao {
     @Query("DELETE FROM ref_entries WHERE source IS NULL")
     suspend fun deleteBuiltinEntries()
 
+    @Query("UPDATE ref_categories SET title = :title WHERE id LIKE 'custom_%'")
+    suspend fun renameCustomCategories(title: String)
+
+    @Query("UPDATE ref_categories SET title = :title WHERE id LIKE 'tldr_%'")
+    suspend fun renameTldrCategories(title: String)
+
     @Query("DELETE FROM ref_categories WHERE id NOT LIKE 'custom_%' AND id NOT LIKE 'tldr_%'")
     suspend fun deleteBuiltinCategories()
 }

@@ -40,6 +40,8 @@ import com.slh.studentlabhub.ui.theme.SlhAccent
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
 import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
 import java.util.Locale
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
 
 @Composable
 fun ReferenceCategoryRoute(
@@ -86,7 +88,7 @@ fun ReferenceCategoryScreen(
             .background(SlhBackground),
     ) {
         ScreenHeader(
-            overline = category?.let { "Команды ${it.tech.label} · синтаксис и примеры" } ?: "Справочник",
+            overline = category?.let { Strings.get(R.string.category_overline, it.tech.label) } ?: Strings.get(R.string.reference),
             title = category?.title ?: "",
             onBackClick = onBack,
             actionIcon = if (category != null) SlhIcon.Plus else null,
@@ -95,7 +97,7 @@ fun ReferenceCategoryScreen(
         ReferenceSearchField(
             query = state.query,
             onQueryChange = onQueryChange,
-            placeholder = "Поиск…",
+            placeholder = Strings.get(R.string.search_hint),
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
         )
 
@@ -115,7 +117,7 @@ fun ReferenceCategoryScreen(
 
             category == null -> {
                 Text(
-                    text = "В этом разделе больше нет статей",
+                    text = Strings.get(R.string.category_empty),
                     color = SlhTextMuted,
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
@@ -131,13 +133,13 @@ fun ReferenceCategoryScreen(
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
                 ) {
                     item(key = "label") {
-                        SectionLabel(text = "${category.title.uppercase(Locale.getDefault())} · ${state.entries.size}")
+                        SectionLabel(text = Strings.get(R.string.section_with_count, category.title.uppercase(Locale.getDefault()), state.entries.size))
                         Spacer(modifier = Modifier.height(10.dp))
                     }
                     if (state.entries.isEmpty()) {
                         item(key = "empty") {
                             Text(
-                                text = "Ничего не найдено",
+                                text = Strings.get(R.string.nothing_found),
                                 color = SlhTextMuted,
                                 style = MaterialTheme.typography.bodyMedium,
                                 textAlign = TextAlign.Center,
@@ -158,7 +160,7 @@ fun ReferenceCategoryScreen(
                     item(key = "hint") {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Нажми на карточку, чтобы скопировать пример",
+                            text = Strings.get(R.string.tap_to_copy),
                             color = SlhTextMuted,
                             style = MaterialTheme.typography.bodySmall,
                             textAlign = TextAlign.Center,

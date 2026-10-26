@@ -1,5 +1,8 @@
 package com.slh.studentlabhub.data.reference
 
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
+
 data class ParsedTldrPage(
     val title: String,
     val description: String,
@@ -55,7 +58,7 @@ object TldrParser {
 
         return ParsedTldrPage(
             title = title,
-            description = descriptionLines.joinToString(" ").ifBlank { "Справка из tldr-pages" },
+            description = descriptionLines.joinToString(" ").ifBlank { Strings.get(R.string.tldr_default_description) },
             example = examples.take(MAX_EXAMPLES).joinToString("\n\n").ifBlank { command },
         )
     }

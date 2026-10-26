@@ -43,6 +43,7 @@ class SettingsRepositoryImpl(context: Context) : SettingsRepository {
             .putBoolean(KEY_REDO_ALERTS, settings.redoAlerts)
             .putBoolean(KEY_BACKGROUND_SYNC, settings.backgroundSync)
             .putBoolean(KEY_LARGE_TEXT, settings.largeText)
+            .putString(KEY_LANGUAGE, settings.language.name)
             .apply()
     }
 
@@ -59,6 +60,7 @@ class SettingsRepositoryImpl(context: Context) : SettingsRepository {
             redoAlerts = prefs.getBoolean(KEY_REDO_ALERTS, defaults.redoAlerts),
             backgroundSync = prefs.getBoolean(KEY_BACKGROUND_SYNC, defaults.backgroundSync),
             largeText = prefs.getBoolean(KEY_LARGE_TEXT, defaults.largeText),
+            language = prefs.readEnum(KEY_LANGUAGE, defaults.language),
         )
     }
 
@@ -75,6 +77,7 @@ class SettingsRepositoryImpl(context: Context) : SettingsRepository {
         const val KEY_BACKGROUND_SYNC = "background_sync"
         const val KEY_NOTIFICATION_PROMPT = "notification_prompt_shown"
         const val KEY_LARGE_TEXT = "large_text"
+        const val KEY_LANGUAGE = "language"
     }
 }
 

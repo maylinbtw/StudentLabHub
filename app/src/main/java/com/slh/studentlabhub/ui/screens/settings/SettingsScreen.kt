@@ -85,33 +85,36 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Switch
 import java.time.LocalDate
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
+import com.slh.studentlabhub.domain.model.AppLanguage
 
 private val syncFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM HH:mm")
 
 private val BackgroundStyle.title: String
     get() = when (this) {
         BackgroundStyle.AMOLED -> "AMOLED"
-        BackgroundStyle.GRAPHITE -> "Графит"
+        BackgroundStyle.GRAPHITE -> Strings.get(R.string.bg_graphite)
     }
 
 private val DotShape.title: String
     get() = when (this) {
-        DotShape.ROUND -> "Круглые"
-        DotShape.SQUARE -> "Квадратные"
+        DotShape.ROUND -> Strings.get(R.string.dots_round)
+        DotShape.SQUARE -> Strings.get(R.string.dots_square)
     }
 
 private val ThemeMode.title: String
     get() = when (this) {
-        ThemeMode.DARK -> "Тёмная"
-        ThemeMode.LIGHT -> "Светлая"
-        ThemeMode.SYSTEM -> "Как в системе"
+        ThemeMode.DARK -> Strings.get(R.string.theme_dark)
+        ThemeMode.LIGHT -> Strings.get(R.string.theme_light)
+        ThemeMode.SYSTEM -> Strings.get(R.string.option_system)
     }
 
 private val ReminderTiming.title: String
     get() = when (this) {
-        ReminderTiming.DAY -> "За сутки"
-        ReminderTiming.HOURS -> "За 3 часа"
-        ReminderTiming.BOTH -> "Оба"
+        ReminderTiming.DAY -> Strings.get(R.string.reminder_day)
+        ReminderTiming.HOURS -> Strings.get(R.string.reminder_hours)
+        ReminderTiming.BOTH -> Strings.get(R.string.reminder_both)
     }
 
 private fun Context.notificationsAllowed(): Boolean {
@@ -129,11 +132,18 @@ private fun Context.openNotificationSettings() {
     runCatching { startActivity(intent) }
 }
 
+private val AppLanguage.title: String
+    get() = when (this) {
+        AppLanguage.SYSTEM -> Strings.get(R.string.option_system)
+        AppLanguage.RU -> "Русский"
+        AppLanguage.EN -> "English"
+    }
+
 private val StartScreen.title: String
     get() = when (this) {
-        StartScreen.TODAY -> "Сегодня"
-        StartScreen.SUBJECTS -> "Предметы"
-        StartScreen.REFERENCE -> "Справка"
+        StartScreen.TODAY -> Strings.get(R.string.tab_today)
+        StartScreen.SUBJECTS -> Strings.get(R.string.tab_subjects)
+        StartScreen.REFERENCE -> Strings.get(R.string.tab_reference)
     }
 
 private val redoOptions = listOf(0, 1, 2, 3)
@@ -189,6 +199,7 @@ fun SettingsRoute(
         state = state,
         notificationsAllowed = notificationsAllowed,
         onThemeModeSelected = viewModel::onThemeModeSelected,
+        onLanguageSelected = viewModel::onLanguageSelected,
         onRemindersChanged = { enabled ->
             viewModel.onRemindersChanged(enabled)
             if (enabled && !notificationsAllowed) requestNotifications()
@@ -241,6 +252,7 @@ fun SettingsScreen(
     onLargeTextChanged: (Boolean) -> Unit = {},
     onExportBackup: () -> Unit = {},
     onImportBackup: () -> Unit = {},
+    onLanguageSelected: (AppLanguage) -> Unit = {},
 ) {
     val settings = state.settings
 
@@ -250,8 +262,8 @@ fun SettingsScreen(
             .background(SlhBackground),
     ) {
         ScreenHeader(
-            overline = "Аккаунт и приложение",
-            title = "НАСТРОЙКИ",
+            overline = Strings.get(R.string.settings_overline),
+            title = Strings.get(R.string.settings_title),
         )
         Column(
             modifier = Modifier
@@ -259,7 +271,7 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 16.dp),
         ) {
-            SectionLabel(text = "АККАУНТ")
+            SectionLabel(text = Strings.get(R.string.settings_account))
             Spacer(modifier = Modifier.height(10.dp))
             AccountCard(
                 email = state.email,
@@ -269,41 +281,41 @@ fun SettingsScreen(
             )
 
             Spacer(modifier = Modifier.height(28.dp))
-            SectionLabel(text = "УВЕДОМЛЕНИЯ")
+            SectionLabel(text = Strings.get(R.string.settings_notifications))
             Spacer(modifier = Modifier.height(10.dp))
             if ((settings.remindersEnabled || settings.redoAlerts) && !notificationsAllowed) {
                 WarningRow(
-                    text = "Уведомления запрещены в настройках Android",
-                    actionText = "РАЗРЕШИТЬ",
+                    text = Strings.get(R.string.notifications_blocked),
+                    actionText = Strings.get(R.string.action_allow),
                     onClick = onAllowNotifications,
                 )
                 Spacer(modifier = Modifier.height(10.dp))
             }
             SettingsCard {
                 SwitchRow(
-                    title = "Напоминать о дедлайнах",
-                    subtitle = "Задания Classroom и лабы со сроком",
+                    title = Strings.get(R.string.remind_deadlines),
+                    subtitle = Strings.get(R.string.remind_deadlines_sub),
                     checked = settings.remindersEnabled,
                     onCheckedChange = onRemindersChanged,
                 )
                 HorizontalDivider(thickness = 1.dp, color = SlhOutline)
                 SwitchRow(
-                    title = "Сообщать о доработке",
-                    subtitle = "Когда в Classroom ставят отметку «переделать»",
+                    title = Strings.get(R.string.redo_alerts),
+                    subtitle = Strings.get(R.string.redo_alerts_sub),
                     checked = settings.redoAlerts,
                     onCheckedChange = onRedoAlertsChanged,
                 )
                 HorizontalDivider(thickness = 1.dp, color = SlhOutline)
                 SwitchRow(
-                    title = "Фоновая синхронизация",
-                    subtitle = "Проверять Classroom примерно раз в 6 часов",
+                    title = Strings.get(R.string.background_sync),
+                    subtitle = Strings.get(R.string.background_sync_sub),
                     checked = settings.backgroundSync,
                     onCheckedChange = onBackgroundSyncChanged,
                 )
             }
             if (settings.remindersEnabled) {
                 Spacer(modifier = Modifier.height(18.dp))
-                OptionTitle(text = "Когда напоминать")
+                OptionTitle(text = Strings.get(R.string.when_remind))
                 Spacer(modifier = Modifier.height(8.dp))
                 SegmentedOptions(
                     options = ReminderTiming.entries,
@@ -311,15 +323,15 @@ fun SettingsScreen(
                     label = { it.title },
                     onSelect = onReminderTimingSelected,
                 )
-                OptionHint(text = "Напоминание приходит за сутки и/или за 3 часа до срока сдачи.")
+                OptionHint(text = Strings.get(R.string.when_remind_hint))
             }
 
             Spacer(modifier = Modifier.height(28.dp))
-            SectionLabel(text = "ОФОРМЛЕНИЕ")
+            SectionLabel(text = Strings.get(R.string.settings_appearance))
             Spacer(modifier = Modifier.height(10.dp))
             AppearancePreview(accent = settings.accent)
             Spacer(modifier = Modifier.height(18.dp))
-            OptionTitle(text = "Тема")
+            OptionTitle(text = Strings.get(R.string.theme))
             Spacer(modifier = Modifier.height(8.dp))
             SegmentedOptions(
                 options = ThemeMode.entries,
@@ -328,14 +340,14 @@ fun SettingsScreen(
                 onSelect = onThemeModeSelected,
             )
             Spacer(modifier = Modifier.height(18.dp))
-            OptionTitle(text = "Акцентный цвет")
+            OptionTitle(text = Strings.get(R.string.accent_color))
             Spacer(modifier = Modifier.height(10.dp))
             AccentPicker(
                 selected = settings.accent,
                 onSelect = onAccentSelected,
             )
             Spacer(modifier = Modifier.height(18.dp))
-            OptionTitle(text = "Фон тёмной темы")
+            OptionTitle(text = Strings.get(R.string.dark_background))
             Spacer(modifier = Modifier.height(8.dp))
             SegmentedOptions(
                 options = BackgroundStyle.entries,
@@ -343,18 +355,18 @@ fun SettingsScreen(
                 label = { it.title },
                 onSelect = onBackgroundSelected,
             )
-            OptionHint(text = "AMOLED — чистый чёрный, экономит заряд. Графит — мягче для глаз.")
+            OptionHint(text = Strings.get(R.string.dark_background_hint))
             Spacer(modifier = Modifier.height(18.dp))
-            OptionTitle(text = "Размер текста")
+            OptionTitle(text = Strings.get(R.string.text_size))
             Spacer(modifier = Modifier.height(8.dp))
             SegmentedOptions(
                 options = listOf(false, true),
                 selected = settings.largeText,
-                label = { if (it) "Крупный" else "Обычный" },
+                label = { if (it) Strings.get(R.string.text_large) else Strings.get(R.string.text_normal) },
                 onSelect = onLargeTextChanged,
             )
             Spacer(modifier = Modifier.height(18.dp))
-            OptionTitle(text = "Точечные цифры")
+            OptionTitle(text = Strings.get(R.string.dot_digits))
             Spacer(modifier = Modifier.height(8.dp))
             SegmentedOptions(
                 options = DotShape.entries,
@@ -364,9 +376,18 @@ fun SettingsScreen(
             )
 
             Spacer(modifier = Modifier.height(28.dp))
-            SectionLabel(text = "ПОВЕДЕНИЕ")
+            SectionLabel(text = Strings.get(R.string.settings_behavior))
             Spacer(modifier = Modifier.height(10.dp))
-            OptionTitle(text = "Стартовый экран")
+            OptionTitle(text = Strings.get(R.string.language))
+            Spacer(modifier = Modifier.height(8.dp))
+            SegmentedOptions(
+                options = AppLanguage.entries,
+                selected = settings.language,
+                label = { it.title },
+                onSelect = onLanguageSelected,
+            )
+            Spacer(modifier = Modifier.height(18.dp))
+            OptionTitle(text = Strings.get(R.string.start_screen))
             Spacer(modifier = Modifier.height(8.dp))
             SegmentedOptions(
                 options = StartScreen.entries,
@@ -374,64 +395,63 @@ fun SettingsScreen(
                 label = { it.title },
                 onSelect = onStartScreenSelected,
             )
-            OptionHint(text = "Откроется при следующем запуске приложения.")
+            OptionHint(text = Strings.get(R.string.start_screen_hint))
             Spacer(modifier = Modifier.height(18.dp))
-            OptionTitle(text = "«На доработку» в Classroom")
+            OptionTitle(text = Strings.get(R.string.redo_threshold))
             Spacer(modifier = Modifier.height(8.dp))
             SegmentedOptions(
                 options = redoOptions,
                 selected = state.redoThreshold.takeIf { it in redoOptions } ?: 1,
-                label = { if (it == 0) "Выкл" else "≤ $it" },
+                label = { if (it == 0) Strings.get(R.string.option_off) else "≤ $it" },
                 onSelect = onRedoThresholdSelected,
             )
             OptionHint(
                 text = if (state.redoThreshold == 0) {
-                    "Отметка не влияет на статус задания."
+                    Strings.get(R.string.redo_threshold_off)
                 } else {
-                    "Отметка ≤ ${state.redoThreshold} из 10 означает «переделать»: " +
-                        "задание попадает в ближайшие и не идёт в средний балл."
+                    Strings.get(R.string.redo_threshold_on, state.redoThreshold)
                 },
             )
 
             Spacer(modifier = Modifier.height(28.dp))
-            SectionLabel(text = "ДАННЫЕ")
+            SectionLabel(text = Strings.get(R.string.settings_data))
             Spacer(modifier = Modifier.height(10.dp))
             SettingsCard {
                 ActionRow(
-                    title = "Резервная копия",
-                    value = "предметы, работы, мои статьи, настройки",
-                    actionText = if (state.isBackupBusy) "…" else "СОХРАНИТЬ",
+                    title = Strings.get(R.string.backup),
+                    value = Strings.get(R.string.backup_sub),
+                    actionText = if (state.isBackupBusy) "…" else Strings.get(R.string.action_save),
                     enabled = !state.isBackupBusy,
                     onConfirmed = onExportBackup,
                     requireConfirm = false,
                 )
                 HorizontalDivider(thickness = 1.dp, color = SlhOutline)
                 ActionRow(
-                    title = "Восстановить из файла",
-                    value = "заменит текущие предметы и работы",
-                    actionText = "ОТКРЫТЬ",
+                    title = Strings.get(R.string.restore_backup),
+                    value = Strings.get(R.string.restore_backup_sub),
+                    actionText = Strings.get(R.string.action_open),
                     enabled = !state.isBackupBusy,
                     onConfirmed = onImportBackup,
                 )
                 HorizontalDivider(thickness = 1.dp, color = SlhOutline)
                 ActionRow(
-                    title = "Загружено из tldr-pages",
-                    value = "${state.tldrCount} ${articlesWord(state.tldrCount)}",
-                    actionText = "ОЧИСТИТЬ",
+                    title = Strings.get(R.string.tldr_downloaded),
+                    value = Strings.plural(R.plurals.articles_count, state.tldrCount, state.tldrCount),
+                    actionText = Strings.get(R.string.action_clear),
                     enabled = state.tldrCount > 0,
                     onConfirmed = onClearTldr,
                 )
                 HorizontalDivider(thickness = 1.dp, color = SlhOutline)
                 InfoRow(
-                    title = "Мои статьи",
-                    value = "${state.customCount} ${articlesWord(state.customCount)}",
+                    title = Strings.get(R.string.my_articles),
+                    value = Strings.plural(R.plurals.articles_count, state.customCount, state.customCount),
                 )
                 if (state.subjectsCount == 0) {
                     HorizontalDivider(thickness = 1.dp, color = SlhOutline)
                     ActionRow(
-                        title = "Демо-предметы",
-                        value = "3 предмета с работами для показа",
-                        actionText = "ДОБАВИТЬ",
+                        title = Strings.get(R.string.demo_subjects),
+                        value = Strings.get(R.string.demo_subjects_sub),
+                        actionText = Strings.get(R.string.action_add),
                         enabled = true,
                         onConfirmed = onInsertDemo,
                     )
@@ -446,19 +466,18 @@ fun SettingsScreen(
                 )
             }
             OptionHint(
-                text = "Все данные хранятся только на этом устройстве. Сохрани копию перед сменой телефона — " +
-                    "фото к работам и данные Classroom в неё не входят (Classroom загрузится заново).",
+                text = Strings.get(R.string.settings_data_hint),
             )
 
             Spacer(modifier = Modifier.height(28.dp))
-            SectionLabel(text = "О ПРИЛОЖЕНИИ")
+            SectionLabel(text = Strings.get(R.string.settings_about))
             Spacer(modifier = Modifier.height(10.dp))
             SettingsCard {
                 InfoRow(title = "StudentLabHub", value = state.versionName.ifBlank { "—" })
                 HorizontalDivider(thickness = 1.dp, color = SlhOutline)
-                InfoRow(title = "Справочник", value = "tldr-pages · CC BY 4.0")
+                InfoRow(title = Strings.get(R.string.about_reference), value = "tldr-pages · CC BY 4.0")
                 HorizontalDivider(thickness = 1.dp, color = SlhOutline)
-                InfoRow(title = "Шрифты", value = "JetBrains Mono, Manrope · OFL")
+                InfoRow(title = Strings.get(R.string.about_fonts), value = "JetBrains Mono, Manrope · OFL")
             }
             Spacer(modifier = Modifier.height(24.dp))
         }
@@ -498,7 +517,7 @@ private fun AccountCard(
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = email ?: "Вход не выполнен",
+                    text = email ?: Strings.get(R.string.not_signed_in),
                     color = SlhContent,
                     fontFamily = SlhMono,
                     fontWeight = FontWeight.Bold,
@@ -508,7 +527,7 @@ private fun AccountCard(
                 )
                 Spacer(modifier = Modifier.height(3.dp))
                 Text(
-                    text = lastSyncAt?.let { "Classroom · синхр. ${formatSync(it)}" } ?: "Classroom · ещё не синхронизирован",
+                    text = lastSyncAt?.let { Strings.get(R.string.classroom_synced_at, formatSync(it)) } ?: Strings.get(R.string.classroom_never_synced),
                     color = SlhTextMuted,
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
@@ -524,7 +543,7 @@ private fun AccountCard(
                 )
             } else {
                 SmallButton(
-                    text = if (confirm) "ТОЧНО?" else "ВЫЙТИ",
+                    text = if (confirm) Strings.get(R.string.action_confirm) else Strings.get(R.string.action_sign_out),
                     color = if (confirm) SlhDanger else SlhTextSecondary,
                     enabled = true,
                     onClick = {
@@ -557,7 +576,7 @@ private fun AppearancePreview(accent: AccentColor) {
         Spacer(modifier = Modifier.width(18.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Средний балл",
+                text = Strings.get(R.string.average_grade),
                 color = SlhContent,
                 style = MaterialTheme.typography.titleMedium,
             )
@@ -572,7 +591,7 @@ private fun AppearancePreview(accent: AccentColor) {
                         .padding(horizontal = 8.dp, vertical = 3.dp),
                 ) {
                     Text(
-                        text = "★ Защищено",
+                        text = Strings.get(R.string.badge_defended),
                         color = SlhOnAccent,
                         fontFamily = SlhMono,
                         fontWeight = FontWeight.Bold,
@@ -808,7 +827,7 @@ private fun ActionRow(
             )
         }
         SmallButton(
-            text = if (confirm) "ТОЧНО?" else actionText,
+            text = if (confirm) Strings.get(R.string.action_confirm) else actionText,
             color = if (confirm) SlhDanger else SlhTextSecondary,
             enabled = enabled,
             onClick = {
@@ -871,17 +890,6 @@ private fun OptionHint(text: String) {
 
 private fun formatSync(millis: Long): String =
     Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).format(syncFormatter)
-
-private fun articlesWord(count: Int): String {
-    val mod100 = count % 100
-    val mod10 = count % 10
-    return when {
-        mod100 in 11..14 -> "статей"
-        mod10 == 1 -> "статья"
-        mod10 in 2..4 -> "статьи"
-        else -> "статей"
-    }
-}
 
 @Preview(showBackground = true, backgroundColor = 0xFF000000, widthDp = 390, heightDp = 1400)
 @Composable

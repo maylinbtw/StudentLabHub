@@ -54,6 +54,8 @@ import com.slh.studentlabhub.ui.theme.SlhContent
 import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
 import java.util.Locale
 import kotlin.math.roundToInt
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
 
 private const val SCORE_DOTS = 10
 private const val MAX_PROGRESS_DOTS = 24
@@ -84,8 +86,8 @@ fun StatisticsScreen(
             .background(SlhBackground),
     ) {
         ScreenHeader(
-            overline = "Успеваемость",
-            title = "СТАТИСТИКА",
+            overline = Strings.get(R.string.performance),
+            title = Strings.get(R.string.statistics_title),
             onBackClick = onBack,
         )
 
@@ -111,7 +113,7 @@ fun StatisticsScreen(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "Пока нет данных.\nДобавь предметы и отметь первые работы.",
+                        text = Strings.get(R.string.statistics_empty),
                         color = SlhTextMuted,
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
@@ -126,7 +128,7 @@ fun StatisticsScreen(
                         .verticalScroll(rememberScrollState())
                         .padding(horizontal = 16.dp, vertical = 16.dp),
                 ) {
-                    SectionLabel(text = "СРЕДНИЙ БАЛЛ ПО ПРЕДМЕТАМ")
+                    SectionLabel(text = Strings.get(R.string.avg_by_subject))
                     Spacer(modifier = Modifier.height(20.dp))
                     SubjectColumns(subjects = state.subjects)
 
@@ -137,17 +139,17 @@ fun StatisticsScreen(
                     HorizontalDivider(thickness = 1.dp, color = SlhOutline)
                     Spacer(modifier = Modifier.height(18.dp))
 
-                    SectionLabel(text = "ПРОГРЕСС · СДЕЛАНО / ЗАЩИЩЕНО")
+                    SectionLabel(text = Strings.get(R.string.progress_section))
                     Spacer(modifier = Modifier.height(14.dp))
                     ProgressBlock(
-                        label = "Защищено (${state.defendedWorks}/${state.totalWorks})",
+                        label = Strings.get(R.string.progress_defended, state.defendedWorks, state.totalWorks),
                         filled = state.defendedWorks,
                         total = state.totalWorks,
                         color = SlhAccent,
                     )
                     Spacer(modifier = Modifier.height(18.dp))
                     ProgressBlock(
-                        label = "Сделано (${state.doneWorks}/${state.totalWorks})",
+                        label = Strings.get(R.string.progress_done, state.doneWorks, state.totalWorks),
                         filled = state.doneWorks,
                         total = state.totalWorks,
                         color = SlhContent,
@@ -259,7 +261,7 @@ private fun OverallCard(average: Double?) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "Общий средний балл",
+                text = Strings.get(R.string.overall_average),
                 color = SlhContent,
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f),
@@ -331,9 +333,9 @@ private fun Legend(
     remaining: Int,
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
-        LegendItem(symbol = "★", text = "Защ: $defended", symbolColor = SlhAccent)
-        LegendItem(symbol = "✓", text = "Сдел: $done", symbolColor = SlhContent)
-        LegendItem(symbol = "○", text = "Ост: $remaining", symbolColor = SlhTextMuted)
+        LegendItem(symbol = "★", text = Strings.get(R.string.legend_defended, defended), symbolColor = SlhAccent)
+        LegendItem(symbol = "✓", text = Strings.get(R.string.legend_done, done), symbolColor = SlhContent)
+        LegendItem(symbol = "○", text = Strings.get(R.string.legend_left, remaining), symbolColor = SlhTextMuted)
     }
 }
 

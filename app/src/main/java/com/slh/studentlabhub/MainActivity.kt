@@ -1,5 +1,6 @@
 package com.slh.studentlabhub
 
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
@@ -9,8 +10,10 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.lifecycleScope
+import com.slh.studentlabhub.domain.model.AppLanguage
 import com.slh.studentlabhub.domain.model.AppSettings
 import com.slh.studentlabhub.domain.model.ThemeMode
+import com.slh.studentlabhub.i18n.AppLocale
 import com.slh.studentlabhub.navigation.LaunchActions
 import com.slh.studentlabhub.navigation.SlhApp
 import com.slh.studentlabhub.ui.theme.SlhPalette
@@ -19,6 +22,16 @@ import com.slh.studentlabhub.widget.DeadlinesWidget
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+
+    private var appliedLanguage: AppLanguage? = null
+
+    override fun attachBaseContext(newBase: Context) {
+        val app = newBase.applicationContext as SlhApplication
+        val language = app.container.settingsRepository.settings.value.language
+        appliedLanguage = language
+        super.attachBaseContext(AppLocale.wrap(newBase, language))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         val settingsRepository = (application as SlhApplication).container.settingsRepository
         applyAppearance(settingsRepository.settings.value)
@@ -30,6 +43,10 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             settingsRepository.settings.collect { settings ->
                 applyAppearance(settings)
+                if (appliedLanguage != null && settings.language != appliedLanguage) {
+                    appliedLanguage = settings.language
+                    recreate()
+                }
             }
         }
 

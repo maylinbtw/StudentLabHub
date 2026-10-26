@@ -13,6 +13,8 @@ import com.slh.studentlabhub.domain.model.AccentColor
 import com.slh.studentlabhub.domain.model.AppSettings
 import com.slh.studentlabhub.domain.model.BackgroundStyle
 import com.slh.studentlabhub.domain.model.DotShape
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
 
 private val PureWhite = Color(0xFFFFFFFF)
 private val PureBlack = Color(0xFF000000)
@@ -48,14 +50,14 @@ private fun contentOn(color: Color): Color = if (color.luminance() > 0.45f) Pure
 
 val AccentColor.label: String
     get() = when (this) {
-        AccentColor.RED -> "Красный"
-        AccentColor.ORANGE -> "Оранжевый"
-        AccentColor.YELLOW -> "Жёлтый"
-        AccentColor.GREEN -> "Зелёный"
-        AccentColor.CYAN -> "Бирюзовый"
-        AccentColor.BLUE -> "Синий"
-        AccentColor.VIOLET -> "Фиолетовый"
-        AccentColor.PINK -> "Розовый"
+        AccentColor.RED -> Strings.get(R.string.accent_red)
+        AccentColor.ORANGE -> Strings.get(R.string.accent_orange)
+        AccentColor.YELLOW -> Strings.get(R.string.accent_yellow)
+        AccentColor.GREEN -> Strings.get(R.string.accent_green)
+        AccentColor.CYAN -> Strings.get(R.string.accent_cyan)
+        AccentColor.BLUE -> Strings.get(R.string.accent_blue)
+        AccentColor.VIOLET -> Strings.get(R.string.accent_violet)
+        AccentColor.PINK -> Strings.get(R.string.accent_pink)
     }
 
 private class Tones(

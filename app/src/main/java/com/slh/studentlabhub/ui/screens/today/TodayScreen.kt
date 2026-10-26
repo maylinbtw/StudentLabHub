@@ -62,14 +62,30 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import java.time.YearMonth
 
-private val ruLocale: Locale = Locale.forLanguageTag("ru")
-private val headerFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("EEEE, d MMMM", ruLocale)
-private val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm", ruLocale)
-private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM", ruLocale)
-private val syncFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM HH:mm", ruLocale)
+private val ruLocale: Locale
+    get() = Locale.getDefault()
+private val headerFormatter: DateTimeFormatter
+    get() = DateTimeFormatter.ofPattern("EEEE, d MMMM", ruLocale)
+private val timeFormatter: DateTimeFormatter
+    get() = DateTimeFormatter.ofPattern("HH:mm", ruLocale)
+private val dateFormatter: DateTimeFormatter
+    get() = DateTimeFormatter.ofPattern("dd.MM", ruLocale)
+private val syncFormatter: DateTimeFormatter
+    get() = DateTimeFormatter.ofPattern("dd.MM HH:mm", ruLocale)
 
 private const val LATER_LIMIT = 8
+
+private fun YearMonth.toIndex(): Int = year * 12 + monthValue - 1
+
+private fun Int.toYearMonth(): YearMonth = YearMonth.of(this / 12, this % 12 + 1)
 
 @Composable
 fun TodayRoute(
@@ -108,6 +124,13 @@ fun TodayScreen(
     onOpenSubjects: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var calendarMode by rememberSaveable { mutableStateOf(false) }
+    var monthIndex by rememberSaveable { mutableStateOf(YearMonth.now().toIndex()) }
+    var selectedDay by rememberSaveable { mutableStateOf(LocalDate.now().toEpochDay()) }
+    val calendarMonth = monthIndex.toYearMonth()
+    val selectedDate = LocalDate.ofEpochDay(selectedDay)
+    val deadlinesByDate = remember(state.calendarRows) { state.calendarRows.groupByDueDate() }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -115,7 +138,7 @@ fun TodayScreen(
     ) {
         ScreenHeader(
             overline = state.today.format(headerFormatter).replaceFirstChar { it.uppercase() },
-            title = "СЕГОДНЯ",
+            title = Strings.get(R.string.today_title),
             actionIcon = SlhIcon.Refresh,
             onActionClick = onSyncClick,
         )
@@ -147,6 +170,47 @@ fun TodayScreen(
                     Spacer(modifier = Modifier.height(18.dp))
                 }
 
+                if (state.hasSubjects) {
+                    item(key = "mode") {
+                        TodayModeSwitch(
+                            isCalendar = calendarMode,
+                            onChange = { calendarMode = it },
+                        )
+                        Spacer(modifier = Modifier.height(18.dp))
+                    }
+                }
+
+                if (state.hasSubjects && calendarMode) {
+                    item(key = "calendar") {
+                        DeadlineCalendar(
+                            month = calendarMonth,
+                            today = state.today,
+                            selected = selectedDate,
+                            deadlines = deadlinesByDate,
+                            onMonthChange = { monthIndex = it.toIndex() },
+                            onSelect = { selectedDay = it.toEpochDay() },
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+                    val dayRows = deadlinesByDate[selectedDate].orEmpty()
+                    item(key = "day_title") {
+                        CalendarDayTitle(date = selectedDate, count = dayRows.size)
+                        HorizontalDivider(thickness = 1.dp, color = SlhOutline)
+                    }
+                    if (dayRows.isEmpty()) {
+                        item(key = "day_empty") { CalendarDayEmpty() }
+                    }
+                    items(items = dayRows, key = { "day_row_${it.labId}" }) { row ->
+                        AgendaRowItem(
+                            row = row,
+                            now = state.now,
+                            onClick = { onRowClick(row) },
+                        )
+                        HorizontalDivider(thickness = 1.dp, color = SlhOutline)
+                    }
+                    return@LazyColumn
+                }
+
                 if (!state.hasSubjects) {
                     item(key = "welcome") {
                         WelcomeCard(
@@ -161,7 +225,7 @@ fun TodayScreen(
                 if (state.sections.isEmpty()) {
                     item(key = "empty") {
                         Text(
-                            text = "Сдавать ничего не нужно.\nПотяни вниз, чтобы обновить Classroom.",
+                            text = Strings.get(R.string.today_empty),
                             color = SlhTextMuted,
                             style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,
@@ -179,7 +243,7 @@ fun TodayScreen(
                         section.rows
                     }
                     item(key = "label_${section.group.name}") {
-                        SectionLabel(text = "${section.group.title} · ${section.rows.size}")
+                        SectionLabel(text = Strings.get(R.string.section_with_count, section.group.title, section.rows.size))
                         Spacer(modifier = Modifier.height(4.dp))
                         HorizontalDivider(thickness = 1.dp, color = SlhOutline)
                     }
@@ -194,7 +258,7 @@ fun TodayScreen(
                     if (section.rows.size > visible.size) {
                         item(key = "more_${section.group.name}") {
                             Text(
-                                text = "и ещё ${section.rows.size - visible.size} — в «Предметах»",
+                                text = Strings.get(R.string.today_more_in_subjects, section.rows.size - visible.size),
                                 color = SlhTextMuted,
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.padding(vertical = 10.dp),
@@ -213,13 +277,13 @@ fun TodayScreen(
 @Composable
 private fun Summary(state: TodayUiState) {
     val parts = buildList {
-        if (state.overdueCount > 0) add("${state.overdueCount} просрочено")
-        if (state.redoCount > 0) add("${state.redoCount} на доработку")
-        if (state.todayCount > 0) add("${state.todayCount} сегодня")
-        if (state.weekCount > 0) add("${state.weekCount} на неделе")
+        if (state.overdueCount > 0) add(Strings.get(R.string.summary_overdue, state.overdueCount))
+        if (state.redoCount > 0) add(Strings.get(R.string.summary_redo, state.redoCount))
+        if (state.todayCount > 0) add(Strings.get(R.string.summary_today, state.todayCount))
+        if (state.weekCount > 0) add(Strings.get(R.string.summary_week, state.weekCount))
     }
     Text(
-        text = if (parts.isEmpty()) "Всё под контролем" else parts.joinToString(" · "),
+        text = if (parts.isEmpty()) Strings.get(R.string.all_under_control) else parts.joinToString(" · "),
         color = if (state.overdueCount > 0 || state.redoCount > 0) SlhDanger else SlhContent,
         fontFamily = SlhMono,
         fontWeight = FontWeight.Bold,
@@ -228,9 +292,9 @@ private fun Summary(state: TodayUiState) {
     Spacer(modifier = Modifier.height(4.dp))
     Text(
         text = when {
-            state.isSyncing -> "Classroom: обновляем…"
-            state.lastSyncAt != null -> "Classroom обновлён ${state.lastSyncAt.formatWith(syncFormatter)}"
-            else -> "Classroom ещё не синхронизирован — потяни вниз"
+            state.isSyncing -> Strings.get(R.string.classroom_syncing)
+            state.lastSyncAt != null -> Strings.get(R.string.classroom_updated_at, state.lastSyncAt.formatWith(syncFormatter))
+            else -> Strings.get(R.string.classroom_not_synced_pull)
         },
         color = SlhTextMuted,
         style = MaterialTheme.typography.bodySmall,
@@ -304,12 +368,12 @@ private fun AgendaRowItem(
 private fun dueLabel(row: AgendaRow, now: Long): Pair<String, Color> {
     val due = row.dueAt
     return when (row.group) {
-        AgendaGroup.REDO -> "переделать" to SlhDanger
+        AgendaGroup.REDO -> Strings.get(R.string.redo_short) to SlhDanger
         AgendaGroup.OVERDUE -> {
             val days = if (due == null) 0L else -daysUntil(due, now)
-            (if (days <= 0L) "просрочено" else "−$days дн") to SlhDanger
+            (if (days <= 0L) Strings.get(R.string.overdue) else Strings.get(R.string.overdue_days_short, days.toInt())) to SlhDanger
         }
-        AgendaGroup.TODAY -> "до ${due?.formatWith(timeFormatter).orEmpty()}" to SlhAccent
+        AgendaGroup.TODAY -> Strings.get(R.string.until_time, due?.formatWith(timeFormatter).orEmpty()) to SlhAccent
         AgendaGroup.TOMORROW -> (due?.formatWith(timeFormatter).orEmpty()) to SlhTextSecondary
         AgendaGroup.WEEK -> (due?.toLocalDate()?.dayOfWeek?.getDisplayName(TextStyle.SHORT, ruLocale).orEmpty()) to SlhTextSecondary
         AgendaGroup.LATER -> (due?.formatWith(dateFormatter).orEmpty()) to SlhTextMuted
@@ -337,14 +401,13 @@ private fun WelcomeCard(
         DotMatrixText(text = "SLH", color = SlhAccent, dotSize = 5.dp, dotGap = 1.5.dp)
         Spacer(modifier = Modifier.height(18.dp))
         Text(
-            text = "С чего начать",
+            text = Strings.get(R.string.where_to_start),
             color = SlhContent,
             style = MaterialTheme.typography.titleMedium,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Загрузи курсы из Google Classroom — каждый курс станет предметом, " +
-                "а задания — лабораторными и практическими со сроками и оценками.",
+            text = Strings.get(R.string.welcome_text),
             color = SlhTextSecondary,
             style = MaterialTheme.typography.bodySmall,
         )
@@ -359,14 +422,14 @@ private fun WelcomeCard(
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = if (isSyncing) "ЗАГРУЖАЕМ…" else "ЗАГРУЗИТЬ ИЗ CLASSROOM",
+                text = if (isSyncing) Strings.get(R.string.loading_caps) else Strings.get(R.string.load_from_classroom),
                 color = if (isSyncing) SlhTextMuted else SlhOnAccent,
                 style = MaterialTheme.typography.labelLarge,
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "или добавить предметы вручную ›",
+            text = Strings.get(R.string.add_subjects_manually_link),
             color = SlhTextSecondary,
             fontFamily = SlhMono,
             fontSize = 12.sp,

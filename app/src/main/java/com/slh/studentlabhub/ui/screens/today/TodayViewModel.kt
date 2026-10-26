@@ -22,14 +22,21 @@ import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
+import androidx.annotation.StringRes
 
-enum class AgendaGroup(val title: String) {
-    REDO("НА ДОРАБОТКУ"),
-    OVERDUE("ПРОСРОЧЕНО"),
-    TODAY("СЕГОДНЯ"),
-    TOMORROW("ЗАВТРА"),
-    WEEK("НА ЭТОЙ НЕДЕЛЕ"),
-    LATER("ПОЗЖЕ"),
+enum class AgendaGroup(@StringRes val titleRes: Int) {
+    REDO(R.string.group_redo),
+    OVERDUE(R.string.group_overdue),
+    TODAY(R.string.group_today),
+    TOMORROW(R.string.group_tomorrow),
+    WEEK(R.string.group_week),
+    LATER(R.string.group_later),
+    ;
+
+    val title: String
+        get() = Strings.get(titleRes)
 }
 
 data class AgendaRow(
@@ -50,6 +57,7 @@ data class TodayUiState(
     val now: Long = System.currentTimeMillis(),
     val today: LocalDate = LocalDate.now(),
     val sections: List<AgendaSection> = emptyList(),
+    val calendarRows: List<AgendaRow> = emptyList(),
     val overdueCount: Int = 0,
     val todayCount: Int = 0,
     val weekCount: Int = 0,
@@ -115,16 +123,16 @@ class TodayViewModel(
         val today = now.toLocalDate()
         val endOfWeek = today.with(DayOfWeek.SUNDAY)
 
-        val rows = works.mapNotNull { work ->
+        fun groupOf(work: LabDeadline, limitOverdue: Boolean): AgendaGroup? {
             val due = work.deadline
-            val group = when {
+            return when {
                 work.needsRedo -> AgendaGroup.REDO
                 due == null -> null
                 else -> {
                     val date = due.toLocalDate()
                     val days = ChronoUnit.DAYS.between(today, date)
                     when {
-                        due < now && days < -OVERDUE_WINDOW_DAYS -> null
+                        limitOverdue && due < now && days < -OVERDUE_WINDOW_DAYS -> null
                         due < now -> AgendaGroup.OVERDUE
                         days == 0L -> AgendaGroup.TODAY
                         days == 1L -> AgendaGroup.TOMORROW
@@ -132,15 +140,25 @@ class TodayViewModel(
                         else -> AgendaGroup.LATER
                     }
                 }
-            } ?: return@mapNotNull null
-            AgendaRow(
-                labId = work.labId,
-                title = "${work.type.shortPrefix} ${work.number} · ${work.title}",
-                subjectTitle = work.subjectTitle,
-                dueAt = due,
-                group = group,
-            )
+            }
         }
+
+        fun rowOf(work: LabDeadline, group: AgendaGroup) = AgendaRow(
+            labId = work.labId,
+            title = Strings.get(R.string.agenda_title, work.type.shortPrefix, work.number, work.title),
+            subjectTitle = work.subjectTitle,
+            dueAt = work.deadline,
+            group = group,
+        )
+
+        val rows = works.mapNotNull { work ->
+            groupOf(work, limitOverdue = true)?.let { rowOf(work, it) }
+        }
+
+        val calendarRows = works
+            .filter { it.deadline != null }
+            .mapNotNull { work -> groupOf(work, limitOverdue = false)?.let { rowOf(work, it) } }
+            .sortedBy { it.dueAt }
 
         val sections = AgendaGroup.entries.mapNotNull { group ->
             val inGroup = rows.filter { it.group == group }.sortedBy { it.dueAt ?: Long.MAX_VALUE }
@@ -152,6 +170,7 @@ class TodayViewModel(
             now = now,
             today = today,
             sections = sections,
+            calendarRows = calendarRows,
             overdueCount = rows.count { it.group == AgendaGroup.OVERDUE },
             todayCount = rows.count { it.group == AgendaGroup.TODAY },
             weekCount = rows.count { it.group == AgendaGroup.TOMORROW || it.group == AgendaGroup.WEEK },

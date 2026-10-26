@@ -2,6 +2,9 @@ package com.slh.studentlabhub.navigation
 
 import com.slh.studentlabhub.domain.model.StartScreen
 import com.slh.studentlabhub.ui.components.SlhIcon
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
+import androidx.annotation.StringRes
 
 object Routes {
     const val LOGIN = "login"
@@ -40,13 +43,16 @@ val StartScreen.route: String
 
 enum class BottomTab(
     val route: String,
-    val label: String,
+    @StringRes val labelRes: Int,
     val icon: SlhIcon,
 ) {
-    Today(Routes.TODAY, "Сегодня", SlhIcon.Grid),
-    Subjects(Routes.SUBJECTS, "Предметы", SlhIcon.Diamond),
-    Reference(Routes.REFERENCE, "Справка", SlhIcon.Menu),
-    Settings(Routes.SETTINGS, "Настройки", SlhIcon.Gear);
+    Today(Routes.TODAY, R.string.tab_today, SlhIcon.Grid),
+    Subjects(Routes.SUBJECTS, R.string.tab_subjects, SlhIcon.Diamond),
+    Reference(Routes.REFERENCE, R.string.tab_reference, SlhIcon.Menu),
+    Settings(Routes.SETTINGS, R.string.tab_settings, SlhIcon.Gear);
+
+    val label: String
+        get() = Strings.get(labelRes)
 
     companion object {
         fun fromRoute(route: String?): BottomTab? =

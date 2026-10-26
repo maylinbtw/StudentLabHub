@@ -18,6 +18,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.InputStream
 import java.io.OutputStream
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
 
 data class BackupSummary(
     val subjects: Int,
@@ -59,9 +61,9 @@ class BackupManager(
     suspend fun import(input: InputStream): BackupSummary = withContext(Dispatchers.IO) {
         val text = input.bufferedReader(Charsets.UTF_8).use { it.readText() }
         val root = runCatching { JSONObject(text) }.getOrNull()
-            ?: throw BackupException("Файл повреждён или это не резервная копия")
+            ?: throw BackupException(Strings.get(R.string.backup_corrupted))
         if (root.optString("format") != FORMAT) {
-            throw BackupException("Это не резервная копия StudentLabHub")
+            throw BackupException(Strings.get(R.string.backup_wrong_format))
         }
 
         val subjects = root.optJSONArray("subjects").objects().map { it.toSubject() }
@@ -129,7 +131,7 @@ private fun SubjectEntity.toJson(): JSONObject = JSONObject()
 
 private fun JSONObject.toSubject(): SubjectEntity = SubjectEntity(
     id = getLong("id"),
-    title = optString("title", "Без названия"),
+    title = optString("title", Strings.get(R.string.untitled)),
     semester = optInt("semester", 1),
     createdAt = optLong("createdAt", System.currentTimeMillis()),
     classroomCourseId = optStringOrNull("classroomCourseId"),
@@ -174,7 +176,7 @@ private fun RefCategoryEntity.toJson(): JSONObject = JSONObject()
 private fun JSONObject.toCategory(): RefCategoryEntity = RefCategoryEntity(
     id = getString("id"),
     tech = optEnum("tech", RefTech.LINUX),
-    title = optString("title", "Мои заметки"),
+    title = optString("title", Strings.get(R.string.ref_my_notes)),
     position = optInt("position", 10_000),
 )
 
@@ -210,6 +212,7 @@ private fun AppSettings.toJson(): JSONObject = JSONObject()
     .put("redoAlerts", redoAlerts)
     .put("backgroundSync", backgroundSync)
     .put("largeText", largeText)
+    .put("language", language.name)
 
 private fun JSONObject.toSettings(current: AppSettings): AppSettings = AppSettings(
     accent = optEnum("accent", current.accent),
@@ -222,5 +225,6 @@ private fun JSONObject.toSettings(current: AppSettings): AppSettings = AppSettin
     redoAlerts = optBoolean("redoAlerts", current.redoAlerts),
     backgroundSync = optBoolean("backgroundSync", current.backgroundSync),
     largeText = optBoolean("largeText", current.largeText),
+    language = optEnum("language", current.language),
 )
 

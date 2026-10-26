@@ -65,6 +65,8 @@ import com.slh.studentlabhub.ui.theme.SlhTextMuted
 import com.slh.studentlabhub.ui.theme.SlhTextSecondary
 import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
 import java.util.Locale
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
 
 @Composable
 fun SubjectsRoute(
@@ -132,8 +134,8 @@ fun SubjectsScreen(
             .background(SlhBackground),
     ) {
         ScreenHeader(
-            overline = "Лабораторные и практические",
-            title = "ПРЕДМЕТЫ",
+            overline = Strings.get(R.string.subjects_overline),
+            title = Strings.get(R.string.subjects_title),
             actionIcon = SlhIcon.Plus,
             onActionClick = onAddSubjectClick,
         )
@@ -207,7 +209,7 @@ fun SubjectsScreen(
 
                 if (!state.isEmpty) {
                     item(key = "add_subject") {
-                        OutlineAction(text = "добавить предмет вручную", onClick = onAddSubjectClick)
+                        OutlineAction(text = Strings.get(R.string.add_subject_manually), onClick = onAddSubjectClick)
                     }
                 }
                 if (state.archivedCount > 0) {
@@ -241,13 +243,13 @@ private fun StatsLink(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Успеваемость",
+                text = Strings.get(R.string.performance),
                 color = SlhContent,
                 style = MaterialTheme.typography.titleMedium,
             )
             Spacer(modifier = Modifier.height(3.dp))
             Text(
-                text = "сделано $done из $total · статистика ›",
+                text = Strings.get(R.string.performance_line, done, total),
                 color = SlhTextMuted,
                 style = MaterialTheme.typography.bodySmall,
             )
@@ -317,7 +319,7 @@ private fun SubjectCard(
             if (subject.redoCount > 0) {
                 Spacer(modifier = Modifier.height(3.dp))
                 Text(
-                    text = "${subject.redoCount} на доработку",
+                    text = Strings.get(R.string.redo_count, subject.redoCount),
                     color = SlhDanger,
                     style = MaterialTheme.typography.bodySmall,
                 )
@@ -350,11 +352,11 @@ private fun SemesterHeader(
     var confirm by remember(semester) { mutableStateOf(false) }
     Row(verticalAlignment = Alignment.CenterVertically) {
         SectionLabel(
-            text = "СЕМЕСТР $semester",
+            text = Strings.get(R.string.semester_caps, semester),
             modifier = Modifier.weight(1f),
         )
         Text(
-            text = if (confirm) "весь семестр в архив?" else "в архив",
+            text = if (confirm) Strings.get(R.string.archive_semester_q) else Strings.get(R.string.move_to_archive_lower),
             color = if (confirm) SlhDanger else SlhTextMuted,
             fontFamily = SlhMono,
             fontSize = 11.sp,
@@ -391,7 +393,7 @@ private fun ArchiveLink(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "Архив",
+            text = Strings.get(R.string.archive),
             color = SlhTextSecondary,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.weight(1f),
@@ -419,20 +421,19 @@ private fun EmptyCard(onAddSubjectClick: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "Пока нет предметов",
+            text = Strings.get(R.string.no_subjects_yet),
             color = SlhContent,
             style = MaterialTheme.typography.titleMedium,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Потяни вниз, чтобы загрузить курсы из Google Classroom — каждый станет предметом " +
-                "со своими лабораторными и практическими. Или добавь предмет вручную.",
+            text = Strings.get(R.string.subjects_empty_text),
             color = SlhTextSecondary,
             style = MaterialTheme.typography.bodySmall,
             textAlign = TextAlign.Center,
         )
         Spacer(modifier = Modifier.height(16.dp))
-        OutlineAction(text = "добавить предмет", onClick = onAddSubjectClick)
+        OutlineAction(text = Strings.get(R.string.add_subject), onClick = onAddSubjectClick)
     }
 }
 
@@ -464,9 +465,9 @@ private fun OutlineAction(
 
 private fun worksLine(subject: SubjectSummary): String =
     if (subject.totalLabs == 0) {
-        "работ пока нет — добавь внутри предмета"
+        Strings.get(R.string.no_works_yet_hint)
     } else {
-        "${subject.doneLabs}/${subject.totalLabs} сделано · ${subject.defendedLabs}/${subject.totalLabs} сдано"
+        Strings.get(R.string.works_line, subject.doneLabs, subject.totalLabs, subject.defendedLabs, subject.totalLabs)
     }
 
 @Preview(showBackground = true, backgroundColor = 0xFF000000, widthDp = 390, heightDp = 760)

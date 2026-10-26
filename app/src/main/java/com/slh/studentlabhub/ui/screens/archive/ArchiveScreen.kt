@@ -46,6 +46,8 @@ import com.slh.studentlabhub.ui.theme.SlhSurface
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
 import com.slh.studentlabhub.ui.theme.SlhTextSecondary
 import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
 
 @Composable
 fun ArchiveRoute(
@@ -83,8 +85,8 @@ fun ArchiveScreen(
             .background(SlhBackground),
     ) {
         ScreenHeader(
-            overline = "Прошлые семестры и забытые курсы",
-            title = "АРХИВ",
+            overline = Strings.get(R.string.archive_overline),
+            title = Strings.get(R.string.archive_title),
             onBackClick = onBack,
         )
         if (state.isLoading) {
@@ -107,8 +109,7 @@ fun ArchiveScreen(
         ) {
             item(key = "hint") {
                 Text(
-                    text = "Всё, что в архиве, не показывается на «Сегодня» и в «Предметах» и не попадает " +
-                        "в статистику. Данные не удаляются — их можно вернуть в любой момент.",
+                    text = Strings.get(R.string.archive_hint),
                     color = SlhTextMuted,
                     style = MaterialTheme.typography.bodySmall,
                 )
@@ -118,7 +119,7 @@ fun ArchiveScreen(
             if (state.isEmpty) {
                 item(key = "empty") {
                     Text(
-                        text = "Архив пуст",
+                        text = Strings.get(R.string.archive_empty),
                         color = SlhTextMuted,
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
@@ -131,16 +132,16 @@ fun ArchiveScreen(
 
             if (state.subjects.isNotEmpty()) {
                 item(key = "subjects_label") {
-                    SectionLabel(text = "ПРЕДМЕТЫ · ${state.subjects.size}")
+                    SectionLabel(text = Strings.get(R.string.subjects_caps_count, state.subjects.size))
                     Spacer(modifier = Modifier.height(8.dp))
                 }
                 items(items = state.subjects, key = { "subject_${it.id}" }) { subject ->
                     ArchiveRow(
                         title = subject.title,
                         subtitle = buildString {
-                            append("семестр ${subject.semester}")
+                            append(Strings.get(R.string.semester_lower, subject.semester))
                             if (subject.totalLabs > 0) {
-                                append(" · ${subject.doneLabs}/${subject.totalLabs} сделано")
+                                append(Strings.get(R.string.done_of, subject.doneLabs, subject.totalLabs))
                             }
                             if (subject.classroomCourseId != null) append(" · GC")
                         },
@@ -156,13 +157,13 @@ fun ArchiveScreen(
 
             if (state.courses.isNotEmpty()) {
                 item(key = "courses_label") {
-                    SectionLabel(text = "КУРСЫ CLASSROOM · ${state.courses.size}")
+                    SectionLabel(text = Strings.get(R.string.classroom_courses_count, state.courses.size))
                     Spacer(modifier = Modifier.height(8.dp))
                 }
                 items(items = state.courses, key = { "course_${it.id}" }) { course ->
                     ArchiveRow(
                         title = course.title,
-                        subtitle = listOfNotNull(course.teacherName, "заданий: ${course.tasksCount}").joinToString(" · "),
+                        subtitle = listOfNotNull(course.teacherName, Strings.get(R.string.tasks_count_label, course.tasksCount)).joinToString(" · "),
                         onClick = { onOpenCourse(course.id) },
                         onRestore = { onRestoreCourse(course) },
                     )
@@ -221,7 +222,7 @@ private fun ArchiveRow(
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = "ВЕРНУТЬ",
+                text = Strings.get(R.string.action_restore),
                 color = SlhAccent,
                 fontFamily = SlhMono,
                 fontWeight = FontWeight.Bold,

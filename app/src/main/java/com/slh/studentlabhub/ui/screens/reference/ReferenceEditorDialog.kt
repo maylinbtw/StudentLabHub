@@ -56,6 +56,8 @@ import com.slh.studentlabhub.ui.theme.SlhAccent
 import com.slh.studentlabhub.ui.theme.SlhTextDisabled
 import com.slh.studentlabhub.ui.theme.SlhContent
 import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
 
 @Composable
 fun ReferenceEditorDialog(
@@ -87,8 +89,8 @@ fun ReferenceEditorDialog(
     val isValid = title.isNotBlank()
 
     SlhDialog(
-        overline = "Справочник",
-        title = if (initial == null) "НОВАЯ СТАТЬЯ" else "ИЗМЕНИТЬ СТАТЬЮ",
+        overline = Strings.get(R.string.reference),
+        title = if (initial == null) Strings.get(R.string.new_article) else Strings.get(R.string.edit_article),
         onDismissRequest = onDismiss,
     ) {
         Column(
@@ -97,7 +99,7 @@ fun ReferenceEditorDialog(
                 .heightIn(max = 460.dp)
                 .verticalScroll(rememberScrollState()),
         ) {
-            SectionLabel(text = "ТЕХНОЛОГИЯ")
+            SectionLabel(text = Strings.get(R.string.section_technology))
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
@@ -118,14 +120,14 @@ fun ReferenceEditorDialog(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            SectionLabel(text = "РАЗДЕЛ")
+            SectionLabel(text = Strings.get(R.string.section_category))
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 SelectChip(
-                    text = "Мои заметки",
+                    text = Strings.get(R.string.ref_my_notes),
                     selected = categoryId == null || categoryId == RefCategoryIds.custom(tech),
                     onClick = { categoryId = null },
                 )
@@ -140,19 +142,19 @@ fun ReferenceEditorDialog(
 
             Spacer(modifier = Modifier.height(16.dp))
             SlhLabeledField(
-                label = "КОМАНДА / КОНСТРУКЦИЯ",
+                label = Strings.get(R.string.field_command),
                 value = title,
                 onValueChange = { title = it.take(60) },
             )
             Spacer(modifier = Modifier.height(12.dp))
             SlhLabeledField(
-                label = "ОПИСАНИЕ",
+                label = Strings.get(R.string.field_description),
                 value = description,
                 onValueChange = { description = it.take(160) },
                 capitalization = KeyboardCapitalization.Sentences,
             )
             Spacer(modifier = Modifier.height(12.dp))
-            SectionLabel(text = "ПРИМЕР")
+            SectionLabel(text = Strings.get(R.string.section_example))
             Spacer(modifier = Modifier.height(6.dp))
             MultilineField(
                 value = example,
@@ -170,7 +172,7 @@ fun ReferenceEditorDialog(
                         .padding(vertical = 6.dp, horizontal = 4.dp),
                 ) {
                     Text(
-                        text = if (confirmDelete) "НАЖМИ ЕЩЁ РАЗ, ЧТОБЫ УДАЛИТЬ" else "УДАЛИТЬ СТАТЬЮ",
+                        text = if (confirmDelete) Strings.get(R.string.tap_again_to_delete) else Strings.get(R.string.delete_article),
                         color = SlhDanger,
                         style = MaterialTheme.typography.labelLarge,
                     )
@@ -181,12 +183,12 @@ fun ReferenceEditorDialog(
         Spacer(modifier = Modifier.height(18.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             SlhDialogOutlinedButton(
-                text = "ОТМЕНА",
+                text = Strings.get(R.string.action_cancel),
                 onClick = onDismiss,
                 modifier = Modifier.weight(1f),
             )
             SlhDialogPrimaryButton(
-                text = "СОХРАНИТЬ",
+                text = Strings.get(R.string.action_save),
                 enabled = isValid,
                 onClick = {
                     onSave(

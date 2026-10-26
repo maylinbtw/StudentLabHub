@@ -13,6 +13,8 @@ import androidx.compose.ui.platform.LocalContext
 import com.slh.studentlabhub.SlhApplication
 import com.slh.studentlabhub.data.remote.AuthState
 import kotlinx.coroutines.launch
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
 
 @Composable
 fun rememberGoogleAuthorization(
@@ -31,13 +33,13 @@ fun rememberGoogleAuthorization(
         contract = ActivityResultContracts.StartIntentSenderForResult(),
     ) { result ->
         if (result.resultCode != Activity.RESULT_OK) {
-            latestOnError("Вход отменён")
+            latestOnError(Strings.get(R.string.sign_in_cancelled))
             return@rememberLauncherForActivityResult
         }
         try {
             when (val state = authManager.handleConsentResult(result.data)) {
                 is AuthState.Authorized -> latestOnAuthorized(state.accessToken)
-                is AuthState.NeedsUserConsent -> latestOnError("Доступ к Classroom не выдан")
+                is AuthState.NeedsUserConsent -> latestOnError(Strings.get(R.string.classroom_access_denied))
             }
         } catch (error: Exception) {
             latestOnError(error.toUserMessage())

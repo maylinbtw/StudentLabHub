@@ -28,6 +28,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
+import com.slh.studentlabhub.domain.model.AppLanguage
 
 data class SettingsUiState(
     val settings: AppSettings = AppSettings(),
@@ -135,21 +138,23 @@ class SettingsViewModel(
 
     fun onBackgroundSyncChanged(enabled: Boolean) = settingsRepository.update { it.copy(backgroundSync = enabled) }
 
+    fun onLanguageSelected(value: AppLanguage) = settingsRepository.update { it.copy(language = value) }
+
     fun onLargeTextChanged(enabled: Boolean) = settingsRepository.update { it.copy(largeText = enabled) }
 
     fun exportBackup(uri: Uri) {
         runBackup {
             val summary = contentResolver.openOutputStream(uri)?.use { backupManager.export(it) }
-                ?: throw BackupException("Не удалось создать файл")
-            "Сохранено: ${summary.subjects} предм., ${summary.works} работ, ${summary.articles} статей"
+                ?: throw BackupException(Strings.get(R.string.backup_create_failed))
+            Strings.get(R.string.backup_saved, summary.subjects, summary.works, summary.articles)
         }
     }
 
     fun importBackup(uri: Uri) {
         runBackup {
             val summary = contentResolver.openInputStream(uri)?.use { backupManager.import(it) }
-                ?: throw BackupException("Не удалось открыть файл")
-            "Восстановлено: ${summary.subjects} предм., ${summary.works} работ, ${summary.articles} статей"
+                ?: throw BackupException(Strings.get(R.string.backup_open_failed))
+            Strings.get(R.string.backup_restored, summary.subjects, summary.works, summary.articles)
         }
     }
 
@@ -160,9 +165,9 @@ class SettingsViewModel(
             val message = try {
                 block()
             } catch (error: BackupException) {
-                error.message ?: "Ошибка резервной копии"
+                error.message ?: Strings.get(R.string.backup_error)
             } catch (error: Exception) {
-                "Ошибка: ${error.message ?: "файл не подходит"}"
+                Strings.get(R.string.error_with_message, error.message ?: Strings.get(R.string.backup_unsuitable_file))
             }
             backup.value = BackupState(message = message)
         }

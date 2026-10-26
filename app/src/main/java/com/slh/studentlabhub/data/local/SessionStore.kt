@@ -31,6 +31,12 @@ class SessionStore(context: Context) {
             prefs.edit().putInt(KEY_REFERENCE_VERSION, value).apply()
         }
 
+    var referenceLanguage: String
+        get() = prefs.getString(KEY_REFERENCE_LANGUAGE, "").orEmpty()
+        set(value) {
+            prefs.edit().putString(KEY_REFERENCE_LANGUAGE, value).apply()
+        }
+
     var archivedCourseIds: Set<String>
         get() = prefs.getStringSet(KEY_ARCHIVED_COURSES, emptySet())?.toSet().orEmpty()
         set(value) {
@@ -52,6 +58,7 @@ class SessionStore(context: Context) {
         private const val KEY_LAST_SYNC = "last_sync_at"
         private const val KEY_REDO_THRESHOLD = "redo_threshold"
         private const val KEY_REFERENCE_VERSION = "reference_version"
+        private const val KEY_REFERENCE_LANGUAGE = "reference_language"
         private const val KEY_ARCHIVED_COURSES = "archived_courses"
     }
 }

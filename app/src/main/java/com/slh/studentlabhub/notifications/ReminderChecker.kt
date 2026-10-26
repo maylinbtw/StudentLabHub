@@ -6,6 +6,8 @@ import com.slh.studentlabhub.domain.model.AppSettings
 import com.slh.studentlabhub.domain.model.ReminderTiming
 import com.slh.studentlabhub.ui.components.shortPrefix
 import kotlinx.coroutines.flow.first
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
 
 private enum class ReminderWindow(val tag: String, val millis: Long) {
     HOURS("3h", 3L * 60 * 60 * 1000),
@@ -66,7 +68,7 @@ suspend fun AppContainer.collectReminders(): List<Reminder> =
     labRepository.observePendingDeadlines().first().map { lab ->
         Reminder(
             key = "lab_${lab.labId}",
-            title = "${lab.type.shortPrefix} ${lab.number} · ${lab.title}",
+            title = Strings.get(R.string.agenda_title, lab.type.shortPrefix, lab.number, lab.title),
             subjectTitle = lab.subjectTitle,
             dueAt = lab.deadline,
             isRedo = lab.needsRedo,

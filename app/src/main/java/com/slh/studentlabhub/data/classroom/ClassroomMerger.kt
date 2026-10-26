@@ -7,6 +7,8 @@ import com.slh.studentlabhub.data.local.entity.LabEntity
 import com.slh.studentlabhub.data.local.entity.SubjectEntity
 import com.slh.studentlabhub.domain.model.LabStatus
 import kotlin.math.roundToInt
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
 
 class ClassroomMerger(
     private val database: AppDatabase,
@@ -88,7 +90,7 @@ class ClassroomMerger(
                 subjectId = subjectId,
                 type = parsed.type,
                 number = number,
-                title = parsed.title.ifEmpty { "Задание из Classroom" },
+                title = parsed.title.ifEmpty { Strings.get(R.string.classroom_task_default) },
                 status = remoteStatus ?: LabStatus.NOT_DONE,
                 score = score,
                 deadline = task.dueAt,

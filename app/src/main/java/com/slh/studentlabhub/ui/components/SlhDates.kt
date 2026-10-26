@@ -21,10 +21,13 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
 
-private val ruLocale: Locale = Locale.forLanguageTag("ru")
-private val dayMonthFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM, EEE", ruLocale)
-private val shortFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM", ruLocale)
+private val dayMonthFormatter: DateTimeFormatter
+    get() = DateTimeFormatter.ofPattern("d MMMM, EEE", Locale.getDefault())
+private val shortFormatter: DateTimeFormatter
+    get() = DateTimeFormatter.ofPattern("dd.MM", Locale.getDefault())
 
 fun Long.toLocalDate(): LocalDate =
     Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
@@ -37,13 +40,13 @@ fun daysUntil(dueAt: Long, now: Long): Long =
     ChronoUnit.DAYS.between(now.toLocalDate(), dueAt.toLocalDate())
 
 fun relativeDueLabel(dueAt: Long?, now: Long): String {
-    if (dueAt == null) return "без срока"
+    if (dueAt == null) return Strings.get(R.string.due_none)
     val days = daysUntil(dueAt, now)
     return when {
-        dueAt < now && days <= 0L -> if (days == 0L) "сегодня, просрочено" else "просрочено ${-days} дн."
-        days == 0L -> "сегодня"
-        days == 1L -> "завтра"
-        days in 2L..6L -> "через $days дн."
+        dueAt < now && days <= 0L -> if (days == 0L) Strings.get(R.string.due_today_overdue) else Strings.get(R.string.due_overdue_days, (-days).toInt())
+        days == 0L -> Strings.get(R.string.due_today)
+        days == 1L -> Strings.get(R.string.due_tomorrow)
+        days in 2L..6L -> Strings.get(R.string.due_in_days, days.toInt())
         else -> dueAt.formatShortDate()
     }
 }
@@ -80,18 +83,18 @@ fun DeadlinePickerDialog(
                     state.selectedDateMillis?.let { onConfirm(utcMillisToLocalEndOfDay(it)) }
                 },
             ) {
-                Text(text = "ГОТОВО", color = SlhAccent, style = MaterialTheme.typography.labelLarge)
+                Text(text = Strings.get(R.string.action_done), color = SlhAccent, style = MaterialTheme.typography.labelLarge)
             }
         },
         dismissButton = {
             Row {
                 if (onClear != null) {
                     TextButton(onClick = onClear) {
-                        Text(text = "УБРАТЬ", color = SlhDanger, style = MaterialTheme.typography.labelLarge)
+                        Text(text = Strings.get(R.string.action_remove), color = SlhDanger, style = MaterialTheme.typography.labelLarge)
                     }
                 }
                 TextButton(onClick = onDismiss) {
-                    Text(text = "ОТМЕНА", color = SlhTextMuted, style = MaterialTheme.typography.labelLarge)
+                    Text(text = Strings.get(R.string.action_cancel), color = SlhTextMuted, style = MaterialTheme.typography.labelLarge)
                 }
             }
         },

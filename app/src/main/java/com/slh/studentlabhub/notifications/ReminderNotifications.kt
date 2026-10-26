@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import com.slh.studentlabhub.MainActivity
 import com.slh.studentlabhub.R
 import kotlin.math.ceil
+import com.slh.studentlabhub.i18n.Strings
 
 data class Reminder(
     val key: String,
@@ -35,14 +36,14 @@ object ReminderNotifications {
             listOf(
                 NotificationChannel(
                     CHANNEL_DEADLINES,
-                    "Дедлайны",
+                    Strings.get(R.string.channel_deadlines),
                     NotificationManager.IMPORTANCE_HIGH,
-                ).apply { description = "Напоминания о сроках сдачи работ" },
+                ).apply { description = Strings.get(R.string.channel_deadlines_desc) },
                 NotificationChannel(
                     CHANNEL_REDO,
-                    "На доработку",
+                    Strings.get(R.string.channel_redo),
                     NotificationManager.IMPORTANCE_DEFAULT,
-                ).apply { description = "Когда работу возвращают на доработку" },
+                ).apply { description = Strings.get(R.string.channel_redo_desc) },
             ),
         )
     }
@@ -70,8 +71,8 @@ object ReminderNotifications {
             context = context,
             channel = CHANNEL_REDO,
             reminder = reminder,
-            title = "На доработку: ${reminder.title}",
-            text = "${reminder.subjectTitle} · преподаватель вернул работу",
+            title = Strings.get(R.string.notif_redo_title, reminder.title),
+            text = Strings.get(R.string.notif_redo_text, reminder.subjectTitle),
         )
     }
 
@@ -110,9 +111,9 @@ object ReminderNotifications {
     private fun leftText(millisLeft: Long): String {
         val hours = ceil(millisLeft / 3_600_000.0).toLong()
         return when {
-            hours <= 1L -> "сдать меньше чем через час"
-            hours < 24L -> "сдать через $hours ч"
-            else -> "сдать завтра"
+            hours <= 1L -> Strings.get(R.string.left_less_hour)
+            hours < 24L -> Strings.get(R.string.left_hours, hours.toInt())
+            else -> Strings.get(R.string.left_tomorrow)
         }
     }
 }

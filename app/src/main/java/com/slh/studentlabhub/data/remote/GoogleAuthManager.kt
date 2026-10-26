@@ -66,7 +66,7 @@ class GoogleAuthManager(context: Context) {
         if (hasResolution() && intent != null) {
             return AuthState.NeedsUserConsent(intent)
         }
-        val token = accessToken ?: throw IllegalStateException("Google не вернул токен доступа")
+        val token = accessToken ?: throw IllegalStateException("Google did not return an access token")
         return AuthState.Authorized(token)
     }
 

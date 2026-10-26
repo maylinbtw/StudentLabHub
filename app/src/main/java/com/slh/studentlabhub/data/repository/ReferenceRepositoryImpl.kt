@@ -21,6 +21,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import java.io.IOException
 import java.util.UUID
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
+import com.slh.studentlabhub.data.reference.ReferenceSeedEn
 
 class ReferenceRepositoryImpl(
     private val database: AppDatabase,
@@ -61,7 +64,14 @@ class ReferenceRepositoryImpl(
         }
 
     override suspend fun ensureSeeded() {
-        if (session.referenceVersion >= ReferenceSeed.VERSION && dao.countBuiltinEntries() > 0) return
+        val language = if (Strings.isRussian()) "ru" else "en"
+        if (session.referenceVersion >= ReferenceSeed.VERSION &&
+            session.referenceLanguage == language &&
+            dao.countBuiltinEntries() > 0
+        ) {
+            return
+        }
+        val tr: (String) -> String = if (language == "ru") { text -> text } else ReferenceSeedEn::translate
 
         val categories = mutableListOf<RefCategoryEntity>()
         val entries = mutableListOf<RefEntryEntity>()
@@ -71,7 +81,7 @@ class ReferenceRepositoryImpl(
             categories += RefCategoryEntity(
                 id = category.id,
                 tech = category.tech,
-                title = category.title,
+                title = tr(category.title),
                 position = categoryIndex,
             )
             category.entries.forEachIndexed { index, entry ->
@@ -79,9 +89,9 @@ class ReferenceRepositoryImpl(
                     id = "${category.id}_$index",
                     categoryId = category.id,
                     tech = category.tech,
-                    title = entry.title,
-                    description = entry.description,
-                    example = entry.example,
+                    title = tr(entry.title),
+                    description = tr(entry.description),
+                    example = tr(entry.example),
                     position = entryPosition++,
                 )
             }
@@ -92,8 +102,11 @@ class ReferenceRepositoryImpl(
             dao.deleteBuiltinCategories()
             dao.insertCategories(categories)
             dao.insertEntries(entries)
+            dao.renameCustomCategories(Strings.get(R.string.ref_my_notes))
+            dao.renameTldrCategories(Strings.get(R.string.ref_tldr_category))
         }
         session.referenceVersion = ReferenceSeed.VERSION
+        session.referenceLanguage = language
     }
 
     override suspend fun saveCustomEntry(draft: RefEntryDraft) {
@@ -129,17 +142,17 @@ class ReferenceRepositoryImpl(
         val page = try {
             tldrApi.fetch(command)
         } catch (error: IOException) {
-            return TldrResult.Failed("Не удалось загрузить: нет интернета или сервер недоступен")
+            return TldrResult.Failed(Strings.get(R.string.tldr_load_failed))
         } ?: return TldrResult.NotFound
 
         val parsed = TldrParser.parse(command, page.markdown)
-        val languageNote = if (page.language == "ru") "" else " (англ.)"
+        val languageNote = if (page.language == "ru" || !Strings.isRussian()) "" else Strings.get(R.string.tldr_english_note)
 
         database.withTransaction {
             ensureCategory(
                 id = RefCategoryIds.TLDR_LINUX,
                 tech = RefTech.LINUX,
-                title = "Загружено из tldr-pages",
+                title = Strings.get(R.string.ref_tldr_category),
                 position = TLDR_CATEGORY_POSITION,
             )
             dao.insertEntry(
@@ -171,7 +184,7 @@ class ReferenceRepositoryImpl(
         ensureCategory(
             id = id,
             tech = tech,
-            title = "Мои заметки",
+            title = Strings.get(R.string.ref_my_notes),
             position = CUSTOM_CATEGORY_POSITION,
         )
         return id

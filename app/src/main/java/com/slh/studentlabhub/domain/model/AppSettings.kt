@@ -11,6 +11,12 @@ enum class AccentColor {
     PINK,
 }
 
+enum class AppLanguage {
+    SYSTEM,
+    RU,
+    EN,
+}
+
 enum class ThemeMode {
     DARK,
     LIGHT,
@@ -50,6 +56,7 @@ data class AppSettings(
     val redoAlerts: Boolean = true,
     val backgroundSync: Boolean = true,
     val largeText: Boolean = false,
+    val language: AppLanguage = AppLanguage.SYSTEM,
 ) {
     val needsBackgroundWork: Boolean
         get() = remindersEnabled || redoAlerts || backgroundSync

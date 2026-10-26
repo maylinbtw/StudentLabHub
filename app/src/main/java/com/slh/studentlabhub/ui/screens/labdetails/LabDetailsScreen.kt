@@ -84,6 +84,8 @@ import com.slh.studentlabhub.ui.theme.SlhTextSecondary
 import com.slh.studentlabhub.ui.theme.SlhContent
 import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
 import java.util.Locale
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
 
 private data class StatusChipStyle(
     val leading: String,
@@ -96,7 +98,7 @@ private data class StatusChipStyle(
 private fun LabStatus.chipStyle(type: WorkType): StatusChipStyle = when (this) {
     LabStatus.NOT_DONE -> StatusChipStyle(
         leading = "○",
-        label = "Не сдел.",
+        label = Strings.get(R.string.status_not_done_short),
         selectedContainer = SlhOutline,
         selectedContent = SlhContent,
         selectedBorder = SlhTextMuted,
@@ -104,7 +106,7 @@ private fun LabStatus.chipStyle(type: WorkType): StatusChipStyle = when (this) {
 
     LabStatus.DONE -> StatusChipStyle(
         leading = "✓",
-        label = "Сделано",
+        label = Strings.get(R.string.status_done_cap),
         selectedContainer = SlhContent,
         selectedContent = SlhOnContent,
         selectedBorder = SlhContent,
@@ -183,8 +185,8 @@ fun LabDetailsScreen(
             .background(SlhBackground),
     ) {
         ScreenHeader(
-            overline = "Детали работы",
-            title = if (state.isLoading) "" else "$prefix №${state.number}",
+            overline = Strings.get(R.string.work_details),
+            title = if (state.isLoading) "" else Strings.get(R.string.work_number, prefix, state.number),
             onBackClick = onBack,
             actionIcon = SlhIcon.Trash,
             onActionClick = { showDeleteConfirm = true },
@@ -217,7 +219,7 @@ fun LabDetailsScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "$prefix №${state.number} · ${state.title}",
+                        text = Strings.get(R.string.work_display_name, prefix, state.number, state.title),
                         color = SlhContent,
                         fontFamily = SlhSans,
                         fontWeight = FontWeight.Bold,
@@ -234,7 +236,7 @@ fun LabDetailsScreen(
                 }
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Предмет: ${state.subjectTitle}",
+                    text = Strings.get(R.string.subject_label, state.subjectTitle),
                     color = SlhTextMuted,
                     fontFamily = SlhSans,
                     fontSize = 12.sp,
@@ -244,8 +246,9 @@ fun LabDetailsScreen(
                 if (state.needsRedo) {
                     Spacer(modifier = Modifier.height(14.dp))
                     Text(
-                        text = "Преподаватель вернул работу на доработку" +
-                            (state.scoreInput.takeIf { it.isNotEmpty() }?.let { " · отметка $it/10" } ?: ""),
+                        text = state.scoreInput.takeIf { it.isNotEmpty() }
+                            ?.let { Strings.get(R.string.redo_notice_grade, it) }
+                            ?: Strings.get(R.string.redo_notice),
                         color = SlhDanger,
                         fontFamily = SlhSans,
                         fontWeight = FontWeight.Bold,
@@ -260,7 +263,7 @@ fun LabDetailsScreen(
 
                 Spacer(modifier = Modifier.height(22.dp))
                 SectionLabel(
-                    text = "СТАТУС · СДЕЛАНО / ${state.type.completedLabel.uppercase(Locale.getDefault())}",
+                    text = Strings.get(R.string.status_section, state.type.completedLabel.uppercase(Locale.getDefault())),
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Row(
@@ -278,7 +281,7 @@ fun LabDetailsScreen(
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
-                SectionLabel(text = "СРОК СДАЧИ")
+                SectionLabel(text = Strings.get(R.string.section_deadline))
                 Spacer(modifier = Modifier.height(10.dp))
                 DeadlineField(
                     deadline = state.deadline,
@@ -288,7 +291,7 @@ fun LabDetailsScreen(
 
                 if (state.hasScore) {
                     Spacer(modifier = Modifier.height(24.dp))
-                    SectionLabel(text = "ОЦЕНКА (БАЛЛ) · ВВОД ВРУЧНУЮ")
+                    SectionLabel(text = Strings.get(R.string.section_score))
                     Spacer(modifier = Modifier.height(10.dp))
                     ScoreField(
                         value = state.scoreInput,
@@ -297,7 +300,7 @@ fun LabDetailsScreen(
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
-                SectionLabel(text = "ЗАМЕТКИ · ВОПРОСЫ ПРЕПОД.")
+                SectionLabel(text = Strings.get(R.string.section_notes))
                 Spacer(modifier = Modifier.height(10.dp))
                 NotesField(
                     value = state.notes,
@@ -305,7 +308,7 @@ fun LabDetailsScreen(
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
-                SectionLabel(text = "ФОТО · ОТЧЁТ, ДОСКА, ЗАДАНИЕ · ${state.photos.size}")
+                SectionLabel(text = Strings.get(R.string.photos_section, state.photos.size))
                 Spacer(modifier = Modifier.height(10.dp))
                 LabPhotosRow(
                     photos = state.photos,
@@ -314,7 +317,7 @@ fun LabDetailsScreen(
                     onDelete = onDeletePhoto,
                 )
                 Text(
-                    text = "Фото сохраняются сразу, без кнопки «Сохранить»",
+                    text = Strings.get(R.string.photos_autosave),
                     color = SlhTextMuted,
                     fontFamily = SlhSans,
                     fontSize = 11.sp,
@@ -368,14 +371,14 @@ fun LabDetailsScreen(
             containerColor = SlhSurface,
             title = {
                 Text(
-                    text = "Удалить работу?",
+                    text = Strings.get(R.string.delete_work_q),
                     color = SlhContent,
                     style = MaterialTheme.typography.titleMedium,
                 )
             },
             text = {
                 Text(
-                    text = "$prefix №${state.number} · ${state.title} будет удалена вместе с заметками.",
+                    text = Strings.get(R.string.delete_work_text, Strings.get(R.string.work_display_name, prefix, state.number, state.title)),
                     color = SlhTextSecondary,
                     style = MaterialTheme.typography.bodyMedium,
                 )
@@ -388,7 +391,7 @@ fun LabDetailsScreen(
                     },
                 ) {
                     Text(
-                        text = "УДАЛИТЬ",
+                        text = Strings.get(R.string.action_delete),
                         color = SlhAccent,
                         style = MaterialTheme.typography.labelLarge,
                     )
@@ -397,7 +400,7 @@ fun LabDetailsScreen(
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }) {
                     Text(
-                        text = "ОТМЕНА",
+                        text = Strings.get(R.string.action_cancel),
                         color = SlhTextMuted,
                         style = MaterialTheme.typography.labelLarge,
                     )
@@ -421,7 +424,7 @@ private fun ClassroomButton(onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "Открыть в Google Classroom",
+            text = Strings.get(R.string.open_in_classroom),
             color = SlhContent,
             fontFamily = SlhSans,
             fontSize = 14.sp,
@@ -457,7 +460,7 @@ private fun DeadlineField(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = deadline?.let { "до ${it.formatDayMonth()}" } ?: "Не задан — нажми, чтобы выбрать",
+            text = deadline?.let { Strings.get(R.string.due_until, it.formatDayMonth()) } ?: Strings.get(R.string.deadline_not_set),
             color = if (deadline != null) SlhContent else SlhTextMuted,
             fontFamily = SlhMono,
             fontWeight = if (deadline != null) FontWeight.Bold else FontWeight.Normal,
@@ -613,7 +616,7 @@ private fun NotesField(
         ) {
             if (value.isEmpty()) {
                 Text(
-                    text = "— Вопросы преподавателя\n— Что доделать к защите",
+                    text = Strings.get(R.string.notes_placeholder),
                     color = SlhTextDisabled,
                     fontFamily = SlhSans,
                     fontSize = 14.sp,
@@ -682,7 +685,7 @@ private fun SaveButton(
                 )
             } else {
                 Text(
-                    text = "СОХРАНИТЬ",
+                    text = Strings.get(R.string.action_save),
                     color = if (enabled) SlhOnContent else SlhTextMuted,
                     style = MaterialTheme.typography.labelLarge,
                 )
@@ -706,7 +709,7 @@ private fun TitleEditDialog(
         containerColor = SlhSurface,
         title = {
             Text(
-                text = "Название работы",
+                text = Strings.get(R.string.work_title_hint),
                 color = SlhContent,
                 style = MaterialTheme.typography.titleMedium,
             )
@@ -740,7 +743,7 @@ private fun TitleEditDialog(
                 enabled = draft.isNotBlank(),
             ) {
                 Text(
-                    text = "ГОТОВО",
+                    text = Strings.get(R.string.action_done),
                     color = if (draft.isNotBlank()) SlhAccent else SlhTextDisabled,
                     style = MaterialTheme.typography.labelLarge,
                 )
@@ -749,7 +752,7 @@ private fun TitleEditDialog(
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text(
-                    text = "ОТМЕНА",
+                    text = Strings.get(R.string.action_cancel),
                     color = SlhTextMuted,
                     style = MaterialTheme.typography.labelLarge,
                 )

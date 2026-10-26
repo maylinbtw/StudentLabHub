@@ -10,6 +10,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import com.slh.studentlabhub.i18n.Strings
+import androidx.compose.ui.platform.LocalContext
 
 val SlhShapes = Shapes(
     extraSmall = RoundedCornerShape(4.dp),
@@ -20,6 +22,7 @@ val SlhShapes = Shapes(
 
 @Composable
 fun StudentLabHubTheme(content: @Composable () -> Unit) {
+    Strings.ensureInitialized(LocalContext.current)
     val colorScheme = if (SlhPalette.isDark) {
         darkColorScheme(
             primary = SlhAccent,

@@ -38,6 +38,8 @@ import com.slh.studentlabhub.notifications.collectReminders
 import com.slh.studentlabhub.ui.components.daysUntil
 import com.slh.studentlabhub.ui.components.relativeDueLabel
 import com.slh.studentlabhub.ui.theme.colorFor
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
 
 private const val MAX_ITEMS = 4
 
@@ -106,7 +108,7 @@ private fun WidgetContent(
             )
             Spacer(modifier = GlanceModifier.width(8.dp))
             Text(
-                text = "ДЕДЛАЙНЫ",
+                text = Strings.get(R.string.widget_deadlines_caps),
                 style = TextStyle(
                     color = muted,
                     fontSize = 11.sp,
@@ -129,7 +131,7 @@ private fun WidgetContent(
 
         if (redoCount > 0) {
             Text(
-                text = "$redoCount на доработку",
+                text = Strings.get(R.string.redo_count, redoCount),
                 style = TextStyle(color = accentColor, fontSize = 12.sp, fontWeight = FontWeight.Bold),
             )
             Spacer(modifier = GlanceModifier.height(6.dp))
@@ -137,7 +139,7 @@ private fun WidgetContent(
 
         if (upcoming.isEmpty()) {
             Text(
-                text = "Дедлайнов нет — можно выдохнуть",
+                text = Strings.get(R.string.widget_no_deadlines),
                 style = TextStyle(color = muted, fontSize = 12.sp),
             )
         }

@@ -50,6 +50,8 @@ import com.slh.studentlabhub.ui.theme.SlhSurface
 import com.slh.studentlabhub.ui.theme.SlhTextMuted
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
 
 @Composable
 fun LabPhotosRow(
@@ -117,7 +119,7 @@ private fun PhotoThumb(
         if (bitmap != null) {
             Image(
                 bitmap = bitmap,
-                contentDescription = "Фото к работе",
+                contentDescription = Strings.get(R.string.photo_description),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.size(size),
             )
@@ -150,7 +152,7 @@ private fun AddPhotoTile(
             SlhIconView(icon = SlhIcon.Plus, color = SlhTextMuted, size = 14.dp)
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "фото",
+                text = Strings.get(R.string.photo_word),
                 color = SlhTextMuted,
                 fontFamily = SlhMono,
                 fontSize = 11.sp,
@@ -194,7 +196,7 @@ private fun PhotoViewer(
                 } else {
                     Image(
                         bitmap = bitmap,
-                        contentDescription = "Фото к работе",
+                        contentDescription = Strings.get(R.string.photo_description),
                         contentScale = ContentScale.Fit,
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -206,7 +208,7 @@ private fun PhotoViewer(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = if (confirm) "НАЖМИ ЕЩЁ РАЗ — УДАЛИТЬ" else "УДАЛИТЬ",
+                    text = if (confirm) Strings.get(R.string.photo_delete_confirm) else Strings.get(R.string.action_delete),
                     color = SlhDanger,
                     fontFamily = SlhMono,
                     fontWeight = FontWeight.Bold,
@@ -219,7 +221,7 @@ private fun PhotoViewer(
                         .padding(8.dp),
                 )
                 Text(
-                    text = "ЗАКРЫТЬ",
+                    text = Strings.get(R.string.action_close),
                     color = SlhTextMuted,
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier

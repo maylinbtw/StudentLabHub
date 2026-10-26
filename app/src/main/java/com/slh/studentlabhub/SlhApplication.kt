@@ -2,6 +2,7 @@ package com.slh.studentlabhub
 
 import android.app.Application
 import com.slh.studentlabhub.di.AppContainer
+import com.slh.studentlabhub.i18n.Strings
 import com.slh.studentlabhub.notifications.ReminderNotifications
 import com.slh.studentlabhub.notifications.ReminderScheduler
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -15,10 +16,17 @@ class SlhApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         container = AppContainer(this)
-        ReminderNotifications.createChannels(this)
+        Strings.init(this) { container.settingsRepository.settings.value.language }
         container.applicationScope.launch {
-            container.referenceRepository.ensureSeeded()
             runCatching { container.classroomRepository.mergeIntoSubjects() }
+        }
+        container.applicationScope.launch {
+            container.settingsRepository.settings
+                .distinctUntilChangedBy { it.language }
+                .collect {
+                    ReminderNotifications.createChannels(this@SlhApplication)
+                    runCatching { container.referenceRepository.ensureSeeded() }
+                }
         }
         container.applicationScope.launch {
             container.settingsRepository.settings

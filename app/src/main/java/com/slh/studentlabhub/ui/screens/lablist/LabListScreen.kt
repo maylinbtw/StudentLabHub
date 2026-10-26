@@ -80,6 +80,8 @@ import com.slh.studentlabhub.ui.theme.SlhTextSecondary
 import com.slh.studentlabhub.ui.theme.SlhContent
 import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
 import java.util.Locale
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
 
 @Composable
 fun LabListRoute(
@@ -140,9 +142,9 @@ fun LabListScreen(
     ) {
         ScreenHeader(
             overline = when {
-                isArchived -> "Предмет · в архиве"
-                linkedCourseId != null -> "Предмет · Google Classroom"
-                else -> "Предмет"
+                isArchived -> Strings.get(R.string.subject_archived_overline)
+                linkedCourseId != null -> Strings.get(R.string.subject_classroom_overline)
+                else -> Strings.get(R.string.subject_overline)
             },
             title = details?.summary?.title?.uppercase(Locale.getDefault()) ?: "",
             onBackClick = onBack,
@@ -157,7 +159,7 @@ fun LabListScreen(
                     DropdownMenuItem(
                         text = {
                             Text(
-                                text = "Редактировать предмет",
+                                text = Strings.get(R.string.edit_subject),
                                 color = SlhContent,
                                 fontFamily = SlhSans,
                                 fontSize = 14.sp,
@@ -172,7 +174,7 @@ fun LabListScreen(
                         DropdownMenuItem(
                             text = {
                                 Text(
-                                    text = "Открыть курс в Classroom",
+                                    text = Strings.get(R.string.open_course_in_classroom),
                                     color = SlhContent,
                                     fontFamily = SlhSans,
                                     fontSize = 14.sp,
@@ -187,7 +189,7 @@ fun LabListScreen(
                     DropdownMenuItem(
                         text = {
                             Text(
-                                text = if (isArchived) "Вернуть из архива" else "В архив",
+                                text = if (isArchived) Strings.get(R.string.restore_from_archive) else Strings.get(R.string.move_to_archive),
                                 color = SlhContent,
                                 fontFamily = SlhSans,
                                 fontSize = 14.sp,
@@ -201,7 +203,7 @@ fun LabListScreen(
                     DropdownMenuItem(
                         text = {
                             Text(
-                                text = "Удалить предмет",
+                                text = Strings.get(R.string.delete_subject),
                                 color = SlhDanger,
                                 fontFamily = SlhSans,
                                 fontSize = 14.sp,
@@ -238,9 +240,9 @@ fun LabListScreen(
                     if (isArchived) {
                         item(key = "archived_banner") {
                             LinkBanner(
-                                overline = "В АРХИВЕ",
-                                title = "Вернуть предмет в список",
-                                subtitle = "Сейчас он скрыт из «Сегодня» и «Предметов»",
+                                overline = Strings.get(R.string.archived_banner_overline),
+                                title = Strings.get(R.string.archived_banner_title),
+                                subtitle = Strings.get(R.string.archived_banner_subtitle),
                                 onClick = onRestore,
                                 accent = false,
                             )
@@ -256,7 +258,7 @@ fun LabListScreen(
                         item(key = "teacher") {
                             Spacer(modifier = Modifier.height(12.dp))
                             Text(
-                                text = "Преподаватель: $teacher",
+                                text = Strings.get(R.string.teacher_name, teacher),
                                 color = SlhTextMuted,
                                 style = MaterialTheme.typography.bodySmall,
                             )
@@ -265,7 +267,7 @@ fun LabListScreen(
                     if (details.labs.isEmpty()) {
                         item(key = "empty") {
                             Text(
-                                text = "В этом предмете пока нет работ",
+                                text = Strings.get(R.string.subject_no_works),
                                 color = SlhTextMuted,
                                 style = MaterialTheme.typography.bodyMedium,
                                 textAlign = TextAlign.Center,
@@ -306,7 +308,7 @@ fun LabListScreen(
                         item(key = "swipe_hint") {
                             Spacer(modifier = Modifier.height(10.dp))
                             Text(
-                                text = "Свайп вправо — следующий статус, влево — вернуть назад",
+                                text = Strings.get(R.string.swipe_hint),
                                 color = SlhTextMuted,
                                 style = MaterialTheme.typography.bodySmall,
                                 textAlign = TextAlign.Center,
@@ -349,14 +351,14 @@ fun LabListScreen(
             containerColor = SlhSurface,
             title = {
                 Text(
-                    text = "Удалить предмет?",
+                    text = Strings.get(R.string.delete_subject_q),
                     color = SlhContent,
                     style = MaterialTheme.typography.titleMedium,
                 )
             },
             text = {
                 Text(
-                    text = "Предмет «${details?.summary?.title.orEmpty()}» и все его работы будут удалены без возможности восстановления.",
+                    text = Strings.get(R.string.delete_subject_text, details?.summary?.title.orEmpty()),
                     color = SlhTextSecondary,
                     style = MaterialTheme.typography.bodyMedium,
                 )
@@ -369,7 +371,7 @@ fun LabListScreen(
                     },
                 ) {
                     Text(
-                        text = "УДАЛИТЬ",
+                        text = Strings.get(R.string.action_delete),
                         color = SlhDanger,
                         style = MaterialTheme.typography.labelLarge,
                     )
@@ -378,7 +380,7 @@ fun LabListScreen(
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }) {
                     Text(
-                        text = "ОТМЕНА",
+                        text = Strings.get(R.string.action_cancel),
                         color = SlhTextMuted,
                         style = MaterialTheme.typography.labelLarge,
                     )
@@ -397,17 +399,17 @@ private fun StatsRow(summary: SubjectSummary) {
     ) {
         StatColumn(
             value = summary.averageScore?.let { String.format(Locale.US, "%.1f", it) } ?: "—",
-            label = "СР. БАЛЛ",
+            label = Strings.get(R.string.stat_avg),
             valueColor = SlhAccent,
         )
         StatColumn(
             value = "${summary.doneLabs}/${summary.totalLabs}",
-            label = "СДЕЛАНО",
+            label = Strings.get(R.string.stat_done),
             valueColor = SlhContent,
         )
         StatColumn(
             value = "${summary.defendedLabs}/${summary.totalLabs}",
-            label = "ЗАЩИЩЕНО",
+            label = Strings.get(R.string.stat_defended),
             valueColor = SlhContent,
         )
     }
@@ -448,8 +450,8 @@ private fun LabStatus.previous(): LabStatus? = when (this) {
 }
 
 private fun statusLabel(status: LabStatus, type: WorkType): String = when (status) {
-    LabStatus.NOT_DONE -> "не сделано"
-    LabStatus.DONE -> "сделано"
+    LabStatus.NOT_DONE -> Strings.get(R.string.status_not_done)
+    LabStatus.DONE -> Strings.get(R.string.status_done)
     LabStatus.DEFENDED -> type.completedLabel.lowercase()
 }
 
@@ -483,12 +485,12 @@ private fun LabRow(
             )
             when {
                 lab.needsRedo -> Text(
-                    text = "на доработку",
+                    text = Strings.get(R.string.needs_redo),
                     color = SlhDanger,
                     style = MaterialTheme.typography.bodySmall,
                 )
                 dueText != null -> Text(
-                    text = "срок: $dueText",
+                    text = Strings.get(R.string.due_label, dueText),
                     color = if (isLate) SlhDanger else SlhTextMuted,
                     style = MaterialTheme.typography.bodySmall,
                 )

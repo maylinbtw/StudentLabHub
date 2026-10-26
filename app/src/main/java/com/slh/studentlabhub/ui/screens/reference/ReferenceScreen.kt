@@ -53,6 +53,8 @@ import com.slh.studentlabhub.ui.theme.SlhTextMuted
 import com.slh.studentlabhub.ui.theme.SlhTextSecondary
 import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
 import java.util.Locale
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
 
 @Composable
 fun ReferenceRoute(
@@ -105,15 +107,15 @@ fun ReferenceScreen(
             .background(SlhBackground),
     ) {
         ScreenHeader(
-            overline = "Работает без интернета",
-            title = "СПРАВОЧНИК",
+            overline = Strings.get(R.string.reference_overline),
+            title = Strings.get(R.string.reference_title),
             actionIcon = SlhIcon.Plus,
             onActionClick = { openEditor(null) },
         )
         ReferenceSearchField(
             query = state.query,
             onQueryChange = onQueryChange,
-            placeholder = "Поиск команд, синтаксиса…",
+            placeholder = Strings.get(R.string.reference_search_hint),
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
         )
 
@@ -195,7 +197,7 @@ private fun LinuxCategories(
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
     ) {
         item(key = "label") {
-            SectionLabel(text = "КАТЕГОРИИ КОМАНД · ${categories.sumOf { it.entryTitles.size }}")
+            SectionLabel(text = Strings.get(R.string.command_categories, categories.sumOf { it.entryTitles.size }))
             Spacer(modifier = Modifier.height(10.dp))
         }
         items(items = categories, key = { it.id }) { category ->
@@ -207,7 +209,7 @@ private fun LinuxCategories(
         }
         item(key = "footer") {
             Text(
-                text = "Нет нужной команды? Найди её через поиск — её можно скачать из tldr-pages. Свою статью добавь кнопкой «+».",
+                text = Strings.get(R.string.reference_tip),
                 color = SlhTextMuted,
                 style = MaterialTheme.typography.bodySmall,
                 textAlign = TextAlign.Center,
@@ -249,7 +251,7 @@ private fun LanguageCheatSheet(
         }
         item(key = "hint") {
             Text(
-                text = "Нажми на карточку, чтобы скопировать пример",
+                text = Strings.get(R.string.tap_to_copy),
                 color = SlhTextMuted,
                 style = MaterialTheme.typography.bodySmall,
                 textAlign = TextAlign.Center,
@@ -273,13 +275,13 @@ private fun SearchResults(
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
     ) {
         item(key = "count") {
-            SectionLabel(text = "НАЙДЕНО: ${results.size}")
+            SectionLabel(text = Strings.get(R.string.found_count, results.size))
             Spacer(modifier = Modifier.height(10.dp))
         }
         if (results.isEmpty()) {
             item(key = "empty") {
                 Text(
-                    text = "В справочнике такого нет.",
+                    text = Strings.get(R.string.reference_not_found),
                     color = SlhTextMuted,
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
@@ -336,7 +338,7 @@ private fun TldrBlock(
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = "Загружаем «$command» из tldr-pages…",
+                        text = Strings.get(R.string.tldr_loading, command),
                         color = SlhTextSecondary,
                         style = MaterialTheme.typography.bodySmall,
                     )
@@ -345,7 +347,7 @@ private fun TldrBlock(
 
             is TldrState.Saved -> {
                 Text(
-                    text = "«${tldrState.title}» сохранено в «Загружено из tldr-pages» и доступно офлайн",
+                    text = Strings.get(R.string.tldr_saved, tldrState.title),
                     color = SlhTextSecondary,
                     style = MaterialTheme.typography.bodySmall,
                     textAlign = TextAlign.Center,
@@ -365,7 +367,7 @@ private fun TldrBlock(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "↓ найти «$command» в tldr-pages",
+                        text = Strings.get(R.string.tldr_find, command),
                         color = SlhAccent,
                         fontFamily = SlhMono,
                         fontWeight = FontWeight.Bold,
@@ -373,9 +375,9 @@ private fun TldrBlock(
                     )
                 }
                 val message = when (tldrState) {
-                    is TldrState.NotFound -> "В tldr-pages нет команды «${tldrState.command}»"
+                    is TldrState.NotFound -> Strings.get(R.string.tldr_not_found, tldrState.command)
                     is TldrState.Failed -> tldrState.message
-                    else -> "Нужен интернет один раз — потом статья доступна офлайн"
+                    else -> Strings.get(R.string.tldr_need_internet)
                 }
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(

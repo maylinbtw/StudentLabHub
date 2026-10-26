@@ -15,6 +15,8 @@ import com.slh.studentlabhub.domain.model.WorkType
 import com.slh.studentlabhub.domain.repository.LabRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import com.slh.studentlabhub.R
+import com.slh.studentlabhub.i18n.Strings
 
 class LabRepositoryImpl(
     private val database: AppDatabase,
@@ -167,41 +169,41 @@ class LabRepositoryImpl(
             if (subjectDao.count() > 0) return@withTransaction false
 
             insertSubjectWithWorks(
-                title = "ТРПО",
+                title = Strings.pick("ТРПО", "Software Engineering"),
                 semester = 4,
                 works = listOf(
-                    SeedWork(WorkType.LAB, "Анализ задачи", LabStatus.DEFENDED),
-                    SeedWork(WorkType.LAB, "Требования", LabStatus.DEFENDED),
-                    SeedWork(WorkType.LAB, "Функц. требования", LabStatus.DEFENDED),
-                    SeedWork(WorkType.LAB, "Модель ЖЦ", LabStatus.DONE),
-                    SeedWork(WorkType.LAB, "Структурное пр.", LabStatus.DONE),
-                    SeedWork(WorkType.LAB, "UX-прототипы", LabStatus.NOT_DONE),
-                    SeedWork(WorkType.PRACTICE, "Диаграмма вариантов использования", LabStatus.DEFENDED, 9),
-                    SeedWork(WorkType.PRACTICE, "Диаграмма классов", LabStatus.DEFENDED, 8),
-                    SeedWork(WorkType.PRACTICE, "Тест-кейсы", LabStatus.NOT_DONE),
+                    SeedWork(WorkType.LAB, Strings.pick("Анализ задачи", "Problem analysis"), LabStatus.DEFENDED),
+                    SeedWork(WorkType.LAB, Strings.pick("Требования", "Requirements"), LabStatus.DEFENDED),
+                    SeedWork(WorkType.LAB, Strings.pick("Функц. требования", "Functional requirements"), LabStatus.DEFENDED),
+                    SeedWork(WorkType.LAB, Strings.pick("Модель ЖЦ", "Life cycle model"), LabStatus.DONE),
+                    SeedWork(WorkType.LAB, Strings.pick("Структурное пр.", "Structured design"), LabStatus.DONE),
+                    SeedWork(WorkType.LAB, Strings.pick("UX-прототипы", "UX prototypes"), LabStatus.NOT_DONE),
+                    SeedWork(WorkType.PRACTICE, Strings.pick("Диаграмма вариантов использования", "Use case diagram"), LabStatus.DEFENDED, 9),
+                    SeedWork(WorkType.PRACTICE, Strings.pick("Диаграмма классов", "Class diagram"), LabStatus.DEFENDED, 8),
+                    SeedWork(WorkType.PRACTICE, Strings.pick("Тест-кейсы", "Test cases"), LabStatus.NOT_DONE),
                 ),
             )
             insertSubjectWithWorks(
-                title = "Операционные системы",
+                title = Strings.pick("Операционные системы", "Operating systems"),
                 semester = 4,
                 works = listOf(
-                    SeedWork(WorkType.LAB, "Файловая система Linux", LabStatus.DEFENDED),
-                    SeedWork(WorkType.LAB, "Процессы", LabStatus.DEFENDED),
-                    SeedWork(WorkType.LAB, "Потоки", LabStatus.DONE),
-                    SeedWork(WorkType.LAB, "Синхронизация", LabStatus.NOT_DONE),
-                    SeedWork(WorkType.PRACTICE, "Команды Linux", LabStatus.DEFENDED, 7),
-                    SeedWork(WorkType.PRACTICE, "Shell-скрипты", LabStatus.DEFENDED, 8),
+                    SeedWork(WorkType.LAB, Strings.pick("Файловая система Linux", "Linux file system"), LabStatus.DEFENDED),
+                    SeedWork(WorkType.LAB, Strings.pick("Процессы", "Processes"), LabStatus.DEFENDED),
+                    SeedWork(WorkType.LAB, Strings.pick("Потоки", "Threads"), LabStatus.DONE),
+                    SeedWork(WorkType.LAB, Strings.pick("Синхронизация", "Synchronization"), LabStatus.NOT_DONE),
+                    SeedWork(WorkType.PRACTICE, Strings.pick("Команды Linux", "Linux commands"), LabStatus.DEFENDED, 7),
+                    SeedWork(WorkType.PRACTICE, Strings.pick("Shell-скрипты", "Shell scripts"), LabStatus.DEFENDED, 8),
                 ),
             )
             insertSubjectWithWorks(
-                title = "Программирование Java",
+                title = Strings.pick("Программирование Java", "Java programming"),
                 semester = 4,
                 works = listOf(
-                    SeedWork(WorkType.LAB, "Основы синтаксиса", LabStatus.DEFENDED),
-                    SeedWork(WorkType.LAB, "ООП", LabStatus.DEFENDED),
-                    SeedWork(WorkType.LAB, "Коллекции", LabStatus.DEFENDED),
-                    SeedWork(WorkType.PRACTICE, "Исключения", LabStatus.DEFENDED, 9),
-                    SeedWork(WorkType.PRACTICE, "Ввод-вывод", LabStatus.DEFENDED, 9),
+                    SeedWork(WorkType.LAB, Strings.pick("Основы синтаксиса", "Syntax basics"), LabStatus.DEFENDED),
+                    SeedWork(WorkType.LAB, Strings.pick("ООП", "OOP"), LabStatus.DEFENDED),
+                    SeedWork(WorkType.LAB, Strings.pick("Коллекции", "Collections"), LabStatus.DEFENDED),
+                    SeedWork(WorkType.PRACTICE, Strings.pick("Исключения", "Exceptions"), LabStatus.DEFENDED, 9),
+                    SeedWork(WorkType.PRACTICE, Strings.pick("Ввод-вывод", "Input/output"), LabStatus.DEFENDED, 9),
                 ),
             )
             true
@@ -234,8 +236,8 @@ class LabRepositoryImpl(
     }
 
     private fun defaultTitle(type: WorkType): String = when (type) {
-        WorkType.LAB -> "Лабораторная работа"
-        WorkType.PRACTICE -> "Практическая работа"
+        WorkType.LAB -> Strings.get(R.string.default_lab_title)
+        WorkType.PRACTICE -> Strings.get(R.string.default_practice_title)
     }
 
     private data class SeedWork(
