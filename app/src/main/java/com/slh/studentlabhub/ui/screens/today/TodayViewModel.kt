@@ -25,6 +25,15 @@ import java.time.temporal.ChronoUnit
 import com.slh.studentlabhub.R
 import com.slh.studentlabhub.i18n.Strings
 import androidx.annotation.StringRes
+import com.slh.studentlabhub.data.schedule.DefenseQueue
+import com.slh.studentlabhub.data.schedule.SubjectMatcher
+import com.slh.studentlabhub.domain.model.Lesson
+import com.slh.studentlabhub.domain.model.QueuedWork
+import com.slh.studentlabhub.domain.model.SubjectSummary
+import com.slh.studentlabhub.domain.repository.ScheduleRepository
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
 
 enum class AgendaGroup(@StringRes val titleRes: Int) {
     REDO(R.string.group_redo),
@@ -66,6 +75,25 @@ data class TodayUiState(
     val isSyncing: Boolean = false,
     val errorMessage: String? = null,
     val lastSyncAt: Long? = null,
+    val schedule: ScheduleBlock = ScheduleBlock(),
+)
+
+data class ScheduleBlock(
+    val isConfigured: Boolean = false,
+    val date: LocalDate? = null,
+    val lessons: List<Lesson> = emptyList(),
+    val currentLessonId: Long? = null,
+    val defense: Map<Long, List<QueuedWork>> = emptyMap(),
+    val lessonSubjectIds: Map<Long, Long> = emptyMap(),
+    val hasMoreDays: Boolean = false,
+    val syncAt: Long? = null,
+    val isSyncing: Boolean = false,
+    val errorMessage: String? = null,
+)
+
+private data class ScheduleSyncState(
+    val isSyncing: Boolean = false,
+    val errorMessage: String? = null,
 )
 
 private data class SyncState(
@@ -77,24 +105,103 @@ private data class SyncState(
 class TodayViewModel(
     private val classroomRepository: ClassroomRepository,
     labRepository: LabRepository,
+    private val scheduleRepository: ScheduleRepository,
 ) : ViewModel() {
 
     private val syncFlow = MutableStateFlow(SyncState(lastSyncAt = classroomRepository.lastSyncAt))
 
+    private val scheduleSync = MutableStateFlow(ScheduleSyncState())
+
+    private val ticker = flow {
+        while (true) {
+            emit(System.currentTimeMillis())
+            delay(60_000)
+        }
+    }
+
+    private val subjectsFlow = labRepository.observeSubjects()
+
+    private val scheduleFlow = combine(
+        combine(
+            scheduleRepository.observeUpcomingLessons(),
+            scheduleRepository.observeQueuedWorks(),
+            subjectsFlow,
+        ) { lessons, queued, subjects -> Triple(lessons, queued, subjects) },
+        scheduleRepository.lastSyncAt,
+        scheduleSync,
+        ticker,
+    ) { (lessons, queued, subjects), syncAt, syncState, now ->
+        buildSchedule(lessons, queued, subjects, syncAt, syncState, now)
+    }
+
     val uiState: StateFlow<TodayUiState> = combine(
         labRepository.observePendingDeadlines(),
-        labRepository.observeSubjects(),
+        subjectsFlow,
         syncFlow,
-    ) { works, subjects, syncState ->
-        buildState(works, subjects.isNotEmpty(), syncState)
+        scheduleFlow,
+    ) { works, subjects, syncState, schedule ->
+        buildState(works, subjects.isNotEmpty(), syncState).copy(schedule = schedule)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = TodayUiState(),
     )
 
+    init {
+        val last = scheduleRepository.lastSyncAt.value ?: 0L
+        if (System.currentTimeMillis() - last > AUTO_REFRESH_MS) {
+            refreshSchedule()
+        }
+    }
+
     fun onSyncStarted() {
         syncFlow.update { it.copy(isSyncing = true, errorMessage = null) }
+        refreshSchedule()
+    }
+
+    fun refreshSchedule() {
+        if (!scheduleRepository.isConfigured || scheduleSync.value.isSyncing) return
+        scheduleSync.value = ScheduleSyncState(isSyncing = true)
+        viewModelScope.launch {
+            scheduleSync.value = try {
+                scheduleRepository.refresh()
+                ScheduleSyncState()
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                ScheduleSyncState(errorMessage = Strings.get(R.string.schedule_load_failed))
+            }
+        }
+    }
+
+    private fun buildSchedule(
+        lessons: List<Lesson>,
+        queued: List<QueuedWork>,
+        subjects: List<SubjectSummary>,
+        syncAt: Long?,
+        syncState: ScheduleSyncState,
+        now: Long,
+    ): ScheduleBlock {
+        val upcoming = lessons.filter { it.endMillis() > now }
+        val date = upcoming.minOfOrNull { it.date }
+        val dayLessons = if (date == null) emptyList() else lessons.filter { it.date == date }
+        val current = dayLessons.firstOrNull { now >= it.startMillis() && now < it.endMillis() }
+        val subjectIds = dayLessons.mapNotNull { lesson ->
+            subjects.firstOrNull { SubjectMatcher.matches(it.title, it.scheduleTitle, lesson.subject) }
+                ?.let { lesson.id to it.id }
+        }.toMap()
+        return ScheduleBlock(
+            isConfigured = scheduleRepository.isConfigured,
+            date = date,
+            lessons = dayLessons,
+            currentLessonId = current?.id,
+            defense = DefenseQueue.assign(lessons, queued, now),
+            lessonSubjectIds = subjectIds,
+            hasMoreDays = upcoming.any { it.date != date },
+            syncAt = syncAt,
+            isSyncing = syncState.isSyncing,
+            errorMessage = syncState.errorMessage,
+        )
     }
 
     fun onAuthorizationFailed(message: String) {
@@ -184,6 +291,7 @@ class TodayViewModel(
 
     companion object {
         private const val OVERDUE_WINDOW_DAYS = 7L
+        private const val AUTO_REFRESH_MS = 30L * 60 * 1000
 
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
@@ -191,6 +299,7 @@ class TodayViewModel(
                 TodayViewModel(
                     classroomRepository = app.container.classroomRepository,
                     labRepository = app.container.labRepository,
+                    scheduleRepository = app.container.scheduleRepository,
                 )
             }
         }

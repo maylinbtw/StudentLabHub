@@ -13,6 +13,12 @@ class ReminderStore(context: Context) {
             prefs.edit().putStringSet(KEY_NOTIFIED, value.toSet()).apply()
         }
 
+    var scheduleKeys: Set<String>
+        get() = prefs.getStringSet(KEY_SCHEDULE, emptySet())?.toSet().orEmpty()
+        set(value) {
+            prefs.edit().putStringSet(KEY_SCHEDULE, value.toSet()).apply()
+        }
+
     var initialized: Boolean
         get() = prefs.getBoolean(KEY_INITIALIZED, false)
         set(value) {
@@ -23,5 +29,6 @@ class ReminderStore(context: Context) {
         const val PREFS_NAME = "slh_reminders"
         const val KEY_NOTIFIED = "notified_keys"
         const val KEY_INITIALIZED = "initialized"
+        const val KEY_SCHEDULE = "schedule_keys"
     }
 }

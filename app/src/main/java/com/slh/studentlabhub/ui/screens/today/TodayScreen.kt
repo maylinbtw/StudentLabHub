@@ -69,6 +69,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import java.time.YearMonth
+import androidx.compose.foundation.lazy.LazyListScope
+import com.slh.studentlabhub.ui.components.LessonRow
+import com.slh.studentlabhub.ui.components.LinkBanner
+import com.slh.studentlabhub.ui.components.dayLabel
 
 private val ruLocale: Locale
     get() = Locale.getDefault()
@@ -92,6 +96,9 @@ fun TodayRoute(
     onOpenLab: (labId: Long) -> Unit,
     onOpenSubjects: () -> Unit,
     modifier: Modifier = Modifier,
+    onOpenSchedule: () -> Unit = {},
+    onOpenSettings: () -> Unit = {},
+    onOpenSubject: (subjectId: Long) -> Unit = {},
     viewModel: TodayViewModel = viewModel(factory = TodayViewModel.Factory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -113,6 +120,9 @@ fun TodayRoute(
         onRowClick = { row -> onOpenLab(row.labId) },
         onOpenSubjects = onOpenSubjects,
         modifier = modifier,
+        onOpenSchedule = onOpenSchedule,
+        onOpenSettings = onOpenSettings,
+        onOpenSubject = onOpenSubject,
     )
 }
 
@@ -123,6 +133,9 @@ fun TodayScreen(
     onRowClick: (AgendaRow) -> Unit,
     onOpenSubjects: () -> Unit,
     modifier: Modifier = Modifier,
+    onOpenSchedule: () -> Unit = {},
+    onOpenSettings: () -> Unit = {},
+    onOpenSubject: (subjectId: Long) -> Unit = {},
 ) {
     var calendarMode by rememberSaveable { mutableStateOf(false) }
     var monthIndex by rememberSaveable { mutableStateOf(YearMonth.now().toIndex()) }
@@ -158,7 +171,7 @@ fun TodayScreen(
         }
 
         SlhPullRefresh(
-            isRefreshing = state.isSyncing,
+            isRefreshing = state.isSyncing || state.schedule.isSyncing,
             onRefresh = onSyncClick,
         ) {
             LazyColumn(
@@ -178,6 +191,16 @@ fun TodayScreen(
                         )
                         Spacer(modifier = Modifier.height(18.dp))
                     }
+                }
+
+                if (!calendarMode) {
+                    scheduleItems(
+                        schedule = state.schedule,
+                        today = state.today,
+                        onOpenSchedule = onOpenSchedule,
+                        onOpenSettings = onOpenSettings,
+                        onOpenSubject = onOpenSubject,
+                    )
                 }
 
                 if (state.hasSubjects && calendarMode) {
@@ -306,6 +329,92 @@ private fun Summary(state: TodayUiState) {
             color = SlhDanger,
             style = MaterialTheme.typography.bodySmall,
         )
+    }
+}
+
+private fun LazyListScope.scheduleItems(
+    schedule: ScheduleBlock,
+    today: LocalDate,
+    onOpenSchedule: () -> Unit,
+    onOpenSettings: () -> Unit,
+    onOpenSubject: (Long) -> Unit,
+) {
+    if (!schedule.isConfigured) {
+        item(key = "schedule_setup") {
+            LinkBanner(
+                overline = Strings.get(R.string.schedule_banner_overline),
+                title = Strings.get(R.string.schedule_banner_title),
+                subtitle = Strings.get(R.string.schedule_banner_subtitle),
+                onClick = onOpenSettings,
+                accent = false,
+            )
+            Spacer(modifier = Modifier.height(22.dp))
+        }
+        return
+    }
+
+    val date = schedule.date
+    item(key = "schedule_label") {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            SectionLabel(
+                text = if (date == null) {
+                    Strings.get(R.string.schedule_section_empty)
+                } else {
+                    Strings.get(
+                        R.string.schedule_section,
+                        date.dayLabel(today).uppercase(Locale.getDefault()),
+                        schedule.lessons.size,
+                    )
+                },
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                text = Strings.get(R.string.schedule_all),
+                color = SlhAccent,
+                fontFamily = SlhMono,
+                fontWeight = FontWeight.Bold,
+                fontSize = 11.sp,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .clickable(role = Role.Button, onClick = onOpenSchedule)
+                    .padding(horizontal = 6.dp, vertical = 4.dp),
+            )
+        }
+        Spacer(modifier = Modifier.height(2.dp))
+        HorizontalDivider(thickness = 1.dp, color = SlhOutline)
+    }
+    if (schedule.lessons.isEmpty()) {
+        item(key = "schedule_empty") {
+            Text(
+                text = Strings.get(R.string.schedule_no_lessons),
+                color = SlhTextMuted,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(vertical = 12.dp),
+            )
+        }
+    }
+    items(items = schedule.lessons, key = { "lesson_${it.id}" }) { lesson ->
+        val subjectId = schedule.lessonSubjectIds[lesson.id]
+        LessonRow(
+            lesson = lesson,
+            isNow = lesson.id == schedule.currentLessonId,
+            queued = schedule.defense[lesson.id].orEmpty(),
+            onClick = subjectId?.let { id -> { onOpenSubject(id) } },
+        )
+        HorizontalDivider(thickness = 1.dp, color = SlhOutline)
+    }
+    item(key = "schedule_footer") {
+        val status = schedule.errorMessage
+            ?: schedule.syncAt?.let { Strings.get(R.string.schedule_updated_at, it.formatWith(syncFormatter)) }
+        status?.let {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = it,
+                color = if (schedule.errorMessage != null) SlhDanger else SlhTextMuted,
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+        Spacer(modifier = Modifier.height(22.dp))
     }
 }
 

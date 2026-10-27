@@ -7,6 +7,7 @@ import androidx.room.Update
 import com.slh.studentlabhub.data.local.entity.LabEntity
 import com.slh.studentlabhub.data.local.entity.LabWithSubjectTitle
 import kotlinx.coroutines.flow.Flow
+import com.slh.studentlabhub.data.local.entity.LabWithSubjectRef
 
 @Dao
 interface LabDao {
@@ -30,6 +31,17 @@ interface LabDao {
             "ORDER BY labs.deadline ASC",
     )
     fun observePendingDeadlines(): Flow<List<LabWithSubjectTitle>>
+
+    @Query(
+        "SELECT labs.*, subjects.title AS subjectTitle, subjects.scheduleTitle AS scheduleTitle FROM labs " +
+            "INNER JOIN subjects ON subjects.id = labs.subjectId " +
+            "WHERE labs.defendQueued = 1 AND labs.status != 'DEFENDED' AND subjects.archived = 0 " +
+            "ORDER BY labs.type ASC, labs.number ASC",
+    )
+    fun observeQueuedForDefense(): Flow<List<LabWithSubjectRef>>
+
+    @Query("UPDATE labs SET defendQueued = :queued WHERE id = :id")
+    suspend fun setDefendQueued(id: Long, queued: Boolean)
 
     @Query("SELECT * FROM labs WHERE subjectId = :subjectId")
     suspend fun getForSubject(subjectId: Long): List<LabEntity>

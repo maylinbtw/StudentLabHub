@@ -28,6 +28,7 @@ data class Reminder(
 object ReminderNotifications {
     private const val CHANNEL_DEADLINES = "deadlines"
     private const val CHANNEL_REDO = "redo"
+    private const val CHANNEL_SCHEDULE = "schedule"
     private const val ACCENT = 0xFFFF3B30.toInt()
 
     fun createChannels(context: Context) {
@@ -44,6 +45,11 @@ object ReminderNotifications {
                     Strings.get(R.string.channel_redo),
                     NotificationManager.IMPORTANCE_DEFAULT,
                 ).apply { description = Strings.get(R.string.channel_redo_desc) },
+                NotificationChannel(
+                    CHANNEL_SCHEDULE,
+                    Strings.get(R.string.channel_schedule),
+                    NotificationManager.IMPORTANCE_DEFAULT,
+                ).apply { description = Strings.get(R.string.channel_schedule_desc) },
             ),
         )
     }
@@ -60,7 +66,7 @@ object ReminderNotifications {
         post(
             context = context,
             channel = CHANNEL_DEADLINES,
-            reminder = reminder,
+            key = reminder.key,
             title = reminder.title,
             text = "${reminder.subjectTitle} · ${leftText(millisLeft)}",
         )
@@ -70,9 +76,19 @@ object ReminderNotifications {
         post(
             context = context,
             channel = CHANNEL_REDO,
-            reminder = reminder,
+            key = reminder.key,
             title = Strings.get(R.string.notif_redo_title, reminder.title),
             text = Strings.get(R.string.notif_redo_text, reminder.subjectTitle),
+        )
+    }
+
+    fun postSchedule(context: Context, key: String, title: String, text: String) {
+        post(
+            context = context,
+            channel = CHANNEL_SCHEDULE,
+            key = key,
+            title = title,
+            text = text,
         )
     }
 
@@ -80,7 +96,7 @@ object ReminderNotifications {
     private fun post(
         context: Context,
         channel: String,
-        reminder: Reminder,
+        key: String,
         title: String,
         text: String,
     ) {
@@ -104,7 +120,7 @@ object ReminderNotifications {
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .build()
         runCatching {
-            NotificationManagerCompat.from(context).notify(reminder.key.hashCode(), notification)
+            NotificationManagerCompat.from(context).notify(key.hashCode(), notification)
         }
     }
 

@@ -13,6 +13,7 @@ data class Lab(
     val link: String? = null,
     val needsRedo: Boolean = false,
     val classroomTaskId: String? = null,
+    val defendQueued: Boolean = false,
 ) {
     val fromClassroom: Boolean
         get() = classroomTaskId != null

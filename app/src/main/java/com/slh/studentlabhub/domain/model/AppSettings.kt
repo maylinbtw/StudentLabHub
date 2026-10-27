@@ -57,7 +57,15 @@ data class AppSettings(
     val backgroundSync: Boolean = true,
     val largeText: Boolean = false,
     val language: AppLanguage = AppLanguage.SYSTEM,
+    val scheduleUrl: String = DEFAULT_SCHEDULE_URL,
+    val scheduleGroup: String = "",
+    val scheduleSubgroup: ScheduleSubgroup = ScheduleSubgroup.BOTH,
+    val scheduleAlerts: Boolean = true,
 ) {
     val needsBackgroundWork: Boolean
-        get() = remindersEnabled || redoAlerts || backgroundSync
+        get() = remindersEnabled || redoAlerts || backgroundSync || scheduleGroup.isNotBlank()
+
+    companion object {
+        const val DEFAULT_SCHEDULE_URL = "https://ggpk.by/Raspisanie/Files/PZT.html"
+    }
 }

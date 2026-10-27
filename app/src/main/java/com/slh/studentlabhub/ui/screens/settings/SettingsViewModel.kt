@@ -31,6 +31,9 @@ import kotlinx.coroutines.launch
 import com.slh.studentlabhub.R
 import com.slh.studentlabhub.i18n.Strings
 import com.slh.studentlabhub.domain.model.AppLanguage
+import com.slh.studentlabhub.domain.model.ScheduleSubgroup
+import com.slh.studentlabhub.domain.repository.ScheduleRepository
+import kotlinx.coroutines.CancellationException
 
 data class SettingsUiState(
     val settings: AppSettings = AppSettings(),
@@ -45,6 +48,16 @@ data class SettingsUiState(
     val isSignedOut: Boolean = false,
     val backupMessage: String? = null,
     val isBackupBusy: Boolean = false,
+    val schedule: ScheduleSettingsState = ScheduleSettingsState(),
+)
+
+data class ScheduleSettingsState(
+    val groups: List<String> = emptyList(),
+    val isLoadingGroups: Boolean = false,
+    val groupsError: String? = null,
+    val syncAt: Long? = null,
+    val isRefreshing: Boolean = false,
+    val refreshError: String? = null,
 )
 
 private data class BackupState(
@@ -69,6 +82,7 @@ class SettingsViewModel(
     private val referenceRepository: ReferenceRepository,
     private val labRepository: LabRepository,
     private val backupManager: BackupManager,
+    private val scheduleRepository: ScheduleRepository,
     private val contentResolver: ContentResolver,
     private val versionName: String,
 ) : ViewModel() {
@@ -76,6 +90,12 @@ class SettingsViewModel(
     private val account = MutableStateFlow(AccountState())
 
     private val backup = MutableStateFlow(BackupState())
+
+    private val scheduleLocal = MutableStateFlow(ScheduleSettingsState())
+
+    private val scheduleState = combine(scheduleLocal, scheduleRepository.lastSyncAt) { local, syncAt ->
+        local.copy(syncAt = syncAt)
+    }
 
     private val accountAndBackup = combine(account, backup) { accountState, backupState ->
         accountState to backupState
@@ -92,7 +112,8 @@ class SettingsViewModel(
         classroomRepository.redoThreshold,
         counts,
         accountAndBackup,
-    ) { settings, threshold, counts, (accountState, backupState) ->
+        scheduleState,
+    ) { settings, threshold, counts, (accountState, backupState), schedule ->
         SettingsUiState(
             settings = settings,
             email = classroomRepository.signedInEmail,
@@ -106,6 +127,7 @@ class SettingsViewModel(
             isSignedOut = accountState.isSignedOut,
             backupMessage = backupState.message,
             isBackupBusy = backupState.isBusy,
+            schedule = schedule,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -137,6 +159,79 @@ class SettingsViewModel(
     fun onRedoAlertsChanged(enabled: Boolean) = settingsRepository.update { it.copy(redoAlerts = enabled) }
 
     fun onBackgroundSyncChanged(enabled: Boolean) = settingsRepository.update { it.copy(backgroundSync = enabled) }
+
+    fun loadScheduleGroups() {
+        val url = settingsRepository.settings.value.scheduleUrl
+        scheduleLocal.update { it.copy(isLoadingGroups = true, groupsError = null) }
+        viewModelScope.launch {
+            try {
+                val groups = scheduleRepository.fetchGroups(url)
+                scheduleLocal.update { it.copy(groups = groups, isLoadingGroups = false) }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                scheduleLocal.update {
+                    it.copy(isLoadingGroups = false, groupsError = Strings.get(R.string.schedule_load_failed))
+                }
+            }
+        }
+    }
+
+    fun onScheduleGroupSelected(group: String) {
+        settingsRepository.update { it.copy(scheduleGroup = group) }
+        reloadSchedule()
+    }
+
+    fun onScheduleSubgroupSelected(value: ScheduleSubgroup) {
+        settingsRepository.update { it.copy(scheduleSubgroup = value) }
+        reloadSchedule()
+    }
+
+    fun onScheduleUrlChanged(url: String) {
+        if (url == settingsRepository.settings.value.scheduleUrl) return
+        settingsRepository.update { it.copy(scheduleUrl = url) }
+        scheduleLocal.update { it.copy(groups = emptyList()) }
+        reloadSchedule()
+    }
+
+    fun onScheduleAlertsChanged(enabled: Boolean) = settingsRepository.update { it.copy(scheduleAlerts = enabled) }
+
+    fun disconnectSchedule() {
+        settingsRepository.update { it.copy(scheduleGroup = "") }
+        viewModelScope.launch { scheduleRepository.clear() }
+    }
+
+    fun refreshSchedule() {
+        if (scheduleLocal.value.isRefreshing) return
+        scheduleLocal.update { it.copy(isRefreshing = true, refreshError = null) }
+        viewModelScope.launch {
+            val error = try {
+                scheduleRepository.refresh()
+                null
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                Strings.get(R.string.schedule_load_failed)
+            }
+            scheduleLocal.update { it.copy(isRefreshing = false, refreshError = error) }
+        }
+    }
+
+    private fun reloadSchedule() {
+        scheduleLocal.update { it.copy(isRefreshing = true, refreshError = null) }
+        viewModelScope.launch {
+            val error = try {
+                scheduleRepository.clear()
+                scheduleRepository.refresh(silent = true)
+                null
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                Strings.get(R.string.schedule_load_failed)
+            }
+            scheduleLocal.update { it.copy(isRefreshing = false, refreshError = error) }
+        }
+    }
 
     fun onLanguageSelected(value: AppLanguage) = settingsRepository.update { it.copy(language = value) }
 
@@ -209,6 +304,7 @@ class SettingsViewModel(
                     referenceRepository = app.container.referenceRepository,
                     labRepository = app.container.labRepository,
                     backupManager = app.container.backupManager,
+                    scheduleRepository = app.container.scheduleRepository,
                     contentResolver = app.contentResolver,
                     versionName = versionName,
                 )

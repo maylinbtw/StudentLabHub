@@ -86,6 +86,10 @@ import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
 import java.util.Locale
 import com.slh.studentlabhub.R
 import com.slh.studentlabhub.i18n.Strings
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import com.slh.studentlabhub.ui.components.NextLessonCard
+import com.slh.studentlabhub.ui.theme.SlhSurfaceVariant
 
 private data class StatusChipStyle(
     val leading: String,
@@ -154,6 +158,7 @@ fun LabDetailsRoute(
         onOpenClassroom = { link -> runCatching { uriHandler.openUri(link) } },
         onSave = viewModel::save,
         onDelete = viewModel::delete,
+        onDefendQueuedChange = viewModel::onDefendQueuedChange,
         modifier = modifier,
     )
 }
@@ -173,6 +178,7 @@ fun LabDetailsScreen(
     onAddPhotos: () -> Unit = {},
     onDeletePhoto: (String) -> Unit = {},
     onOpenClassroom: (String) -> Unit = {},
+    onDefendQueuedChange: (Boolean) -> Unit = {},
 ) {
     var showDeleteConfirm by rememberSaveable { mutableStateOf(false) }
     var showDeadlinePicker by rememberSaveable { mutableStateOf(false) }
@@ -278,6 +284,22 @@ fun LabDetailsScreen(
                             modifier = Modifier.weight(1f),
                         )
                     }
+                }
+
+                if (state.status != LabStatus.DEFENDED) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    SectionLabel(text = Strings.get(R.string.section_defense))
+                    Spacer(modifier = Modifier.height(10.dp))
+                    DefenseToggle(
+                        checked = state.defendQueued,
+                        onCheckedChange = onDefendQueuedChange,
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    NextLessonCard(
+                        lesson = state.nextLesson,
+                        queued = if (state.defendQueued) state.queuedForNext else emptyList(),
+                        isConfigured = state.scheduleConfigured,
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -406,6 +428,50 @@ fun LabDetailsScreen(
                     )
                 }
             },
+        )
+    }
+}
+
+@Composable
+private fun DefenseToggle(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    val shape = RoundedCornerShape(8.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .border(1.dp, if (checked) SlhAccent else SlhOutline, shape)
+            .clickable(role = Role.Switch, onClick = { onCheckedChange(!checked) })
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = Strings.get(R.string.defense_toggle),
+                color = SlhContent,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = Strings.get(R.string.defense_toggle_hint),
+                color = SlhTextMuted,
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = SlhOnAccent,
+                checkedTrackColor = SlhAccent,
+                checkedBorderColor = SlhAccent,
+                uncheckedThumbColor = SlhTextMuted,
+                uncheckedTrackColor = SlhSurfaceVariant,
+                uncheckedBorderColor = SlhOutline,
+            ),
         )
     }
 }

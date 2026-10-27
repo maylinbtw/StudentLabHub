@@ -35,4 +35,6 @@ data class LabEntity(
     val link: String? = null,
     @ColumnInfo(defaultValue = "0")
     val needsRedo: Boolean = false,
+    @ColumnInfo(defaultValue = "0")
+    val defendQueued: Boolean = false,
 )

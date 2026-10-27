@@ -128,6 +128,7 @@ private fun SubjectEntity.toJson(): JSONObject = JSONObject()
     .put("createdAt", createdAt)
     .put("classroomCourseId", classroomCourseId ?: JSONObject.NULL)
     .put("archived", archived)
+    .put("scheduleTitle", scheduleTitle ?: JSONObject.NULL)
 
 private fun JSONObject.toSubject(): SubjectEntity = SubjectEntity(
     id = getLong("id"),
@@ -136,6 +137,7 @@ private fun JSONObject.toSubject(): SubjectEntity = SubjectEntity(
     createdAt = optLong("createdAt", System.currentTimeMillis()),
     classroomCourseId = optStringOrNull("classroomCourseId"),
     archived = optBoolean("archived", false),
+    scheduleTitle = optStringOrNull("scheduleTitle"),
 )
 
 private fun LabEntity.toJson(): JSONObject = JSONObject()
@@ -151,6 +153,7 @@ private fun LabEntity.toJson(): JSONObject = JSONObject()
     .put("classroomTaskId", classroomTaskId ?: JSONObject.NULL)
     .put("link", link ?: JSONObject.NULL)
     .put("needsRedo", needsRedo)
+    .put("defendQueued", defendQueued)
 
 private fun JSONObject.toLab(): LabEntity = LabEntity(
     id = getLong("id"),
@@ -165,6 +168,7 @@ private fun JSONObject.toLab(): LabEntity = LabEntity(
     classroomTaskId = optStringOrNull("classroomTaskId"),
     link = optStringOrNull("link"),
     needsRedo = optBoolean("needsRedo", false),
+    defendQueued = optBoolean("defendQueued", false),
 )
 
 private fun RefCategoryEntity.toJson(): JSONObject = JSONObject()
@@ -213,6 +217,10 @@ private fun AppSettings.toJson(): JSONObject = JSONObject()
     .put("backgroundSync", backgroundSync)
     .put("largeText", largeText)
     .put("language", language.name)
+    .put("scheduleUrl", scheduleUrl)
+    .put("scheduleGroup", scheduleGroup)
+    .put("scheduleSubgroup", scheduleSubgroup.name)
+    .put("scheduleAlerts", scheduleAlerts)
 
 private fun JSONObject.toSettings(current: AppSettings): AppSettings = AppSettings(
     accent = optEnum("accent", current.accent),
@@ -226,5 +234,9 @@ private fun JSONObject.toSettings(current: AppSettings): AppSettings = AppSettin
     backgroundSync = optBoolean("backgroundSync", current.backgroundSync),
     largeText = optBoolean("largeText", current.largeText),
     language = optEnum("language", current.language),
+    scheduleUrl = optString("scheduleUrl", current.scheduleUrl).ifBlank { current.scheduleUrl },
+    scheduleGroup = optString("scheduleGroup", current.scheduleGroup),
+    scheduleSubgroup = optEnum("scheduleSubgroup", current.scheduleSubgroup),
+    scheduleAlerts = optBoolean("scheduleAlerts", current.scheduleAlerts),
 )
 

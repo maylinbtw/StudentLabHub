@@ -39,6 +39,7 @@ import com.slh.studentlabhub.ui.screens.statistics.StatisticsRoute
 import com.slh.studentlabhub.ui.screens.subjects.SubjectsRoute
 import com.slh.studentlabhub.ui.screens.today.TodayRoute
 import com.slh.studentlabhub.ui.theme.SlhBackground
+import com.slh.studentlabhub.ui.screens.schedule.ScheduleRoute
 
 @Composable
 fun SlhApp() {
@@ -126,8 +127,30 @@ fun SlhApp() {
             composable(Routes.TODAY) {
                 TodayRoute(
                     onOpenLab = { navController.navigate(Routes.labDetails(it)) },
+                    onOpenSchedule = { navController.navigate(Routes.SCHEDULE) },
+                    onOpenSubject = { navController.navigate(Routes.subject(it)) },
+                    onOpenSettings = {
+                        navController.navigate(Routes.SETTINGS) {
+                            popUpTo(homeRoute) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
                     onOpenSubjects = {
                         navController.navigate(Routes.SUBJECTS) {
+                            popUpTo(homeRoute) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                )
+            }
+            composable(Routes.SCHEDULE) {
+                ScheduleRoute(
+                    onBack = { navController.popBackStack() },
+                    onOpenSubject = { navController.navigate(Routes.subject(it)) },
+                    onOpenSettings = {
+                        navController.navigate(Routes.SETTINGS) {
                             popUpTo(homeRoute) { saveState = true }
                             launchSingleTop = true
                             restoreState = true

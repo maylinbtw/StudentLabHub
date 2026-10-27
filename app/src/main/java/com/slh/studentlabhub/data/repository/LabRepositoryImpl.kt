@@ -72,10 +72,11 @@ class LabRepositoryImpl(
 
     override suspend fun getLabDetails(labId: Long): LabDetails? {
         val lab = labDao.getById(labId) ?: return null
-        val subjectTitle = subjectDao.getTitle(lab.subjectId).orEmpty()
+        val subject = subjectDao.getById(lab.subjectId)
         return LabDetails(
             lab = lab.toDomain(),
-            subjectTitle = subjectTitle,
+            subjectTitle = subject?.title.orEmpty(),
+            scheduleTitle = subject?.scheduleTitle,
         )
     }
 
@@ -110,8 +111,8 @@ class LabRepositoryImpl(
         }
     }
 
-    override suspend fun updateSubject(subjectId: Long, title: String, semester: Int) {
-        subjectDao.update(id = subjectId, title = title, semester = semester)
+    override suspend fun updateSubject(subjectId: Long, title: String, semester: Int, scheduleTitle: String?) {
+        subjectDao.update(id = subjectId, title = title, semester = semester, scheduleTitle = scheduleTitle)
     }
 
     override suspend fun deleteSubject(subjectId: Long) {
@@ -265,6 +266,7 @@ private fun SubjectWithLabs.toSummary(): SubjectSummary {
         classroomCourseId = subject.classroomCourseId,
         archived = subject.archived,
         redoCount = labs.count { it.needsRedo },
+        scheduleTitle = subject.scheduleTitle,
     )
 }
 
@@ -281,6 +283,7 @@ private fun LabEntity.toDomain(): Lab = Lab(
     link = link,
     needsRedo = needsRedo,
     classroomTaskId = classroomTaskId,
+    defendQueued = defendQueued,
 )
 
 private fun Lab.toEntity(): LabEntity = LabEntity(
@@ -296,4 +299,5 @@ private fun Lab.toEntity(): LabEntity = LabEntity(
     classroomTaskId = classroomTaskId,
     link = link,
     needsRedo = needsRedo,
+    defendQueued = defendQueued,
 )

@@ -16,6 +16,8 @@ import com.slh.studentlabhub.data.local.entity.LabEntity
 import com.slh.studentlabhub.data.local.entity.RefCategoryEntity
 import com.slh.studentlabhub.data.local.entity.RefEntryEntity
 import com.slh.studentlabhub.data.local.entity.SubjectEntity
+import com.slh.studentlabhub.data.local.dao.LessonDao
+import com.slh.studentlabhub.data.local.entity.LessonEntity
 
 @Database(
     entities = [
@@ -25,8 +27,9 @@ import com.slh.studentlabhub.data.local.entity.SubjectEntity
         ClassroomTaskEntity::class,
         RefCategoryEntity::class,
         RefEntryEntity::class,
+        LessonEntity::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -37,6 +40,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun classroomDao(): ClassroomDao
 
     abstract fun referenceDao(): ReferenceDao
+
+    abstract fun lessonDao(): LessonDao
 
     companion object {
         private val MIGRATION_3_4 = object : Migration(3, 4) {
@@ -93,9 +98,28 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `labs` ADD COLUMN `defendQueued` INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE `subjects` ADD COLUMN `scheduleTitle` TEXT")
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `lessons` (" +
+                        "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`date` INTEGER NOT NULL, " +
+                        "`number` INTEGER NOT NULL, " +
+                        "`startMinutes` INTEGER, " +
+                        "`endMinutes` INTEGER, " +
+                        "`subject` TEXT NOT NULL, " +
+                        "`teacher` TEXT NOT NULL, " +
+                        "`room` TEXT NOT NULL)",
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_lessons_date` ON `lessons` (`date`)")
+            }
+        }
+
         fun create(context: Context): AppDatabase =
             Room.databaseBuilder(context, AppDatabase::class.java, "studentlabhub.db")
-                .addMigrations(MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
+                .addMigrations(MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
                 .fallbackToDestructiveMigrationFrom(true, 1, 2)
                 .build()
     }

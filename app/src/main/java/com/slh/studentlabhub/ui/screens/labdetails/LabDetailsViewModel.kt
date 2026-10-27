@@ -19,6 +19,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.slh.studentlabhub.data.schedule.DefenseQueue
+import com.slh.studentlabhub.domain.model.Lesson
+import com.slh.studentlabhub.domain.model.QueuedWork
+import com.slh.studentlabhub.domain.repository.ScheduleRepository
+import kotlinx.coroutines.flow.combine
+import com.slh.studentlabhub.domain.model.LabDetails
 
 data class LabDetailsUiState(
     val isLoading: Boolean = true,
@@ -38,6 +44,10 @@ data class LabDetailsUiState(
     val link: String? = null,
     val needsRedo: Boolean = false,
     val fromClassroom: Boolean = false,
+    val defendQueued: Boolean = false,
+    val nextLesson: Lesson? = null,
+    val queuedForNext: List<QueuedWork> = emptyList(),
+    val scheduleConfigured: Boolean = false,
 ) {
     val canSave: Boolean
         get() = !isLoading && !isSaving && title.isNotBlank()
@@ -50,6 +60,7 @@ class LabDetailsViewModel(
     private val labId: Long,
     private val repository: LabRepository,
     private val photoStore: LabPhotoStore,
+    private val scheduleRepository: ScheduleRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LabDetailsUiState())
@@ -78,7 +89,10 @@ class LabDetailsViewModel(
                     link = details.lab.link,
                     needsRedo = details.lab.needsRedo,
                     fromClassroom = details.lab.fromClassroom,
+                    defendQueued = details.lab.defendQueued,
+                    scheduleConfigured = scheduleRepository.isConfigured,
                 )
+                observeSchedule(details)
             }
         }
     }
@@ -123,6 +137,34 @@ class LabDetailsViewModel(
         _uiState.update { it.copy(notes = value.take(2000)) }
     }
 
+    private fun observeSchedule(details: LabDetails) {
+        viewModelScope.launch {
+            combine(
+                scheduleRepository.observeUpcomingLessons(),
+                scheduleRepository.observeQueuedWorks(),
+            ) { lessons, queued -> lessons to queued }.collect { (lessons, queued) ->
+                val now = System.currentTimeMillis()
+                val next = DefenseQueue.nextLesson(lessons, details.subjectTitle, details.scheduleTitle, now)
+                val assigned = DefenseQueue.assign(lessons, queued, now)
+                _uiState.update {
+                    it.copy(
+                        nextLesson = next,
+                        queuedForNext = next?.let { lesson -> assigned[lesson.id] }.orEmpty()
+                            .filter { work -> work.subjectId == details.lab.subjectId },
+                    )
+                }
+            }
+        }
+    }
+
+    fun onDefendQueuedChange(queued: Boolean) {
+        original = original?.copy(defendQueued = queued)
+        _uiState.update { it.copy(defendQueued = queued) }
+        viewModelScope.launch {
+            scheduleRepository.setDefendQueued(labId, queued)
+        }
+    }
+
     fun save() {
         val lab = original ?: return
         val state = _uiState.value
@@ -137,6 +179,7 @@ class LabDetailsViewModel(
                     notes = state.notes.trimEnd(),
                     deadline = state.deadline,
                     needsRedo = lab.needsRedo && state.status == LabStatus.NOT_DONE,
+                    defendQueued = state.defendQueued && state.status != LabStatus.DEFENDED,
                 ),
             )
             _uiState.update { it.copy(isSaving = false, isFinished = true) }
@@ -163,6 +206,7 @@ class LabDetailsViewModel(
                     labId = labId,
                     repository = app.container.labRepository,
                     photoStore = app.container.labPhotoStore,
+                    scheduleRepository = app.container.scheduleRepository,
                 )
             }
         }

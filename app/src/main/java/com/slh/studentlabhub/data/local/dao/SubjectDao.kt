@@ -18,6 +18,9 @@ interface SubjectDao {
     @Query("SELECT * FROM subjects WHERE id = :id")
     fun observeSubjectWithLabs(id: Long): Flow<SubjectWithLabs?>
 
+    @Query("SELECT * FROM subjects WHERE id = :id")
+    suspend fun getById(id: Long): SubjectEntity?
+
     @Query("SELECT title FROM subjects WHERE id = :id")
     suspend fun getTitle(id: Long): String?
 
@@ -33,8 +36,8 @@ interface SubjectDao {
     @Query("DELETE FROM subjects")
     suspend fun deleteAll()
 
-    @Query("UPDATE subjects SET title = :title, semester = :semester WHERE id = :id")
-    suspend fun update(id: Long, title: String, semester: Int)
+    @Query("UPDATE subjects SET title = :title, semester = :semester, scheduleTitle = :scheduleTitle WHERE id = :id")
+    suspend fun update(id: Long, title: String, semester: Int, scheduleTitle: String?)
 
     @Query("UPDATE subjects SET classroomCourseId = NULL WHERE classroomCourseId = :courseId")
     suspend fun clearCourseLink(courseId: String)

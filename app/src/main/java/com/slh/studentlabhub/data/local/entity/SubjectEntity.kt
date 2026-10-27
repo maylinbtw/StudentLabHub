@@ -14,4 +14,5 @@ data class SubjectEntity(
     val classroomCourseId: String? = null,
     @ColumnInfo(defaultValue = "0")
     val archived: Boolean = false,
+    val scheduleTitle: String? = null,
 )

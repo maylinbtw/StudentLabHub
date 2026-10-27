@@ -19,6 +19,12 @@ class SessionStore(context: Context) {
             prefs.edit().putLong(KEY_LAST_SYNC, value ?: 0L).apply()
         }
 
+    var scheduleSyncAt: Long?
+        get() = prefs.getLong(KEY_SCHEDULE_SYNC, 0L).takeIf { it > 0L }
+        set(value) {
+            prefs.edit().putLong(KEY_SCHEDULE_SYNC, value ?: 0L).apply()
+        }
+
     var redoThreshold: Int
         get() = prefs.getInt(KEY_REDO_THRESHOLD, DEFAULT_REDO_THRESHOLD)
         set(value) {
@@ -58,6 +64,7 @@ class SessionStore(context: Context) {
         private const val KEY_LAST_SYNC = "last_sync_at"
         private const val KEY_REDO_THRESHOLD = "redo_threshold"
         private const val KEY_REFERENCE_VERSION = "reference_version"
+        private const val KEY_SCHEDULE_SYNC = "schedule_sync_at"
         private const val KEY_REFERENCE_LANGUAGE = "reference_language"
         private const val KEY_ARCHIVED_COURSES = "archived_courses"
     }

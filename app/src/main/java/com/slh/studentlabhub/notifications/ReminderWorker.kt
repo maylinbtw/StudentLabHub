@@ -36,6 +36,7 @@ class ReminderWorker(
         if (settings.remindersEnabled || settings.redoAlerts) {
             ReminderChecker(applicationContext, container).run(settings)
         }
+        ScheduleChecker(applicationContext, container).run(settings)
         DeadlinesWidget.refresh(applicationContext)
         return Result.success()
     }

@@ -25,6 +25,10 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import com.slh.studentlabhub.data.schedule.DefenseQueue
+import com.slh.studentlabhub.domain.model.Lesson
+import com.slh.studentlabhub.domain.model.QueuedWork
+import com.slh.studentlabhub.domain.repository.ScheduleRepository
 
 data class LabListUiState(
     val isLoading: Boolean = true,
@@ -32,6 +36,10 @@ data class LabListUiState(
     val details: SubjectDetails? = null,
     val course: CourseTasks? = null,
     val now: Long = System.currentTimeMillis(),
+    val nextLesson: Lesson? = null,
+    val queuedForNext: List<QueuedWork> = emptyList(),
+    val scheduleConfigured: Boolean = false,
+    val scheduleSubjects: List<String> = emptyList(),
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -39,6 +47,7 @@ class LabListViewModel(
     private val subjectId: Long,
     private val repository: LabRepository,
     private val classroomRepository: ClassroomRepository,
+    private val scheduleRepository: ScheduleRepository,
 ) : ViewModel() {
 
     private val details = repository.observeSubjectDetails(subjectId)
@@ -53,13 +62,24 @@ class LabListViewModel(
     val uiState: StateFlow<LabListUiState> = combine(
         details,
         course,
-    ) { details, course ->
+        scheduleRepository.observeUpcomingLessons(),
+        scheduleRepository.observeQueuedWorks(),
+        scheduleRepository.observeLessonSubjects(),
+    ) { details, course, lessons, queued, lessonSubjects ->
+        val now = System.currentTimeMillis()
+        val summary = details?.summary
+        val next = summary?.let { DefenseQueue.nextLesson(lessons, it.title, it.scheduleTitle, now) }
+        val assigned = DefenseQueue.assign(lessons, queued, now)
         LabListUiState(
             isLoading = false,
             isMissing = details == null,
             details = details,
             course = course,
-            now = System.currentTimeMillis(),
+            now = now,
+            nextLesson = next,
+            queuedForNext = next?.let { assigned[it.id] }.orEmpty().filter { it.subjectId == summary?.id },
+            scheduleConfigured = scheduleRepository.isConfigured,
+            scheduleSubjects = lessonSubjects,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -73,12 +93,13 @@ class LabListViewModel(
         }
     }
 
-    fun updateSubject(title: String, semester: Int) {
+    fun updateSubject(title: String, semester: Int, scheduleTitle: String?) {
         viewModelScope.launch {
             repository.updateSubject(
                 subjectId = subjectId,
                 title = title.trim(),
                 semester = semester,
+                scheduleTitle = scheduleTitle?.takeIf { it.isNotBlank() },
             )
         }
     }
@@ -105,6 +126,7 @@ class LabListViewModel(
                 lab.copy(
                     status = status,
                     needsRedo = lab.needsRedo && status == LabStatus.NOT_DONE,
+                    defendQueued = lab.defendQueued && status != LabStatus.DEFENDED,
                 ),
             )
         }
@@ -122,6 +144,7 @@ class LabListViewModel(
                     subjectId = subjectId,
                     repository = app.container.labRepository,
                     classroomRepository = app.container.classroomRepository,
+                    scheduleRepository = app.container.scheduleRepository,
                 )
             }
         }

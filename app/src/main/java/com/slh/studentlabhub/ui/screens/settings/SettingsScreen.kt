@@ -88,6 +88,8 @@ import java.time.LocalDate
 import com.slh.studentlabhub.R
 import com.slh.studentlabhub.i18n.Strings
 import com.slh.studentlabhub.domain.model.AppLanguage
+import com.slh.studentlabhub.domain.model.ScheduleSubgroup
+import androidx.compose.runtime.saveable.rememberSaveable
 
 private val syncFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM HH:mm")
 
@@ -137,6 +139,13 @@ private val AppLanguage.title: String
         AppLanguage.SYSTEM -> Strings.get(R.string.option_system)
         AppLanguage.RU -> "Русский"
         AppLanguage.EN -> "English"
+    }
+
+private val ScheduleSubgroup.title: String
+    get() = when (this) {
+        ScheduleSubgroup.BOTH -> Strings.get(R.string.subgroup_both)
+        ScheduleSubgroup.FIRST -> Strings.get(R.string.subgroup_n, 1)
+        ScheduleSubgroup.SECOND -> Strings.get(R.string.subgroup_n, 2)
     }
 
 private val StartScreen.title: String
@@ -200,6 +209,13 @@ fun SettingsRoute(
         notificationsAllowed = notificationsAllowed,
         onThemeModeSelected = viewModel::onThemeModeSelected,
         onLanguageSelected = viewModel::onLanguageSelected,
+        onLoadScheduleGroups = viewModel::loadScheduleGroups,
+        onScheduleGroupSelected = viewModel::onScheduleGroupSelected,
+        onScheduleSubgroupSelected = viewModel::onScheduleSubgroupSelected,
+        onScheduleUrlChanged = viewModel::onScheduleUrlChanged,
+        onScheduleAlertsChanged = viewModel::onScheduleAlertsChanged,
+        onRefreshSchedule = viewModel::refreshSchedule,
+        onDisconnectSchedule = viewModel::disconnectSchedule,
         onRemindersChanged = { enabled ->
             viewModel.onRemindersChanged(enabled)
             if (enabled && !notificationsAllowed) requestNotifications()
@@ -253,7 +269,16 @@ fun SettingsScreen(
     onExportBackup: () -> Unit = {},
     onImportBackup: () -> Unit = {},
     onLanguageSelected: (AppLanguage) -> Unit = {},
+    onLoadScheduleGroups: () -> Unit = {},
+    onScheduleGroupSelected: (String) -> Unit = {},
+    onScheduleSubgroupSelected: (ScheduleSubgroup) -> Unit = {},
+    onScheduleUrlChanged: (String) -> Unit = {},
+    onScheduleAlertsChanged: (Boolean) -> Unit = {},
+    onRefreshSchedule: () -> Unit = {},
+    onDisconnectSchedule: () -> Unit = {},
 ) {
+    var showGroupPicker by rememberSaveable { mutableStateOf(false) }
+    var showUrlDialog by rememberSaveable { mutableStateOf(false) }
     val settings = state.settings
 
     Column(
@@ -324,6 +349,72 @@ fun SettingsScreen(
                     onSelect = onReminderTimingSelected,
                 )
                 OptionHint(text = Strings.get(R.string.when_remind_hint))
+            }
+
+            Spacer(modifier = Modifier.height(28.dp))
+            SectionLabel(text = Strings.get(R.string.settings_schedule))
+            Spacer(modifier = Modifier.height(10.dp))
+            SettingsCard {
+                ActionRow(
+                    title = Strings.get(R.string.schedule_group),
+                    value = settings.scheduleGroup.ifBlank { Strings.get(R.string.schedule_group_none) },
+                    actionText = Strings.get(R.string.action_choose),
+                    enabled = true,
+                    onConfirmed = {
+                        showGroupPicker = true
+                        onLoadScheduleGroups()
+                    },
+                    requireConfirm = false,
+                )
+                HorizontalDivider(thickness = 1.dp, color = SlhOutline)
+                ActionRow(
+                    title = Strings.get(R.string.schedule_page),
+                    value = settings.scheduleUrl.substringAfter("://"),
+                    actionText = Strings.get(R.string.action_edit),
+                    enabled = true,
+                    onConfirmed = { showUrlDialog = true },
+                    requireConfirm = false,
+                )
+                if (settings.scheduleGroup.isNotBlank()) {
+                    HorizontalDivider(thickness = 1.dp, color = SlhOutline)
+                    ActionRow(
+                        title = Strings.get(R.string.schedule_refresh_now),
+                        value = state.schedule.refreshError
+                            ?: state.schedule.syncAt?.let { Strings.get(R.string.schedule_updated_at, formatSync(it)) }
+                            ?: Strings.get(R.string.schedule_never_updated),
+                        actionText = if (state.schedule.isRefreshing) "…" else Strings.get(R.string.action_refresh),
+                        enabled = !state.schedule.isRefreshing,
+                        onConfirmed = onRefreshSchedule,
+                        requireConfirm = false,
+                    )
+                    HorizontalDivider(thickness = 1.dp, color = SlhOutline)
+                    SwitchRow(
+                        title = Strings.get(R.string.schedule_alerts),
+                        subtitle = Strings.get(R.string.schedule_alerts_sub),
+                        checked = settings.scheduleAlerts,
+                        onCheckedChange = onScheduleAlertsChanged,
+                    )
+                    HorizontalDivider(thickness = 1.dp, color = SlhOutline)
+                    ActionRow(
+                        title = Strings.get(R.string.schedule_disconnect),
+                        value = Strings.get(R.string.schedule_disconnect_sub),
+                        actionText = Strings.get(R.string.action_disable),
+                        enabled = true,
+                        onConfirmed = onDisconnectSchedule,
+                    )
+                }
+            }
+            if (settings.scheduleGroup.isNotBlank()) {
+                Spacer(modifier = Modifier.height(18.dp))
+                OptionTitle(text = Strings.get(R.string.schedule_subgroup))
+                Spacer(modifier = Modifier.height(8.dp))
+                SegmentedOptions(
+                    options = ScheduleSubgroup.entries,
+                    selected = settings.scheduleSubgroup,
+                    label = { it.title },
+                    onSelect = onScheduleSubgroupSelected,
+                )
+                OptionHint(text = Strings.get(R.string.schedule_subgroup_hint))
             }
 
             Spacer(modifier = Modifier.height(28.dp))
@@ -481,6 +572,32 @@ fun SettingsScreen(
             }
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+
+    if (showGroupPicker) {
+        GroupPickerDialog(
+            groups = state.schedule.groups,
+            selected = settings.scheduleGroup,
+            isLoading = state.schedule.isLoadingGroups,
+            errorMessage = state.schedule.groupsError,
+            onPick = { group ->
+                showGroupPicker = false
+                onScheduleGroupSelected(group)
+            },
+            onRetry = onLoadScheduleGroups,
+            onDismiss = { showGroupPicker = false },
+        )
+    }
+
+    if (showUrlDialog) {
+        ScheduleUrlDialog(
+            initialUrl = settings.scheduleUrl,
+            onConfirm = { url ->
+                showUrlDialog = false
+                onScheduleUrlChanged(url)
+            },
+            onDismiss = { showUrlDialog = false },
+        )
     }
 }
 

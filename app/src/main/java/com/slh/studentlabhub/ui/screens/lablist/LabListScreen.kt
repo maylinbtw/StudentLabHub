@@ -82,6 +82,7 @@ import com.slh.studentlabhub.ui.theme.StudentLabHubTheme
 import java.util.Locale
 import com.slh.studentlabhub.R
 import com.slh.studentlabhub.i18n.Strings
+import com.slh.studentlabhub.ui.components.NextLessonCard
 
 @Composable
 fun LabListRoute(
@@ -120,7 +121,7 @@ fun LabListScreen(
     onBack: () -> Unit,
     onLabClick: (Lab) -> Unit,
     onAddWork: (WorkType) -> Unit,
-    onUpdateSubject: (title: String, semester: Int) -> Unit,
+    onUpdateSubject: (title: String, semester: Int, scheduleTitle: String?) -> Unit,
     onDeleteSubject: () -> Unit,
     modifier: Modifier = Modifier,
     onOpenClassroom: (String) -> Unit = {},
@@ -254,6 +255,16 @@ fun LabListScreen(
                         Spacer(modifier = Modifier.height(14.dp))
                         HorizontalDivider(thickness = 1.dp, color = SlhOutline)
                     }
+                    if (!isArchived && (state.scheduleConfigured || state.nextLesson != null)) {
+                        item(key = "next_lesson") {
+                            Spacer(modifier = Modifier.height(14.dp))
+                            NextLessonCard(
+                                lesson = state.nextLesson,
+                                queued = state.queuedForNext,
+                                isConfigured = state.scheduleConfigured,
+                            )
+                        }
+                    }
                     state.course?.teacherName?.let { teacher ->
                         item(key = "teacher") {
                             Spacer(modifier = Modifier.height(12.dp))
@@ -337,9 +348,11 @@ fun LabListScreen(
         EditSubjectDialog(
             initialTitle = details.summary.title,
             initialSemester = details.summary.semester,
+            initialScheduleTitle = details.summary.scheduleTitle,
+            scheduleSubjects = state.scheduleSubjects,
             onDismiss = { showEditDialog = false },
-            onConfirm = { title, semester ->
-                onUpdateSubject(title, semester)
+            onConfirm = { title, semester, scheduleTitle ->
+                onUpdateSubject(title, semester, scheduleTitle)
                 showEditDialog = false
             },
         )
@@ -484,6 +497,11 @@ private fun LabRow(
                 overflow = TextOverflow.Ellipsis,
             )
             when {
+                lab.defendQueued && lab.status != LabStatus.DEFENDED -> Text(
+                    text = Strings.get(R.string.defense_queued_short),
+                    color = SlhAccent,
+                    style = MaterialTheme.typography.bodySmall,
+                )
                 lab.needsRedo -> Text(
                     text = Strings.get(R.string.needs_redo),
                     color = SlhDanger,
@@ -619,7 +637,7 @@ private fun LabListScreenPreview() {
             onBack = {},
             onLabClick = {},
             onAddWork = {},
-            onUpdateSubject = { _, _ -> },
+            onUpdateSubject = { _, _, _ -> },
             onDeleteSubject = {},
         )
     }

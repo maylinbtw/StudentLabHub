@@ -11,4 +11,5 @@ data class SubjectSummary(
     val classroomCourseId: String? = null,
     val archived: Boolean = false,
     val redoCount: Int = 0,
+    val scheduleTitle: String? = null,
 )

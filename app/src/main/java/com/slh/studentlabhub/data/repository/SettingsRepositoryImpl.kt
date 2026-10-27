@@ -44,6 +44,10 @@ class SettingsRepositoryImpl(context: Context) : SettingsRepository {
             .putBoolean(KEY_BACKGROUND_SYNC, settings.backgroundSync)
             .putBoolean(KEY_LARGE_TEXT, settings.largeText)
             .putString(KEY_LANGUAGE, settings.language.name)
+            .putString(KEY_SCHEDULE_URL, settings.scheduleUrl)
+            .putString(KEY_SCHEDULE_GROUP, settings.scheduleGroup)
+            .putString(KEY_SCHEDULE_SUBGROUP, settings.scheduleSubgroup.name)
+            .putBoolean(KEY_SCHEDULE_ALERTS, settings.scheduleAlerts)
             .apply()
     }
 
@@ -61,6 +65,10 @@ class SettingsRepositoryImpl(context: Context) : SettingsRepository {
             backgroundSync = prefs.getBoolean(KEY_BACKGROUND_SYNC, defaults.backgroundSync),
             largeText = prefs.getBoolean(KEY_LARGE_TEXT, defaults.largeText),
             language = prefs.readEnum(KEY_LANGUAGE, defaults.language),
+            scheduleUrl = prefs.getString(KEY_SCHEDULE_URL, null) ?: defaults.scheduleUrl,
+            scheduleGroup = prefs.getString(KEY_SCHEDULE_GROUP, null) ?: defaults.scheduleGroup,
+            scheduleSubgroup = prefs.readEnum(KEY_SCHEDULE_SUBGROUP, defaults.scheduleSubgroup),
+            scheduleAlerts = prefs.getBoolean(KEY_SCHEDULE_ALERTS, defaults.scheduleAlerts),
         )
     }
 
@@ -78,6 +86,10 @@ class SettingsRepositoryImpl(context: Context) : SettingsRepository {
         const val KEY_NOTIFICATION_PROMPT = "notification_prompt_shown"
         const val KEY_LARGE_TEXT = "large_text"
         const val KEY_LANGUAGE = "language"
+        const val KEY_SCHEDULE_URL = "schedule_url"
+        const val KEY_SCHEDULE_GROUP = "schedule_group"
+        const val KEY_SCHEDULE_SUBGROUP = "schedule_subgroup"
+        const val KEY_SCHEDULE_ALERTS = "schedule_alerts"
     }
 }
 
