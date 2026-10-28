@@ -380,28 +380,39 @@ private fun LazyListScope.scheduleItems(
                     .padding(horizontal = 6.dp, vertical = 4.dp),
             )
         }
-        Spacer(modifier = Modifier.height(2.dp))
-        HorizontalDivider(thickness = 1.dp, color = SlhOutline)
+        Spacer(modifier = Modifier.height(6.dp))
     }
-    if (schedule.lessons.isEmpty()) {
-        item(key = "schedule_empty") {
-            Text(
-                text = Strings.get(R.string.schedule_no_lessons),
-                color = SlhTextMuted,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(vertical = 12.dp),
-            )
+    item(key = "schedule_card") {
+        val shape = RoundedCornerShape(10.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(shape)
+                .background(SlhSurface)
+                .border(1.dp, SlhOutline, shape),
+        ) {
+            if (schedule.lessons.isEmpty()) {
+                Text(
+                    text = Strings.get(R.string.schedule_no_lessons),
+                    color = SlhTextMuted,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
+                )
+            }
+            schedule.lessons.forEachIndexed { index, lesson ->
+                if (index > 0) {
+                    HorizontalDivider(thickness = 1.dp, color = SlhOutline)
+                }
+                val subjectId = schedule.lessonSubjectIds[lesson.id]
+                LessonRow(
+                    lesson = lesson,
+                    isNow = lesson.id == schedule.currentLessonId,
+                    queued = schedule.defense[lesson.id].orEmpty(),
+                    horizontalPadding = 8.dp,
+                    onClick = subjectId?.let { id -> { onOpenSubject(id) } },
+                )
+            }
         }
-    }
-    items(items = schedule.lessons, key = { "lesson_${it.id}" }) { lesson ->
-        val subjectId = schedule.lessonSubjectIds[lesson.id]
-        LessonRow(
-            lesson = lesson,
-            isNow = lesson.id == schedule.currentLessonId,
-            queued = schedule.defense[lesson.id].orEmpty(),
-            onClick = subjectId?.let { id -> { onOpenSubject(id) } },
-        )
-        HorizontalDivider(thickness = 1.dp, color = SlhOutline)
     }
     item(key = "schedule_footer") {
         val status = schedule.errorMessage
@@ -464,12 +475,34 @@ private fun AgendaRowItem(
             )
         }
         Spacer(modifier = Modifier.width(12.dp))
+        DueChip(text = label, color = labelColor)
+    }
+}
+
+@Composable
+private fun DueChip(text: String, color: Color) {
+    if (text.isBlank()) return
+    val shape = RoundedCornerShape(50)
+    val isHighlighted = color == SlhDanger || color == SlhAccent
+    Box(
+        modifier = Modifier
+            .clip(shape)
+            .then(
+                if (isHighlighted) {
+                    Modifier.background(color.copy(alpha = 0.16f))
+                } else {
+                    Modifier.border(1.dp, SlhOutline, shape)
+                },
+            )
+            .padding(horizontal = 9.dp, vertical = 4.dp),
+    ) {
         Text(
-            text = label,
-            color = labelColor,
+            text = text,
+            color = color,
             fontFamily = SlhMono,
             fontWeight = FontWeight.Bold,
-            fontSize = 12.sp,
+            fontSize = 11.sp,
+            maxLines = 1,
         )
     }
 }

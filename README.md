@@ -2,7 +2,7 @@
 
 Android-приложение для студента: все лабораторные и практические работы, сроки сдачи и оценки в одном месте. Задания подтягиваются из Google Classroom автоматически.
 
-**[⬇ Скачать APK](https://github.com/maylinbtw/StudentLabHub/releases/latest)** · Android 8.0+ · русский / English
+**[⬇ Скачать APK](https://github.com/maylinbtw/StudentLabHub/releases/latest)** · Android 8.0+ · русский / English / беларуская
 
 ---
 
@@ -36,7 +36,8 @@ Android-приложение для студента: все лаборатор�
 - Статистика: средний балл по предметам и общий прогресс.
 
 **Справочник**
-- Команды Linux и основы C++, Java и Python. Работает без интернета.
+- Статьи в формате учебника по Linux, C#, C++, Java и Python: главы, оглавление, примеры кода с копированием, вывод программ. Работает без интернета.
+- Поиск по тексту статей с переходом к нужному разделу.
 - Недостающую команду можно скачать из [tldr-pages](https://github.com/tldr-pages/tldr). После скачивания она доступна офлайн.
 - Можно добавлять свои статьи.
 
@@ -106,4 +107,4 @@ app/src/main/java/com/slh/studentlabhub/
 
 ---
 
-*StudentLabHub — Android app for students: lab works, deadlines and grades in one place, synced with Google Classroom. Interface available in English and Russian.*
+*StudentLabHub — Android app for students: lab works, deadlines and grades in one place, synced with Google Classroom. Interface available in English, Russian and Belarusian.*

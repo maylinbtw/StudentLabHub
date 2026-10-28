@@ -42,7 +42,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.slh.studentlabhub.domain.model.RefCategory
 import com.slh.studentlabhub.domain.model.RefEntry
 import com.slh.studentlabhub.domain.model.RefSource
 import com.slh.studentlabhub.domain.model.RefTech
@@ -169,51 +168,6 @@ fun TechTabs(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun CategoryCard(
-    category: RefCategory,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val shape = RoundedCornerShape(10.dp)
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(SlhSurface)
-            .border(1.dp, SlhOutline, shape)
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = category.title,
-                color = SlhContent,
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = category.entryTitles.take(5).joinToString(" · "),
-                color = SlhTextMuted,
-                style = MaterialTheme.typography.bodySmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(
-            text = "${category.entryTitles.size} ›",
-            color = SlhAccent,
-            fontFamily = SlhMono,
-            fontWeight = FontWeight.Bold,
-            fontSize = 15.sp,
-        )
     }
 }
 

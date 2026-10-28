@@ -75,8 +75,6 @@
     <string name="calendar_legend_later">позже</string>
     <string name="calendar_legend_overdue">просрочено</string>
     <string name="calendar_legend_urgent">ближайшие 3 дня</string>
-    <string name="category_empty">В этом разделе больше нет статей</string>
-    <string name="category_overline">Команды %1$s · синтаксис и примеры</string>
     <string name="channel_deadlines">Дедлайны</string>
     <string name="channel_deadlines_desc">Напоминания о сроках сдачи работ</string>
     <string name="channel_redo">На доработку</string>
@@ -92,7 +90,6 @@
     <string name="classroom_syncing">Classroom: обновляем…</string>
     <string name="classroom_task_default">Задание из Classroom</string>
     <string name="classroom_updated_at">Classroom обновлён %1$s</string>
-    <string name="command_categories">КАТЕГОРИИ КОМАНД · %1$d</string>
     <string name="completed_lab">Защищено</string>
     <string name="completed_practice">Сдано</string>
     <string name="dark_background">Фон тёмной темы</string>
@@ -152,6 +149,7 @@
     <string name="group_week">НА ЭТОЙ НЕДЕЛЕ</string>
     <string name="lab_works">Лабораторные</string>
     <string name="language">Язык</string>
+    <string name="language_system_short">Авто</string>
     <string name="left_hours">сдать через %1$d ч</string>
     <string name="left_less_hour">сдать меньше чем через час</string>
     <string name="left_tomorrow">сдать завтра</string>
@@ -181,7 +179,6 @@
     <string name="no_works_yet_hint">работ пока нет — добавь внутри предмета</string>
     <string name="not_signed_in">Вход не выполнен</string>
     <string name="notes_placeholder">— Вопросы преподавателя\n— Что доделать к защите</string>
-    <string name="nothing_found">Ничего не найдено</string>
     <string name="notif_defense_line">%1$d пара · %2$s — %3$s</string>
     <string name="notif_defense_title">%1$s на защиту</string>
     <string name="notif_redo_text">%1$s · преподаватель вернул работу</string>
@@ -275,7 +272,6 @@
     <string name="schedule_url_field">АДРЕС</string>
     <string name="schedule_url_reset">Вернуть адрес по умолчанию</string>
     <string name="schedule_url_title">СТРАНИЦА РАСПИСАНИЯ</string>
-    <string name="search_hint">Поиск…</string>
     <string name="section_category">РАЗДЕЛ</string>
     <string name="section_deadline">СРОК СДАЧИ</string>
     <string name="section_defense">ЗАЩИТА</string>

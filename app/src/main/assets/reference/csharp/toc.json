@@ -2,7 +2,7 @@
   "chapters": [
     {
       "id": "basics",
-      "title": { "ru": "Основы C#", "en": "C# basics" },
+      "title": { "ru": "Основы C#", "en": "C# basics", "be": "Асновы C#" },
       "articles": [
         "intro",
         "first-program",
@@ -12,6 +12,18 @@
         "console",
         "operators",
         "conversions"
+      ]
+    },
+    {
+      "id": "flow",
+      "title": { "ru": "Условия, циклы, массивы", "en": "Conditions, loops, arrays", "be": "Умовы, цыклы, масівы" },
+      "articles": [
+        "logic",
+        "conditions",
+        "switch",
+        "loops",
+        "arrays",
+        "strings"
       ]
     }
   ]

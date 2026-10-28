@@ -65,7 +65,6 @@ import com.slh.studentlabhub.i18n.Strings
 
 @Composable
 fun ReferenceRoute(
-    onCategoryClick: (RefCategory) -> Unit,
     onArticleClick: (RefArticleLink, String?) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ReferenceViewModel = viewModel(factory = ReferenceViewModel.Factory),
@@ -77,7 +76,6 @@ fun ReferenceRoute(
         state = state,
         onTechSelected = viewModel::onTechSelected,
         onQueryChange = viewModel::onQueryChange,
-        onCategoryClick = onCategoryClick,
         onArticleClick = onArticleClick,
         onEntryClick = copyExample,
         onDownloadTldr = viewModel::downloadFromTldr,
@@ -92,7 +90,6 @@ fun ReferenceScreen(
     state: ReferenceUiState,
     onTechSelected: (RefTech) -> Unit,
     onQueryChange: (String) -> Unit,
-    onCategoryClick: (RefCategory) -> Unit,
     onEntryClick: (RefEntry) -> Unit,
     onDownloadTldr: () -> Unit,
     onSaveEntry: (RefEntryDraft) -> Unit,
@@ -158,26 +155,14 @@ fun ReferenceScreen(
                     selected = state.selectedTech,
                     onSelect = onTechSelected,
                 )
-                if (state.chapters.isNotEmpty()) {
-                    ArticleChapters(
-                        chapters = state.chapters,
-                        notes = state.entriesByCategory,
-                        onArticleClick = { link -> onArticleClick(link, null) },
-                        onEntryClick = onEntryClick,
-                        onEditEntry = openEditor,
-                    )
-                } else if (state.selectedTech == RefTech.LINUX) {
-                    LinuxCategories(
-                        categories = state.categories,
-                        onCategoryClick = onCategoryClick,
-                    )
-                } else {
-                    LanguageCheatSheet(
-                        groups = state.entriesByCategory,
-                        onEntryClick = onEntryClick,
-                        onEditEntry = openEditor,
-                    )
-                }
+                ArticleChapters(
+                    chapters = state.chapters,
+                    notes = state.entriesByCategory,
+                    showTldrTip = state.selectedTech == RefTech.LINUX,
+                    onArticleClick = { link -> onArticleClick(link, null) },
+                    onEntryClick = onEntryClick,
+                    onEditEntry = openEditor,
+                )
             }
         }
     }
@@ -207,88 +192,15 @@ fun ReferenceScreen(
 }
 
 @Composable
-private fun LinuxCategories(
-    categories: List<RefCategory>,
-    onCategoryClick: (RefCategory) -> Unit,
-) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
-    ) {
-        item(key = "label") {
-            SectionLabel(text = Strings.get(R.string.command_categories, categories.sumOf { it.entryTitles.size }))
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-        items(items = categories, key = { it.id }) { category ->
-            CategoryCard(
-                category = category,
-                onClick = { onCategoryClick(category) },
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-        item(key = "footer") {
-            Text(
-                text = Strings.get(R.string.reference_tip),
-                color = SlhTextMuted,
-                style = MaterialTheme.typography.bodySmall,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp, start = 8.dp, end = 8.dp),
-            )
-            OfflineFooter()
-        }
-    }
-}
-
-@Composable
-private fun LanguageCheatSheet(
-    groups: List<Pair<RefCategory, List<RefEntry>>>,
-    onEntryClick: (RefEntry) -> Unit,
-    onEditEntry: (RefEntry) -> Unit,
-) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
-    ) {
-        groups.forEach { (category, entries) ->
-            item(key = "group_${category.id}") {
-                SectionLabel(text = category.title.uppercase(Locale.getDefault()))
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-            items(items = entries, key = { it.id }) { entry ->
-                EntryCard(
-                    entry = entry,
-                    onClick = { onEntryClick(entry) },
-                    onEdit = { onEditEntry(entry) },
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-            item(key = "space_${category.id}") {
-                Spacer(modifier = Modifier.height(10.dp))
-            }
-        }
-        item(key = "hint") {
-            Text(
-                text = Strings.get(R.string.tap_to_copy),
-                color = SlhTextMuted,
-                style = MaterialTheme.typography.bodySmall,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            OfflineFooter()
-        }
-    }
-}
-
-@Composable
 private fun ArticleChapters(
     chapters: List<RefChapter>,
     notes: List<Pair<RefCategory, List<RefEntry>>>,
+    showTldrTip: Boolean,
     onArticleClick: (RefArticleLink) -> Unit,
     onEntryClick: (RefEntry) -> Unit,
     onEditEntry: (RefEntry) -> Unit,
 ) {
+    val filledNotes = notes.filter { it.second.isNotEmpty() }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
@@ -299,7 +211,7 @@ private fun ArticleChapters(
                 Spacer(modifier = Modifier.height(12.dp))
             }
         }
-        notes.filter { it.second.isNotEmpty() }.forEach { (category, entries) ->
+        filledNotes.forEach { (category, entries) ->
             item(key = "notes_${category.id}") {
                 Spacer(modifier = Modifier.height(4.dp))
                 SectionLabel(text = category.title.uppercase(Locale.getDefault()))
@@ -315,6 +227,21 @@ private fun ArticleChapters(
             }
         }
         item(key = "footer") {
+            val tips = listOfNotNull(
+                Strings.get(R.string.tap_to_copy).takeIf { filledNotes.isNotEmpty() },
+                Strings.get(R.string.reference_tip).takeIf { showTldrTip },
+            )
+            tips.forEach { tip ->
+                Text(
+                    text = tip,
+                    color = SlhTextMuted,
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp, start = 8.dp, end = 8.dp),
+                )
+            }
             OfflineFooter()
         }
     }
@@ -577,10 +504,17 @@ private fun TldrBlock(
     }
 }
 
-private val previewCategories = listOf(
-    RefCategory("1", RefTech.LINUX, "Файлы и директории", listOf("ls", "cd", "mkdir", "rm", "cp", "mv")),
-    RefCategory("2", RefTech.LINUX, "Процессы", listOf("ps", "kill", "top", "htop")),
-    RefCategory("3", RefTech.LINUX, "Права доступа", listOf("chmod", "chown", "umask")),
+private val previewChapters = listOf(
+    RefChapter(
+        id = "basics",
+        tech = RefTech.CSHARP,
+        number = 1,
+        title = "Основы C#",
+        articles = listOf(
+            RefArticleLink("intro", RefTech.CSHARP, "1.1", "Язык C# и платформа .NET"),
+            RefArticleLink("first-program", RefTech.CSHARP, "1.2", "Первая программа"),
+        ),
+    ),
 )
 
 @Preview(showBackground = true, backgroundColor = 0xFF000000, widthDp = 390, heightDp = 720)
@@ -590,11 +524,11 @@ private fun ReferenceScreenPreview() {
         ReferenceScreen(
             state = ReferenceUiState(
                 isLoading = false,
-                categories = previewCategories,
+                selectedTech = RefTech.CSHARP,
+                chapters = previewChapters,
             ),
             onTechSelected = {},
             onQueryChange = {},
-            onCategoryClick = {},
             onEntryClick = {},
             onDownloadTldr = {},
             onSaveEntry = {},
@@ -615,7 +549,6 @@ private fun ReferenceSearchPreview() {
             ),
             onTechSelected = {},
             onQueryChange = {},
-            onCategoryClick = {},
             onEntryClick = {},
             onDownloadTldr = {},
             onSaveEntry = {},

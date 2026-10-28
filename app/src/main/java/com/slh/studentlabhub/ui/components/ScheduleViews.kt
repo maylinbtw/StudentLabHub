@@ -25,6 +25,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slh.studentlabhub.R
@@ -83,6 +84,7 @@ fun LessonRow(
     isNow: Boolean,
     queued: List<QueuedWork>,
     modifier: Modifier = Modifier,
+    horizontalPadding: Dp = 0.dp,
     onClick: (() -> Unit)? = null,
 ) {
     Row(
@@ -90,7 +92,7 @@ fun LessonRow(
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
             .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
-            .padding(vertical = 10.dp),
+            .padding(horizontal = horizontalPadding, vertical = 10.dp),
     ) {
         Box(
             modifier = Modifier

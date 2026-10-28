@@ -5,7 +5,6 @@ import com.slh.studentlabhub.data.local.AppDatabase
 import com.slh.studentlabhub.data.local.SessionStore
 import com.slh.studentlabhub.data.local.entity.RefCategoryEntity
 import com.slh.studentlabhub.data.local.entity.RefEntryEntity
-import com.slh.studentlabhub.data.reference.ReferenceSeed
 import com.slh.studentlabhub.data.reference.TldrParser
 import com.slh.studentlabhub.data.remote.TldrApi
 import com.slh.studentlabhub.domain.model.RefCategory
@@ -23,7 +22,6 @@ import java.io.IOException
 import java.util.UUID
 import com.slh.studentlabhub.R
 import com.slh.studentlabhub.i18n.Strings
-import com.slh.studentlabhub.data.reference.ReferenceSeedEn
 
 class ReferenceRepositoryImpl(
     private val database: AppDatabase,
@@ -64,49 +62,31 @@ class ReferenceRepositoryImpl(
         }
 
     override suspend fun ensureSeeded() {
-        val language = if (Strings.isRussian()) "ru" else "en"
-        if (session.referenceVersion >= ReferenceSeed.VERSION &&
-            session.referenceLanguage == language &&
-            dao.countBuiltinEntries() > 0
-        ) {
-            return
+        val language = when {
+            Strings.isBelarusian() -> "be"
+            Strings.isRussian() -> "ru"
+            else -> "en"
         }
-        val tr: (String) -> String = if (language == "ru") { text -> text } else ReferenceSeedEn::translate
-
-        val categories = mutableListOf<RefCategoryEntity>()
-        val entries = mutableListOf<RefEntryEntity>()
-        var entryPosition = 0
-
-        ReferenceSeed.categories.forEachIndexed { categoryIndex, category ->
-            categories += RefCategoryEntity(
-                id = category.id,
-                tech = category.tech,
-                title = tr(category.title),
-                position = categoryIndex,
-            )
-            category.entries.forEachIndexed { index, entry ->
-                entries += RefEntryEntity(
-                    id = "${category.id}_$index",
-                    categoryId = category.id,
-                    tech = category.tech,
-                    title = tr(entry.title),
-                    description = tr(entry.description),
-                    example = tr(entry.example),
-                    position = entryPosition++,
-                )
+        database.withTransaction {
+            moveOrphanedCustomEntries()
+            if (session.referenceVersion < STORAGE_VERSION) {
+                dao.deleteBuiltinEntries()
+                dao.deleteBuiltinCategories()
+            }
+            if (session.referenceVersion < STORAGE_VERSION || session.referenceLanguage != language) {
+                dao.renameCustomCategories(Strings.get(R.string.ref_my_notes))
+                dao.renameTldrCategories(Strings.get(R.string.ref_tldr_category))
             }
         }
-
-        database.withTransaction {
-            dao.deleteBuiltinEntries()
-            dao.deleteBuiltinCategories()
-            dao.insertCategories(categories)
-            dao.insertEntries(entries)
-            dao.renameCustomCategories(Strings.get(R.string.ref_my_notes))
-            dao.renameTldrCategories(Strings.get(R.string.ref_tldr_category))
-        }
-        session.referenceVersion = ReferenceSeed.VERSION
+        session.referenceVersion = STORAGE_VERSION
         session.referenceLanguage = language
+    }
+
+    private suspend fun moveOrphanedCustomEntries() {
+        val orphaned = dao.getCustomEntries().filterNot { it.categoryId.startsWith(CUSTOM_PREFIX) }
+        if (orphaned.isEmpty()) return
+        val moved = orphaned.map { entry -> entry.copy(categoryId = ensureCustomCategory(entry.tech)) }
+        dao.insertEntries(moved)
     }
 
     override suspend fun saveCustomEntry(draft: RefEntryDraft) {
@@ -206,6 +186,8 @@ class ReferenceRepositoryImpl(
     private fun nextUserPosition(): Int = (System.currentTimeMillis() / 1000L).toInt()
 
     private companion object {
+        const val STORAGE_VERSION = 2
+        const val CUSTOM_PREFIX = "custom_"
         const val CUSTOM_CATEGORY_POSITION = 10_000
         const val TLDR_CATEGORY_POSITION = 10_001
     }

@@ -136,9 +136,10 @@ private fun Context.openNotificationSettings() {
 
 private val AppLanguage.title: String
     get() = when (this) {
-        AppLanguage.SYSTEM -> Strings.get(R.string.option_system)
+        AppLanguage.SYSTEM -> Strings.get(R.string.language_system_short)
         AppLanguage.RU -> "Русский"
         AppLanguage.EN -> "English"
+        AppLanguage.BE -> "Беларуская"
     }
 
 private val ScheduleSubgroup.title: String

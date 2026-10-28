@@ -74,8 +74,6 @@
     <string name="calendar_legend_later">later</string>
     <string name="calendar_legend_overdue">overdue</string>
     <string name="calendar_legend_urgent">next 3 days</string>
-    <string name="category_empty">There are no more articles in this section</string>
-    <string name="category_overline">%1$s commands · syntax and examples</string>
     <string name="channel_deadlines">Deadlines</string>
     <string name="channel_deadlines_desc">Reminders about work due dates</string>
     <string name="channel_redo">Redo</string>
@@ -91,7 +89,6 @@
     <string name="classroom_syncing">Classroom: updating…</string>
     <string name="classroom_task_default">Classroom assignment</string>
     <string name="classroom_updated_at">Classroom updated %1$s</string>
-    <string name="command_categories">COMMAND CATEGORIES · %1$d</string>
     <string name="completed_lab">Defended</string>
     <string name="completed_practice">Submitted</string>
     <string name="dark_background">Dark theme background</string>
@@ -151,6 +148,7 @@
     <string name="group_week">THIS WEEK</string>
     <string name="lab_works">Works</string>
     <string name="language">Language</string>
+    <string name="language_system_short">Auto</string>
     <string name="left_hours">due in %1$d h</string>
     <string name="left_less_hour">due in less than an hour</string>
     <string name="left_tomorrow">due tomorrow</string>
@@ -178,7 +176,6 @@
     <string name="no_works_yet_hint">no works yet; add them inside the subject</string>
     <string name="not_signed_in">Not signed in</string>
     <string name="notes_placeholder">— Teacher questions\n— What to finish before defending</string>
-    <string name="nothing_found">Nothing found</string>
     <string name="notif_defense_line">Class %1$d · %2$s: %3$s</string>
     <string name="notif_defense_title">To defend %1$s</string>
     <string name="notif_redo_text">%1$s · the teacher returned the work</string>
@@ -272,7 +269,6 @@
     <string name="schedule_url_field">ADDRESS</string>
     <string name="schedule_url_reset">Restore the default address</string>
     <string name="schedule_url_title">SCHEDULE PAGE</string>
-    <string name="search_hint">Search…</string>
     <string name="section_category">SECTION</string>
     <string name="section_deadline">DUE DATE</string>
     <string name="section_defense">DEFENSE</string>

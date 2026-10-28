@@ -16,9 +16,6 @@ interface ReferenceDao {
     @Query("SELECT * FROM ref_entries ORDER BY position ASC")
     fun observeEntries(): Flow<List<RefEntryEntity>>
 
-    @Query("SELECT COUNT(*) FROM ref_entries WHERE source IS NULL")
-    suspend fun countBuiltinEntries(): Int
-
     @Query("SELECT COUNT(*) FROM ref_entries WHERE source = 'tldr'")
     fun observeTldrCount(): Flow<Int>
 

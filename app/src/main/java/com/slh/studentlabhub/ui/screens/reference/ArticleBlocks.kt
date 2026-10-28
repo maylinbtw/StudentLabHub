@@ -337,7 +337,35 @@ private val keywordsByLanguage: Map<String, Set<String>> = run {
         "using", "var", "virtual", "void", "volatile", "while", "async", "await", "record", "nint", "nuint",
         "dynamic", "get", "set", "init", "required", "when", "with", "and", "or", "not",
     )
-    mapOf("csharp" to csharp, "cs" to csharp)
+    val cpp = setOf(
+        "alignas", "auto", "bool", "break", "case", "catch", "char", "class", "const", "constexpr",
+        "continue", "default", "delete", "do", "double", "else", "enum", "explicit", "extern", "false",
+        "float", "for", "friend", "goto", "if", "inline", "int", "long", "mutable", "namespace", "new",
+        "noexcept", "nullptr", "operator", "override", "private", "protected", "public", "return",
+        "short", "signed", "sizeof", "static", "struct", "switch", "template", "this", "throw", "true",
+        "try", "typedef", "typename", "unsigned", "using", "virtual", "void", "volatile", "while",
+        "std", "string", "size_t",
+    )
+    val java = setOf(
+        "abstract", "boolean", "break", "byte", "case", "catch", "char", "class", "const", "continue",
+        "default", "do", "double", "else", "enum", "extends", "false", "final", "finally", "float", "for",
+        "if", "implements", "import", "instanceof", "int", "interface", "long", "new", "null", "package",
+        "private", "protected", "public", "record", "return", "short", "static", "super", "switch",
+        "this", "throw", "throws", "true", "try", "var", "void", "while", "yield", "String",
+    )
+    val python = setOf(
+        "and", "as", "assert", "async", "await", "break", "class", "continue", "def", "del", "elif",
+        "else", "except", "False", "finally", "for", "from", "global", "if", "import", "in", "is",
+        "lambda", "None", "nonlocal", "not", "or", "pass", "raise", "return", "True", "try", "while",
+        "with", "yield", "match", "case", "print", "len", "range", "int", "float", "str", "bool",
+        "list", "dict", "set", "tuple", "input",
+    )
+    mapOf(
+        "csharp" to csharp, "cs" to csharp,
+        "cpp" to cpp, "c++" to cpp, "c" to cpp,
+        "java" to java,
+        "python" to python, "py" to python,
+    )
 }
 
 private fun highlightCode(code: String, language: String): AnnotatedString {
@@ -347,25 +375,34 @@ private fun highlightCode(code: String, language: String): AnnotatedString {
     val commentStyle = SpanStyle(color = SlhTextMuted, fontStyle = FontStyle.Italic)
     val numberStyle = SpanStyle(color = SlhAccent)
     val isShell = language in setOf("bash", "sh", "shell")
+    val hashComments = isShell || language in setOf("python", "py")
+    val isCpp = language in setOf("cpp", "c++", "c")
 
     return buildAnnotatedString {
         var index = 0
         while (index < code.length) {
             val char = code[index]
             when {
-                !isShell && code.startsWith("//", index) -> {
+                !hashComments && code.startsWith("//", index) -> {
                     val end = code.indexOf('\n', index).let { if (it < 0) code.length else it }
                     withStyle(commentStyle) { append(code.substring(index, end)) }
                     index = end
                 }
 
-                isShell && char == '#' -> {
+                hashComments && char == '#' -> {
                     val end = code.indexOf('\n', index).let { if (it < 0) code.length else it }
                     withStyle(commentStyle) { append(code.substring(index, end)) }
                     index = end
                 }
 
-                !isShell && code.startsWith("/*", index) -> {
+                isCpp && char == '#' -> {
+                    var end = index + 1
+                    while (end < code.length && code[end].isLetter()) end++
+                    withStyle(keywordStyle) { append(code.substring(index, end)) }
+                    index = end
+                }
+
+                !hashComments && code.startsWith("/*", index) -> {
                     val end = code.indexOf("*/", index + 2).let { if (it < 0) code.length else it + 2 }
                     withStyle(commentStyle) { append(code.substring(index, end)) }
                     index = end

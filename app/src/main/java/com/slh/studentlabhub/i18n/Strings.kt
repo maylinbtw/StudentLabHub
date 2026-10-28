@@ -36,6 +36,8 @@ object Strings {
 
     fun isRussian(): Boolean = AppLocale.isRussian(languageProvider())
 
+    fun isBelarusian(): Boolean = AppLocale.isBelarusian(languageProvider())
+
     fun pick(ru: String, en: String): String = if (isRussian()) ru else en
 
     fun get(@StringRes id: Int, vararg args: Any): String =

@@ -115,7 +115,11 @@ class ArticleRepositoryImpl(
     }
 
     private suspend fun content(tech: RefTech): TechContent {
-        val language = if (Strings.isRussian()) LANG_RU else LANG_EN
+        val language = when {
+            Strings.isBelarusian() -> LANG_BE
+            Strings.isRussian() -> LANG_RU
+            else -> LANG_EN
+        }
         val key = "${tech.folder}/$language"
         return mutex.withLock {
             cache.getOrPut(key) { withContext(Dispatchers.IO) { load(tech, language) } }
@@ -173,6 +177,7 @@ class ArticleRepositoryImpl(
     private companion object {
         const val ROOT = "reference"
         const val LANG_RU = "ru"
+        const val LANG_BE = "be"
         const val LANG_EN = "en"
     }
 }

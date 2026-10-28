@@ -33,7 +33,6 @@ import com.slh.studentlabhub.ui.screens.auth.LoginRoute
 import com.slh.studentlabhub.ui.screens.labdetails.LabDetailsRoute
 import com.slh.studentlabhub.ui.screens.lablist.LabListRoute
 import com.slh.studentlabhub.ui.screens.reference.ArticleRoute
-import com.slh.studentlabhub.ui.screens.reference.ReferenceCategoryRoute
 import com.slh.studentlabhub.ui.screens.reference.ReferenceRoute
 import com.slh.studentlabhub.ui.screens.settings.SettingsRoute
 import com.slh.studentlabhub.ui.screens.statistics.StatisticsRoute
@@ -201,9 +200,6 @@ fun SlhApp() {
             }
             composable(Routes.REFERENCE) {
                 ReferenceRoute(
-                    onCategoryClick = { category ->
-                        navController.navigate(Routes.referenceCategory(category.id))
-                    },
                     onArticleClick = { link, section ->
                         navController.navigate(Routes.referenceArticle(link, section))
                     },
@@ -228,16 +224,6 @@ fun SlhApp() {
                             popUpTo(Routes.REFERENCE_ARTICLE) { inclusive = true }
                         }
                     },
-                )
-            }
-            composable(
-                route = Routes.REFERENCE_CATEGORY,
-                arguments = listOf(
-                    navArgument(Routes.ARG_REF_CATEGORY_ID) { type = NavType.StringType },
-                ),
-            ) {
-                ReferenceCategoryRoute(
-                    onBack = { navController.popBackStack() },
                 )
             }
             composable(Routes.SETTINGS) {

@@ -28,8 +28,6 @@ object Routes {
     const val LAB_DETAILS = "subjects/lab/{$ARG_LAB_ID}"
 
 
-    const val ARG_REF_CATEGORY_ID = "refCategoryId"
-    const val REFERENCE_CATEGORY = "reference/category/{$ARG_REF_CATEGORY_ID}"
 
     const val ARG_REF_TECH = "refTech"
     const val ARG_REF_ARTICLE_ID = "refArticleId"
@@ -39,8 +37,6 @@ object Routes {
     fun subject(subjectId: Long): String = "subjects/$subjectId"
 
     fun labDetails(labId: Long): String = "subjects/lab/$labId"
-
-    fun referenceCategory(categoryId: String): String = "reference/category/$categoryId"
 
     fun referenceArticle(link: RefArticleLink, section: String? = null): String {
         val base = "reference/article/${link.tech.name}/${link.id}"

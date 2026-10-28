@@ -1,0 +1,16 @@
+{
+  "chapters": [
+    {
+      "id": "terminal",
+      "title": { "ru": "Работа в терминале", "en": "Working in the terminal", "be": "Праца ў тэрмінале" },
+      "articles": [
+        "terminal",
+        "navigation",
+        "files",
+        "text",
+        "permissions",
+        "processes"
+      ]
+    }
+  ]
+}

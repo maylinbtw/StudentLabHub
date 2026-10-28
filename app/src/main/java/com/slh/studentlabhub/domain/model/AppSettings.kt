@@ -15,6 +15,7 @@ enum class AppLanguage {
     SYSTEM,
     RU,
     EN,
+    BE,
 }
 
 enum class ThemeMode {

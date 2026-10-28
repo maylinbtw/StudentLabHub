@@ -12,10 +12,14 @@ object AppLocale {
     fun resolve(language: AppLanguage): Locale = when (language) {
         AppLanguage.RU -> Locale.forLanguageTag("ru")
         AppLanguage.EN -> Locale.ENGLISH
+        AppLanguage.BE -> Locale.forLanguageTag("be")
         AppLanguage.SYSTEM -> systemLocale()
     }
 
-    fun isRussian(language: AppLanguage): Boolean = resolve(language).language == "ru"
+    // Встроенный контент (справочник, демо-данные) для белорусского берётся русский
+    fun isRussian(language: AppLanguage): Boolean = resolve(language).language in setOf("ru", "be")
+
+    fun isBelarusian(language: AppLanguage): Boolean = resolve(language).language == "be"
 
     fun wrap(base: Context, language: AppLanguage): Context {
         val locale = resolve(language)

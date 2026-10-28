@@ -1,0 +1,16 @@
+{
+  "chapters": [
+    {
+      "id": "basics",
+      "title": { "ru": "Основы C++", "en": "C++ basics", "be": "Асновы C++" },
+      "articles": [
+        "first-program",
+        "variables",
+        "io",
+        "operators",
+        "conditions",
+        "loops"
+      ]
+    }
+  ]
+}
