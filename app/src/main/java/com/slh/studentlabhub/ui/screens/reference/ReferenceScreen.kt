@@ -37,7 +37,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.slh.studentlabhub.domain.model.ArticleHit
+import com.slh.studentlabhub.domain.model.RefArticleLink
 import com.slh.studentlabhub.domain.model.RefCategory
+import com.slh.studentlabhub.domain.model.RefChapter
+import com.slh.studentlabhub.ui.theme.SlhContent
+import com.slh.studentlabhub.ui.theme.SlhSurface
+import com.slh.studentlabhub.ui.theme.SlhTextDisabled
+import androidx.compose.ui.text.style.TextOverflow
 import com.slh.studentlabhub.domain.model.RefEntry
 import com.slh.studentlabhub.domain.model.RefEntryDraft
 import com.slh.studentlabhub.domain.model.RefTech
@@ -59,6 +66,7 @@ import com.slh.studentlabhub.i18n.Strings
 @Composable
 fun ReferenceRoute(
     onCategoryClick: (RefCategory) -> Unit,
+    onArticleClick: (RefArticleLink, String?) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ReferenceViewModel = viewModel(factory = ReferenceViewModel.Factory),
 ) {
@@ -70,6 +78,7 @@ fun ReferenceRoute(
         onTechSelected = viewModel::onTechSelected,
         onQueryChange = viewModel::onQueryChange,
         onCategoryClick = onCategoryClick,
+        onArticleClick = onArticleClick,
         onEntryClick = copyExample,
         onDownloadTldr = viewModel::downloadFromTldr,
         onSaveEntry = viewModel::saveEntry,
@@ -89,6 +98,7 @@ fun ReferenceScreen(
     onSaveEntry: (RefEntryDraft) -> Unit,
     onDeleteEntry: (String) -> Unit,
     modifier: Modifier = Modifier,
+    onArticleClick: (RefArticleLink, String?) -> Unit = { _, _ -> },
 ) {
     var showEditor by rememberSaveable { mutableStateOf(false) }
     var editingEntryId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -136,6 +146,7 @@ fun ReferenceScreen(
             state.isSearching -> {
                 SearchResults(
                     state = state,
+                    onArticleClick = onArticleClick,
                     onEntryClick = onEntryClick,
                     onEditEntry = openEditor,
                     onDownloadTldr = onDownloadTldr,
@@ -147,7 +158,15 @@ fun ReferenceScreen(
                     selected = state.selectedTech,
                     onSelect = onTechSelected,
                 )
-                if (state.selectedTech == RefTech.LINUX) {
+                if (state.chapters.isNotEmpty()) {
+                    ArticleChapters(
+                        chapters = state.chapters,
+                        notes = state.entriesByCategory,
+                        onArticleClick = { link -> onArticleClick(link, null) },
+                        onEntryClick = onEntryClick,
+                        onEditEntry = openEditor,
+                    )
+                } else if (state.selectedTech == RefTech.LINUX) {
                     LinuxCategories(
                         categories = state.categories,
                         onCategoryClick = onCategoryClick,
@@ -263,22 +282,188 @@ private fun LanguageCheatSheet(
 }
 
 @Composable
+private fun ArticleChapters(
+    chapters: List<RefChapter>,
+    notes: List<Pair<RefCategory, List<RefEntry>>>,
+    onArticleClick: (RefArticleLink) -> Unit,
+    onEntryClick: (RefEntry) -> Unit,
+    onEditEntry: (RefEntry) -> Unit,
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
+    ) {
+        chapters.forEach { chapter ->
+            item(key = "chapter_${chapter.id}") {
+                ChapterCard(chapter = chapter, onArticleClick = onArticleClick)
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+        }
+        notes.filter { it.second.isNotEmpty() }.forEach { (category, entries) ->
+            item(key = "notes_${category.id}") {
+                Spacer(modifier = Modifier.height(4.dp))
+                SectionLabel(text = category.title.uppercase(Locale.getDefault()))
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            items(items = entries, key = { it.id }) { entry ->
+                EntryCard(
+                    entry = entry,
+                    onClick = { onEntryClick(entry) },
+                    onEdit = { onEditEntry(entry) },
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+        item(key = "footer") {
+            OfflineFooter()
+        }
+    }
+}
+
+@Composable
+private fun ChapterCard(
+    chapter: RefChapter,
+    onArticleClick: (RefArticleLink) -> Unit,
+) {
+    val shape = RoundedCornerShape(10.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(SlhSurface)
+            .border(1.dp, SlhOutline, shape),
+    ) {
+        Column(modifier = Modifier.padding(start = 14.dp, end = 14.dp, top = 14.dp, bottom = 6.dp)) {
+            Text(
+                text = Strings.get(R.string.ref_chapter_n, chapter.number).uppercase(Locale.getDefault()),
+                color = SlhAccent,
+                fontFamily = SlhMono,
+                fontWeight = FontWeight.Bold,
+                fontSize = 11.sp,
+                letterSpacing = 1.sp,
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = chapter.title,
+                color = SlhContent,
+                style = MaterialTheme.typography.titleMedium,
+            )
+        }
+        chapter.articles.forEach { link ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(role = Role.Button) { onArticleClick(link) }
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = link.number,
+                    color = SlhTextMuted,
+                    fontFamily = SlhMono,
+                    fontSize = 12.sp,
+                    modifier = Modifier.width(40.dp),
+                )
+                Text(
+                    text = link.title,
+                    color = SlhTextSecondary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    text = "›",
+                    color = SlhAccent,
+                    fontFamily = SlhMono,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp,
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+    }
+}
+
+@Composable
+private fun ArticleHitCard(
+    hit: ArticleHit,
+    onClick: () -> Unit,
+) {
+    val shape = RoundedCornerShape(6.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(SlhSurface)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+    ) {
+        Text(
+            text = "${hit.article.number} ${hit.article.title}",
+            color = SlhContent,
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp,
+        )
+        if (hit.snippet.isNotBlank()) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = hit.snippet,
+                color = SlhTextSecondary,
+                fontSize = 13.sp,
+                lineHeight = 18.sp,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = listOfNotNull(hit.article.tech.label, hit.chapterTitle, hit.section).joinToString(" › "),
+            color = SlhTextDisabled,
+            fontFamily = SlhMono,
+            fontSize = 10.sp,
+            letterSpacing = 1.sp,
+        )
+    }
+}
+
+@Composable
 private fun SearchResults(
     state: ReferenceUiState,
+    onArticleClick: (RefArticleLink, String?) -> Unit,
     onEntryClick: (RefEntry) -> Unit,
     onEditEntry: (RefEntry) -> Unit,
     onDownloadTldr: () -> Unit,
 ) {
     val results = state.searchResults
+    val hits = state.articleHits
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
     ) {
-        item(key = "count") {
-            SectionLabel(text = Strings.get(R.string.found_count, results.size))
-            Spacer(modifier = Modifier.height(10.dp))
+        if (hits.isNotEmpty()) {
+            item(key = "articles_count") {
+                SectionLabel(text = Strings.get(R.string.ref_articles_found, hits.size))
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+            items(items = hits, key = { "hit_${it.article.tech}_${it.article.id}" }) { hit ->
+                ArticleHitCard(
+                    hit = hit,
+                    onClick = { onArticleClick(hit.article, hit.section) },
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            item(key = "articles_space") {
+                Spacer(modifier = Modifier.height(10.dp))
+            }
         }
-        if (results.isEmpty()) {
+        if (results.isNotEmpty() || hits.isEmpty()) {
+            item(key = "count") {
+                SectionLabel(text = Strings.get(R.string.found_count, results.size))
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+        }
+        if (results.isEmpty() && hits.isEmpty()) {
             item(key = "empty") {
                 Text(
                     text = Strings.get(R.string.reference_not_found),

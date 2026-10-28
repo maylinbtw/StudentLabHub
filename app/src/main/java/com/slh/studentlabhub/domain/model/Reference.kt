@@ -2,6 +2,7 @@ package com.slh.studentlabhub.domain.model
 
 enum class RefTech(val label: String) {
     LINUX("Linux"),
+    CSHARP("C#"),
     CPP("C++"),
     JAVA("Java"),
     PYTHON("Python"),

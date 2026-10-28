@@ -14,6 +14,11 @@ import com.slh.studentlabhub.domain.model.TldrResult
 import com.slh.studentlabhub.domain.model.search
 import com.slh.studentlabhub.domain.model.tldrCommandOrNull
 import com.slh.studentlabhub.domain.repository.ReferenceRepository
+import com.slh.studentlabhub.domain.model.ArticleHit
+import com.slh.studentlabhub.domain.model.RefChapter
+import com.slh.studentlabhub.domain.repository.ArticleRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -39,20 +44,28 @@ data class ReferenceUiState(
     val searchResults: List<RefEntry> = emptyList(),
     val tldrCommand: String? = null,
     val tldrState: TldrState = TldrState.Idle,
+    val chapters: List<RefChapter> = emptyList(),
+    val articleHits: List<ArticleHit> = emptyList(),
 ) {
     val isSearching: Boolean
         get() = query.isNotBlank()
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ReferenceViewModel(
     private val repository: ReferenceRepository,
+    private val articleRepository: ArticleRepository,
 ) : ViewModel() {
 
     private val selectedTech = MutableStateFlow(RefTech.LINUX)
     private val query = MutableStateFlow("")
     private val tldrState = MutableStateFlow<TldrState>(TldrState.Idle)
 
-    val uiState: StateFlow<ReferenceUiState> = combine(
+    private val chapters = selectedTech.mapLatest { tech -> articleRepository.chapters(tech) }
+
+    private val articleHits = query.mapLatest { text -> articleRepository.search(text) }
+
+    private val baseState = combine(
         repository.observeReference(),
         selectedTech,
         query,
@@ -72,6 +85,17 @@ class ReferenceViewModel(
             searchResults = data.entries.search(text),
             tldrCommand = tldrCommandOrNull(text),
             tldrState = tldr,
+        )
+    }
+
+    val uiState: StateFlow<ReferenceUiState> = combine(
+        baseState,
+        chapters,
+        articleHits,
+    ) { base, techChapters, hits ->
+        base.copy(
+            chapters = techChapters.filter { it.tech == base.selectedTech },
+            articleHits = if (base.isSearching) hits else emptyList(),
         )
     }.stateIn(
         scope = viewModelScope,
@@ -117,7 +141,10 @@ class ReferenceViewModel(
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as SlhApplication
-                ReferenceViewModel(app.container.referenceRepository)
+                ReferenceViewModel(
+                    repository = app.container.referenceRepository,
+                    articleRepository = app.container.articleRepository,
+                )
             }
         }
     }

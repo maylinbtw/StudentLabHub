@@ -24,6 +24,8 @@ import kotlinx.coroutines.SupervisorJob
 import com.slh.studentlabhub.data.remote.ScheduleApi
 import com.slh.studentlabhub.data.repository.ScheduleRepositoryImpl
 import com.slh.studentlabhub.domain.repository.ScheduleRepository
+import com.slh.studentlabhub.data.repository.ArticleRepositoryImpl
+import com.slh.studentlabhub.domain.repository.ArticleRepository
 
 class AppContainer(context: Context) {
 
@@ -63,6 +65,8 @@ class AppContainer(context: Context) {
             tldrApi = TldrApi(),
         )
     }
+
+    val articleRepository: ArticleRepository by lazy { ArticleRepositoryImpl(appContext.assets) }
 
     val scheduleRepository: ScheduleRepository by lazy {
         ScheduleRepositoryImpl(

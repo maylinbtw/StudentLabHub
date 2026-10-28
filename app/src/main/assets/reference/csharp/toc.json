@@ -1,0 +1,18 @@
+{
+  "chapters": [
+    {
+      "id": "basics",
+      "title": { "ru": "Основы C#", "en": "C# basics" },
+      "articles": [
+        "intro",
+        "first-program",
+        "structure",
+        "variables",
+        "types",
+        "console",
+        "operators",
+        "conversions"
+      ]
+    }
+  ]
+}

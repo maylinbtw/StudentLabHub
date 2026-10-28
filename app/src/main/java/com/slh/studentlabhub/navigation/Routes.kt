@@ -5,6 +5,8 @@ import com.slh.studentlabhub.ui.components.SlhIcon
 import com.slh.studentlabhub.R
 import com.slh.studentlabhub.i18n.Strings
 import androidx.annotation.StringRes
+import android.net.Uri
+import com.slh.studentlabhub.domain.model.RefArticleLink
 
 object Routes {
     const val LOGIN = "login"
@@ -29,11 +31,21 @@ object Routes {
     const val ARG_REF_CATEGORY_ID = "refCategoryId"
     const val REFERENCE_CATEGORY = "reference/category/{$ARG_REF_CATEGORY_ID}"
 
+    const val ARG_REF_TECH = "refTech"
+    const val ARG_REF_ARTICLE_ID = "refArticleId"
+    const val ARG_REF_SECTION = "section"
+    const val REFERENCE_ARTICLE = "reference/article/{$ARG_REF_TECH}/{$ARG_REF_ARTICLE_ID}?$ARG_REF_SECTION={$ARG_REF_SECTION}"
+
     fun subject(subjectId: Long): String = "subjects/$subjectId"
 
     fun labDetails(labId: Long): String = "subjects/lab/$labId"
 
     fun referenceCategory(categoryId: String): String = "reference/category/$categoryId"
+
+    fun referenceArticle(link: RefArticleLink, section: String? = null): String {
+        val base = "reference/article/${link.tech.name}/${link.id}"
+        return if (section.isNullOrBlank()) base else "$base?$ARG_REF_SECTION=${Uri.encode(section)}"
+    }
 }
 
 val StartScreen.route: String
