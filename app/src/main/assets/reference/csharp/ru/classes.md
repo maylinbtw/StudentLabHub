@@ -1,0 +1,115 @@
+# Классы и объекты
+
+**Класс** — описание нового типа: какие данные он хранит (**поля**) и что умеет делать (**методы**). **Объект** — конкретный экземпляр класса, созданный по этому описанию.
+
+## Объявление класса
+
+```csharp
+class Student
+{
+    public string Name = "";
+    public int Course;
+
+    public void Introduce()
+    {
+        Console.WriteLine($"Я {Name}, {Course} курс");
+    }
+}
+```
+
+Класс обычно кладут в отдельный файл с таким же именем: `Student.cs`.
+
+> [!NOTE]
+> В программе с верхнеуровневыми инструкциями классы объявляют после основного кода или в отдельных файлах. В примерах этой главы класс и код, который его использует, показаны рядом для краткости.
+
+## Создание объекта
+
+Объект создаётся оператором `new`. К полям и методам обращаются через точку:
+
+```csharp
+Student anna = new Student();
+anna.Name = "Анна";
+anna.Course = 2;
+anna.Introduce();
+
+var oleg = new Student { Name = "Олег", Course = 3 }; // инициализатор объекта
+oleg.Introduce();
+```
+
+```output
+Я Анна, 2 курс
+Я Олег, 3 курс
+```
+
+Короткая запись `Student s = new();` тоже допустима — тип берётся из объявления слева.
+
+## Модификаторы доступа
+
+| Модификатор | Кто видит |
+|---|---|
+| `public` | весь код |
+| `private` | только сам класс (по умолчанию для членов класса) |
+| `protected` | класс и его наследники |
+| `internal` | код того же проекта (по умолчанию для класса) |
+
+Поля обычно делают `private`, а наружу открывают методы и свойства — так объект сам контролирует свои данные. Это называется **инкапсуляция**.
+
+```csharp
+class Counter
+{
+    private int value;
+
+    public void Increment() => value++;
+    public int Get() => value;
+}
+```
+
+## this
+
+Внутри метода `this` — ссылка на текущий объект. Нужна, когда имя параметра совпадает с именем поля:
+
+```csharp
+class Lab
+{
+    private string title = "";
+
+    public void SetTitle(string title)
+    {
+        this.title = title;
+    }
+}
+```
+
+## Классы — ссылочный тип
+
+Переменная хранит ссылку на объект. При присваивании копируется ссылка, а объект остаётся один:
+
+```csharp
+var a = new Student { Name = "Анна" };
+var b = a;
+b.Name = "Ира";
+Console.WriteLine(a.Name); // Ира
+```
+
+> [!WARNING]
+> Если переменная равна `null`, обращение к её членам выбросит `NullReferenceException`: `Student s = null; s.Introduce();`.
+
+## Статические члены
+
+Члены со словом `static` принадлежат классу целиком, а не отдельному объекту:
+
+```csharp
+class Student
+{
+    public static int Count;
+    public string Name = "";
+
+    public Student() => Count++;
+}
+
+new Student();
+new Student();
+Console.WriteLine(Student.Count); // 2
+```
+
+Так устроены `Math.Sqrt`, `Console.WriteLine`, `int.Parse` — их вызывают через имя класса.

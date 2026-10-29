@@ -1,0 +1,100 @@
+# Конструкторы
+
+**Конструктор** — специальный метод, который вызывается при создании объекта через `new`. Его задача — привести объект в правильное начальное состояние.
+
+## Объявление
+
+Имя конструктора совпадает с именем класса, тип результата не пишется:
+
+```csharp
+class Student
+{
+    public string Name { get; }
+    public int Course { get; }
+
+    public Student(string name, int course)
+    {
+        Name = name;
+        Course = course;
+    }
+}
+
+var s = new Student("Анна", 2);
+Console.WriteLine($"{s.Name}, {s.Course} курс");
+```
+
+```output
+Анна, 2 курс
+```
+
+## Конструктор по умолчанию
+
+Если в классе нет ни одного конструктора, компилятор добавляет пустой конструктор без параметров. Как только вы объявили свой — пустой пропадает:
+
+```csharp
+var s = new Student(); // CS7036: нет аргумента для параметра name
+```
+
+## Несколько конструкторов
+
+Конструкторы можно перегружать. Чтобы не дублировать код, один вызывает другой через `this(...)`:
+
+```csharp
+class Lab
+{
+    public string Title { get; }
+    public int Number { get; }
+
+    public Lab(string title, int number)
+    {
+        Title = title;
+        Number = number;
+    }
+
+    public Lab(string title) : this(title, 1) { }
+}
+
+var a = new Lab("Массивы", 3);
+var b = new Lab("Введение");   // Number = 1
+```
+
+## Первичный конструктор
+
+В C# 12 параметры конструктора можно указать прямо после имени класса:
+
+```csharp
+class Teacher(string name, string subject)
+{
+    public string Name => name;
+    public void Introduce() => Console.WriteLine($"{name}, {subject}");
+}
+
+new Teacher("Иванова", "Математика").Introduce();
+```
+
+Параметры первичного конструктора видны во всём теле класса.
+
+## record
+
+Для простых классов-данных удобен `record`. Конструктор, свойства, сравнение по значению и `ToString` создаются автоматически:
+
+```csharp
+record Mark(string Subject, int Value);
+
+var m1 = new Mark("Физика", 8);
+var m2 = new Mark("Физика", 8);
+
+Console.WriteLine(m1);          // Mark { Subject = Физика, Value = 8 }
+Console.WriteLine(m1 == m2);    // True — сравнение по значениям
+
+var m3 = m1 with { Value = 9 }; // копия с изменённым полем
+```
+
+> [!NOTE]
+> У обычного класса `==` сравнивает ссылки: два разных объекта с одинаковыми полями не равны. У `record` сравниваются значения свойств.
+
+## Порядок инициализации
+
+1. Полям присваиваются значения из объявления (`int count = 5;`).
+2. Выполняется конструктор.
+3. Применяется инициализатор объекта `{ Name = ... }`, если он есть.

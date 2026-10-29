@@ -11,6 +11,26 @@
         "conditions",
         "loops"
       ]
+    },
+    {
+      "id": "methods",
+      "title": { "ru": "Методы, массивы, строки", "en": "Methods, arrays, strings", "be": "Метады, масівы, радкі" },
+      "articles": [
+        "methods",
+        "arrays",
+        "strings",
+        "exceptions"
+      ]
+    },
+    {
+      "id": "oop",
+      "title": { "ru": "ООП и коллекции", "en": "OOP and collections", "be": "ААП і калекцыі" },
+      "articles": [
+        "classes",
+        "inheritance",
+        "interfaces",
+        "collections"
+      ]
     }
   ]
 }

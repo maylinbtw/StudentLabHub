@@ -1,0 +1,117 @@
+# Массивы
+
+**Массив** — несколько значений одного типа подряд в памяти. Индексы начинаются с нуля.
+
+## Обычный массив
+
+```cpp
+int marks[5] = {8, 6, 9, 7, 10};
+double prices[] = {9.5, 12.0, 3.2};   // размер 3 — по числу значений
+int zeros[10] = {};                   // все элементы 0
+
+cout << marks[0] << '\n';             // 8
+marks[1] = 7;
+```
+
+Размер обычного массива должен быть известен при компиляции и не меняется.
+
+Количество элементов:
+
+```cpp
+int count = sizeof(marks) / sizeof(marks[0]);   // 5
+// или в C++17:
+#include <iterator>
+size_t n = std::size(marks);                     // 5
+```
+
+> [!WARNING]
+> C++ не проверяет границы массива. `marks[5]` или `marks[-1]` не вызовут ошибку сразу — программа прочитает чужую память. Это **неопределённое поведение**: мусор, падение или «всё работает» до поры.
+
+## Перебор
+
+```cpp
+int sum = 0;
+for (int i = 0; i < 5; i++)
+    sum += marks[i];
+
+for (int m : marks)          // цикл по диапазону
+    cout << m << ' ';
+```
+
+## std::array
+
+Из `<array>` — массив фиксированного размера, который знает свою длину и умеет проверять индекс:
+
+```cpp
+#include <array>
+
+array<int, 4> a = {3, 1, 4, 1};
+cout << a.size() << '\n';     // 4
+cout << a.at(2) << '\n';      // 4
+// a.at(10) — исключение out_of_range
+```
+
+## std::vector
+
+Если размер заранее неизвестен, используйте `vector` — массив, который растёт:
+
+```cpp
+#include <vector>
+
+vector<int> marks;
+int m;
+while (cin >> m && m > 0)
+    marks.push_back(m);
+
+cout << "Введено оценок: " << marks.size() << '\n';
+```
+
+Подробнее о `vector` — в главе «Классы и STL».
+
+## Двумерный массив
+
+```cpp
+int table[2][3] = {
+    {1, 2, 3},
+    {4, 5, 6}
+};
+
+for (int r = 0; r < 2; r++)
+{
+    for (int c = 0; c < 3; c++)
+        cout << table[r][c] << ' ';
+    cout << '\n';
+}
+```
+
+```output
+1 2 3 
+4 5 6 
+```
+
+## Массив в функцию
+
+Обычный массив передаётся как указатель на первый элемент — размер теряется, его передают отдельно:
+
+```cpp
+double average(const int arr[], int size)
+{
+    int sum = 0;
+    for (int i = 0; i < size; i++) sum += arr[i];
+    return static_cast<double>(sum) / size;
+}
+
+int marks[] = {8, 6, 9};
+cout << average(marks, 3);   // 7.66667
+```
+
+С `vector` проще — он передаётся с размером:
+
+```cpp
+double average(const vector<int>& v)
+{
+    int sum = 0;
+    for (int x : v) sum += x;
+    return static_cast<double>(sum) / v.size();
+}
+```

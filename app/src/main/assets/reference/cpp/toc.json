@@ -11,6 +11,27 @@
         "conditions",
         "loops"
       ]
+    },
+    {
+      "id": "functions",
+      "title": { "ru": "Функции и данные", "en": "Functions and data", "be": "Функцыі і даныя" },
+      "articles": [
+        "functions",
+        "arrays",
+        "strings",
+        "pointers"
+      ]
+    },
+    {
+      "id": "oop",
+      "title": { "ru": "Классы и STL", "en": "Classes and STL", "be": "Класы і STL" },
+      "articles": [
+        "classes",
+        "inheritance",
+        "vector",
+        "map",
+        "algorithms"
+      ]
     }
   ]
 }

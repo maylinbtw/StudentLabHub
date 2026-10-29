@@ -11,6 +11,27 @@
         "permissions",
         "processes"
       ]
+    },
+    {
+      "id": "system",
+      "title": { "ru": "Система и сеть", "en": "System and network", "be": "Сістэма і сетка" },
+      "articles": [
+        "packages",
+        "editors",
+        "environment",
+        "network"
+      ]
+    },
+    {
+      "id": "scripts",
+      "title": { "ru": "Скрипты bash", "en": "Bash scripts", "be": "Скрыпты bash" },
+      "articles": [
+        "scripts",
+        "script-variables",
+        "script-conditions",
+        "script-loops",
+        "script-functions"
+      ]
     }
   ]
 }

@@ -25,6 +25,50 @@
         "arrays",
         "strings"
       ]
+    },
+    {
+      "id": "methods",
+      "title": { "ru": "Методы", "en": "Methods", "be": "Метады" },
+      "articles": [
+        "methods",
+        "parameters",
+        "overloading",
+        "recursion",
+        "exceptions"
+      ]
+    },
+    {
+      "id": "oop",
+      "title": { "ru": "Объектно-ориентированное программирование", "en": "Object-oriented programming", "be": "Аб'ектна-арыентаванае праграмаванне" },
+      "articles": [
+        "classes",
+        "properties",
+        "constructors",
+        "inheritance",
+        "polymorphism",
+        "interfaces"
+      ]
+    },
+    {
+      "id": "collections",
+      "title": { "ru": "Коллекции и LINQ", "en": "Collections and LINQ", "be": "Калекцыі і LINQ" },
+      "articles": [
+        "list",
+        "dictionary",
+        "sets-queues",
+        "lambdas",
+        "linq"
+      ]
+    },
+    {
+      "id": "io",
+      "title": { "ru": "Файлы, текст и даты", "en": "Files, text and dates", "be": "Файлы, тэкст і даты" },
+      "articles": [
+        "formatting",
+        "files",
+        "json",
+        "datetime"
+      ]
     }
   ]
 }

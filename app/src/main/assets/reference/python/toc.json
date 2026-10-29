@@ -11,6 +11,27 @@
         "conditions",
         "loops"
       ]
+    },
+    {
+      "id": "data",
+      "title": { "ru": "Функции и структуры данных", "en": "Functions and data structures", "be": "Функцыі і структуры даных" },
+      "articles": [
+        "functions",
+        "lists",
+        "tuples-sets",
+        "dicts",
+        "strings"
+      ]
+    },
+    {
+      "id": "advanced",
+      "title": { "ru": "Файлы, исключения, классы", "en": "Files, exceptions, classes", "be": "Файлы, выключэнні, класы" },
+      "articles": [
+        "files",
+        "exceptions",
+        "classes",
+        "modules"
+      ]
     }
   ]
 }
