@@ -78,3 +78,15 @@ static void Log2(string text, string level = "INFO") =>
 ```
 
 Overloads are needed when versions take **different types** or behave differently. If only a default value changes, an optional parameter is simpler.
+
+## Check yourself
+
+> [!QUIZ]
+> Can you overload methods that differ only in return type?
+> ---
+> No: the return type isn't part of the signature, you get error CS0111.
+
+> [!QUIZ]
+> Given `Show(long)` and `Show(double)`, which runs for `Show(5)`?
+> ---
+> `Show(long)`: the `int` → `long` conversion is better than `int` → `double`.

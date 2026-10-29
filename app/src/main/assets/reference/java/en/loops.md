@@ -110,3 +110,15 @@ int[] marks = {8, 6, 9, 7};
 double avg = Arrays.stream(marks).average().orElse(0);
 long good = Arrays.stream(marks).filter(m -> m >= 8).count();   // 2
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> How do you exit two nested loops at once?
+> ---
+> Put a label before the outer loop and write `break label;`.
+
+> [!QUIZ]
+> When is a for-each loop handy?
+> ---
+> When you need every element of an array or collection and don't need the index.

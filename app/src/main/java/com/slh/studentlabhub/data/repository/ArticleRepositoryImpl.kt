@@ -103,6 +103,7 @@ class ArticleRepositoryImpl(
             is ArticleBlock.BulletList -> block.items.joinToString(" ")
             is ArticleBlock.NumberedList -> block.items.joinToString(" ")
             is ArticleBlock.Table -> (listOf(block.header) + block.rows).joinToString(" ") { it.joinToString(" ") }
+            is ArticleBlock.Quiz -> block.question
         },
     ).replace('\n', ' ')
 

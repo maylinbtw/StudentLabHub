@@ -98,3 +98,15 @@ Console.WriteLine(big.Count());      // 3 — the new element is counted too
 ```
 
 To fix the result, call `.ToList()`.
+
+## Check yourself
+
+> [!QUIZ]
+> How does `First` differ from `FirstOrDefault`?
+> ---
+> If nothing is found, `First` throws `InvalidOperationException`, while `FirstOrDefault` returns the default (`null` for objects).
+
+> [!QUIZ]
+> When does `list.Where(...)` actually run?
+> ---
+> Not immediately, but when iterated or when `ToList()`, `Count()` etc. is called — deferred execution.

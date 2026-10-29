@@ -103,3 +103,15 @@ unzip lab3.zip                     # unpack a zip
 ```
 
 Letters in `tar`: `c` — create, `x` — extract, `z` — gzip compression, `f` — archive file name, `v` — show progress.
+
+## Check yourself
+
+> [!QUIZ]
+> How do you delete a folder with its contents?
+> ---
+> `rm -r folder`. There's no trash — deletion is permanent.
+
+> [!QUIZ]
+> How do you extract `lab3.tar.gz`?
+> ---
+> `tar -xzf lab3.tar.gz`.

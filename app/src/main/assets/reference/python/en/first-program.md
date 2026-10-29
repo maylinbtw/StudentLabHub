@@ -94,3 +94,15 @@ The block under `if __name__ == "__main__":` runs only when the file is executed
 - **PyCharm** — a full IDE;
 - **VS Code** with the Python extension;
 - **Jupyter Notebook** — for data analysis and experiments.
+
+## Check yourself
+
+> [!QUIZ]
+> What marks the body of an `if`, loop or function in Python?
+> ---
+> Indentation — usually 4 spaces. There are no braces.
+
+> [!QUIZ]
+> What is `if __name__ == "__main__":` for?
+> ---
+> The code inside runs only when the file is run directly, not when it's imported.

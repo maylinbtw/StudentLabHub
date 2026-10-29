@@ -82,3 +82,15 @@ while (queue.TryDequeue(out string? name))
 | unique values only, fast "is it there" check | `HashSet<T>` |
 | process items in turn | `Queue<T>` |
 | undo, "back", matching brackets | `Stack<T>` |
+
+## Check yourself
+
+> [!QUIZ]
+> Which collection fits a first-in, first-out defense queue?
+> ---
+> `Queue<T>`: `Enqueue` adds to the end, `Dequeue` takes the first.
+
+> [!QUIZ]
+> What does `set.Add(x)` return if `x` is already in the `HashSet`?
+> ---
+> `false` — the element isn't added.

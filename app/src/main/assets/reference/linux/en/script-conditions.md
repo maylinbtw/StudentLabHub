@@ -136,3 +136,15 @@ esac
 - each branch ends with `;;`;
 - `|` puts several options in one branch;
 - `*` matches everything else, like `default`.
+
+## Check yourself
+
+> [!QUIZ]
+> Which `[ ]` operator means "greater or equal" for numbers?
+> ---
+> `-ge`.
+
+> [!QUIZ]
+> How do you check that the `build` folder exists?
+> ---
+> `[ -d build ]`.

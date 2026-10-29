@@ -134,3 +134,15 @@ print(factorial(10))   # 3628800
 
 > [!NOTE]
 > By default recursion depth is limited to about 1000 calls — beyond that you get `RecursionError`. For deep tasks, a loop is better.
+
+## Check yourself
+
+> [!QUIZ]
+> What does a function without `return` return?
+> ---
+> `None`.
+
+> [!QUIZ]
+> Why is `def add(x, items=[])` a bad idea?
+> ---
+> The list is created once when the function is defined and keeps values between calls. Use `items=None`.

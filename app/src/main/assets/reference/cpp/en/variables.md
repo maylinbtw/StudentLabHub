@@ -88,3 +88,15 @@ int i = static_cast<int>(d);             // 7 — explicit cast
 double r = static_cast<double>(7) / 2;   // 3.5
 int old = (int)d;                         // C-style cast, better avoided
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> What is the value of a local `int x;` without initialization?
+> ---
+> Indeterminate — it can be any garbage. Reading it is undefined behavior.
+
+> [!QUIZ]
+> What does `auto` do in `auto n = 10;`?
+> ---
+> The compiler infers the type from the value — `int` here.

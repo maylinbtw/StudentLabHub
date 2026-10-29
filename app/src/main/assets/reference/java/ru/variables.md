@@ -92,3 +92,15 @@ Integer boxed = 5;          // int → Integer
 int raw = boxed;            // Integer → int
 int max = Integer.MAX_VALUE;
 ```
+
+## Проверь себя
+
+> [!QUIZ]
+> Чем `int` отличается от `Integer`?
+> ---
+> `int` — примитив, `Integer` — класс-обёртка. Обёртки нужны в коллекциях и могут быть `null`.
+
+> [!QUIZ]
+> Что означает `final int MAX = 10;`?
+> ---
+> Константу: значение нельзя присвоить повторно.

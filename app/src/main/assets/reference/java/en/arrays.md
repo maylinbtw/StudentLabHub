@@ -103,3 +103,15 @@ jagged[2] = new int[]{1, 2, 3};
 
 > [!NOTE]
 > An array's size can't change. If elements are added as the program runs, use `ArrayList` — see the "OOP and collections" chapter.
+
+## Check yourself
+
+> [!QUIZ]
+> Why doesn't `System.out.println(arr)` print the elements?
+> ---
+> It prints the type and hash. `Arrays.toString(arr)` prints the elements.
+
+> [!QUIZ]
+> How do you get an array's length?
+> ---
+> With the `length` field, no parentheses: `arr.length`.

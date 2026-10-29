@@ -114,3 +114,15 @@ set -euo pipefail
 
 > [!WARNING]
 > A script created on Windows may have `\r\n` line endings. Then bash reports `/bin/bash^M: bad interpreter`. Fix: `sed -i 's/\r$//' script.sh` or save the file with LF endings.
+
+## Check yourself
+
+> [!QUIZ]
+> Why does a script start with `#!/bin/bash`?
+> ---
+> It's the shebang: it says which program should run the file.
+
+> [!QUIZ]
+> What does `$?` hold?
+> ---
+> The exit code of the last command: `0` means success, anything else an error.

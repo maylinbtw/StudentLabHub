@@ -105,3 +105,15 @@ string word;
 while (ss >> word)
     cout << word << '\n';
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> What does `s.find("x")` return if there's no match?
+> ---
+> `string::npos`.
+
+> [!QUIZ]
+> Why does `getline` after `cin >> n` return an empty string?
+> ---
+> A newline is left in the stream after the number. Call `cin.ignore()` before `getline`.

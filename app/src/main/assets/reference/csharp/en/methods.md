@@ -122,3 +122,15 @@ static int Sum(int[] items)
 ```
 
 `total` exists only while `Sum` runs and disappears when the method returns.
+
+## Check yourself
+
+> [!QUIZ]
+> What does `void` mean in a method declaration?
+> ---
+> The method returns nothing.
+
+> [!QUIZ]
+> When do you get error CS0161?
+> ---
+> When not every execution path of a method with a result type ends with `return`.

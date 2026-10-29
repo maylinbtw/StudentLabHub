@@ -104,3 +104,15 @@ cut -d ' ' -f 1 access.log | sort | uniq -c | sort -rn | head -n 10
 diff old.c new.c                     # отличия построчно
 diff -u old.c new.c                  # в формате патча (как в git)
 ```
+
+## Проверь себя
+
+> [!QUIZ]
+> Чем `>` отличается от `>>`?
+> ---
+> `>` перезаписывает файл, `>>` дописывает в конец.
+
+> [!QUIZ]
+> Как посчитать строки, где встречается слово `error`?
+> ---
+> `grep -c error log.txt` или `grep error log.txt | wc -l`.

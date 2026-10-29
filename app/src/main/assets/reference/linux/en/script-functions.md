@@ -159,3 +159,15 @@ set +x
 
 > [!NOTE]
 > The `shellcheck` tool checks scripts for common mistakes: `sudo apt install shellcheck`, then `shellcheck script.sh`.
+
+## Check yourself
+
+> [!QUIZ]
+> How do you return a string or number from a function?
+> ---
+> Print it with `echo` and capture it with `result=$(func)`. `return` only gives a 0–255 exit code.
+
+> [!QUIZ]
+> What is `local` for in a function?
+> ---
+> The variable is visible only inside the function and won't change a global one with the same name.

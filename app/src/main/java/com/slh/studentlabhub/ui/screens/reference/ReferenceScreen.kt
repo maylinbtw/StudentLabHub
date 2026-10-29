@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.slh.studentlabhub.domain.model.ArticleHit
+import com.slh.studentlabhub.domain.model.ReadingProgress
 import com.slh.studentlabhub.domain.model.RefArticleLink
 import com.slh.studentlabhub.domain.model.RefCategory
 import com.slh.studentlabhub.domain.model.RefChapter
@@ -157,6 +159,9 @@ fun ReferenceScreen(
                 )
                 ArticleChapters(
                     chapters = state.chapters,
+                    progress = state.progress,
+                    continueLink = state.continueLink,
+                    bookmarks = state.bookmarks,
                     notes = state.entriesByCategory,
                     showTldrTip = state.selectedTech == RefTech.LINUX,
                     onArticleClick = { link -> onArticleClick(link, null) },
@@ -194,6 +199,9 @@ fun ReferenceScreen(
 @Composable
 private fun ArticleChapters(
     chapters: List<RefChapter>,
+    progress: ReadingProgress,
+    continueLink: RefArticleLink?,
+    bookmarks: List<RefArticleLink>,
     notes: List<Pair<RefCategory, List<RefEntry>>>,
     showTldrTip: Boolean,
     onArticleClick: (RefArticleLink) -> Unit,
@@ -205,9 +213,21 @@ private fun ArticleChapters(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
     ) {
+        if (continueLink != null) {
+            item(key = "continue") {
+                ContinueCard(link = continueLink, onClick = { onArticleClick(continueLink) })
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+        }
+        if (bookmarks.isNotEmpty()) {
+            item(key = "bookmarks") {
+                BookmarksCard(bookmarks = bookmarks, onArticleClick = onArticleClick)
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+        }
         chapters.forEach { chapter ->
             item(key = "chapter_${chapter.id}") {
-                ChapterCard(chapter = chapter, onArticleClick = onArticleClick)
+                ChapterCard(chapter = chapter, progress = progress, onArticleClick = onArticleClick)
                 Spacer(modifier = Modifier.height(12.dp))
             }
         }
@@ -248,21 +268,24 @@ private fun ArticleChapters(
 }
 
 @Composable
-private fun ChapterCard(
-    chapter: RefChapter,
-    onArticleClick: (RefArticleLink) -> Unit,
+private fun ContinueCard(
+    link: RefArticleLink,
+    onClick: () -> Unit,
 ) {
     val shape = RoundedCornerShape(10.dp)
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
             .background(SlhSurface)
-            .border(1.dp, SlhOutline, shape),
+            .border(1.dp, SlhAccent, shape)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(modifier = Modifier.padding(start = 14.dp, end = 14.dp, top = 14.dp, bottom = 6.dp)) {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = Strings.get(R.string.ref_chapter_n, chapter.number).uppercase(Locale.getDefault()),
+                text = Strings.get(R.string.ref_continue),
                 color = SlhAccent,
                 fontFamily = SlhMono,
                 fontWeight = FontWeight.Bold,
@@ -271,12 +294,151 @@ private fun ChapterCard(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
+                text = "${link.number} ${link.title}",
+                color = SlhContent,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = link.tech.label,
+                color = SlhTextMuted,
+                fontFamily = SlhMono,
+                fontSize = 10.sp,
+                letterSpacing = 1.sp,
+            )
+        }
+        Text(
+            text = "›",
+            color = SlhAccent,
+            fontFamily = SlhMono,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+        )
+    }
+}
+
+@Composable
+private fun BookmarksCard(
+    bookmarks: List<RefArticleLink>,
+    onArticleClick: (RefArticleLink) -> Unit,
+) {
+    val shape = RoundedCornerShape(10.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(SlhSurface)
+            .border(1.dp, SlhOutline, shape)
+            .padding(vertical = 6.dp),
+    ) {
+        Text(
+            text = Strings.get(R.string.ref_bookmarks),
+            color = SlhAccent,
+            fontFamily = SlhMono,
+            fontWeight = FontWeight.Bold,
+            fontSize = 11.sp,
+            letterSpacing = 1.sp,
+            modifier = Modifier.padding(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 4.dp),
+        )
+        bookmarks.forEach { link ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(role = Role.Button) { onArticleClick(link) }
+                    .padding(horizontal = 14.dp, vertical = 9.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "★",
+                    color = SlhAccent,
+                    fontSize = 13.sp,
+                    modifier = Modifier.width(24.dp),
+                )
+                Text(
+                    text = link.title,
+                    color = SlhTextSecondary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = link.tech.label,
+                    color = SlhTextMuted,
+                    fontFamily = SlhMono,
+                    fontSize = 10.sp,
+                    letterSpacing = 1.sp,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ChapterCard(
+    chapter: RefChapter,
+    progress: ReadingProgress,
+    onArticleClick: (RefArticleLink) -> Unit,
+) {
+    val shape = RoundedCornerShape(10.dp)
+    val readCount = progress.readCount(chapter)
+    val total = chapter.articles.size
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(SlhSurface)
+            .border(1.dp, SlhOutline, shape),
+    ) {
+        Column(modifier = Modifier.padding(start = 14.dp, end = 14.dp, top = 14.dp, bottom = 6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = Strings.get(R.string.ref_chapter_n, chapter.number).uppercase(Locale.getDefault()),
+                    color = SlhAccent,
+                    fontFamily = SlhMono,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 11.sp,
+                    letterSpacing = 1.sp,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    text = "$readCount/$total",
+                    color = if (total > 0 && readCount == total) SlhAccent else SlhTextMuted,
+                    fontFamily = SlhMono,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 11.sp,
+                    letterSpacing = 1.sp,
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
                 text = chapter.title,
                 color = SlhContent,
                 style = MaterialTheme.typography.titleMedium,
             )
+            if (readCount > 0 && total > 0) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(3.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(SlhOutline),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(readCount.toFloat() / total)
+                            .fillMaxHeight()
+                            .background(SlhAccent),
+                    )
+                }
+            }
         }
         chapter.articles.forEach { link ->
+            val isRead = progress.isRead(link)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -293,14 +455,22 @@ private fun ChapterCard(
                 )
                 Text(
                     text = link.title,
-                    color = SlhTextSecondary,
+                    color = if (isRead) SlhTextMuted else SlhTextSecondary,
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f),
                 )
+                if (progress.isBookmarked(link)) {
+                    Text(
+                        text = "★",
+                        color = SlhAccent,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(horizontal = 6.dp),
+                    )
+                }
                 Text(
-                    text = "›",
+                    text = if (isRead) "✓" else "›",
                     color = SlhAccent,
                     fontFamily = SlhMono,
                     fontWeight = FontWeight.Bold,

@@ -101,3 +101,15 @@ var g = new Group { Name = "P-21" };
 
 > [!NOTE]
 > A get-only property and a parameterless method look similar. Rule of thumb: if it is a characteristic of the object and is quick to compute — a property; if it is an action or a slow operation — a method.
+
+## Check yourself
+
+> [!QUIZ]
+> What does `{ get; init; }` mean?
+> ---
+> The property can be set only when the object is created (constructor or initializer), then only read.
+
+> [!QUIZ]
+> How do you get the assigned value inside `set`?
+> ---
+> With the `value` keyword.

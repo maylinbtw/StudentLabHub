@@ -144,3 +144,15 @@ Console.WriteLine(grade); // C
 ```
 
 > The `or`, `and` and `>=` patterns in `case` labels and switch expressions appeared in C# 9. In older versions use `when`.
+
+## Check yourself
+
+> [!QUIZ]
+> What happens if you forget `break` in a classic `switch` case?
+> ---
+> Compile error CS0163: C# doesn't allow falling through to the next `case` when the current one has code.
+
+> [!QUIZ]
+> What does `_` mean in a `switch` expression?
+> ---
+> The "everything else" branch, like `default`.

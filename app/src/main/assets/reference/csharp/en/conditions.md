@@ -126,3 +126,15 @@ group ??= "CS-44";                        // assign only if null
 - a semicolon after the condition: `if (x > 0);` — the block after it always runs;
 - comparing `double` values with `==`: because of rounding errors, check `Math.Abs(a - b) < 1e-9` instead;
 - redundant comparison with `true`: write `if (isDone)` instead of `if (isDone == true)`.
+
+## Check yourself
+
+> [!QUIZ]
+> What does `x > 0 ? "plus" : "not plus"` do?
+> ---
+> It's the ternary operator: it returns the first value if the condition is true, otherwise the second.
+
+> [!QUIZ]
+> Why doesn't `if (x = 5)` compile in C#?
+> ---
+> The condition must be `bool`, but `x = 5` is an `int` assignment. Comparison needs `==`.

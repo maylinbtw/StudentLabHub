@@ -127,3 +127,15 @@ deactivate
 ```
 
 The `.venv` folder isn't added to git — `requirements.txt` is kept instead.
+
+## Check yourself
+
+> [!QUIZ]
+> Why shouldn't you name your file `random.py`?
+> ---
+> `import random` would load your file instead of the standard module.
+
+> [!QUIZ]
+> Why does a project need a virtual environment?
+> ---
+> So packages and their versions don't clash between projects.

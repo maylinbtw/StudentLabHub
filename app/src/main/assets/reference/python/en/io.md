@@ -100,3 +100,15 @@ Marks: 8 6 9 7
 ```
 
 `split()` cuts the string at spaces, `map(int, ...)` turns each piece into a number.
+
+## Check yourself
+
+> [!QUIZ]
+> How do you print `x` with two decimal places?
+> ---
+> With an f-string: `print(f"{x:.2f}")`.
+
+> [!QUIZ]
+> How do you read two numbers from one input line?
+> ---
+> `a, b = map(int, input().split())`.

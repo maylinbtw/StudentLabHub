@@ -92,3 +92,15 @@ Integer boxed = 5;          // int → Integer
 int raw = boxed;            // Integer → int
 int max = Integer.MAX_VALUE;
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> How does `int` differ from `Integer`?
+> ---
+> `int` is a primitive, `Integer` is a wrapper class. Wrappers are used in collections and can be `null`.
+
+> [!QUIZ]
+> What does `final int MAX = 10;` mean?
+> ---
+> A constant: the value can't be reassigned.

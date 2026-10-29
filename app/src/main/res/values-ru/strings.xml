@@ -228,6 +228,17 @@
     <string name="article_note">ПРИМЕЧАНИЕ</string>
     <string name="article_warning">ВАЖНО</string>
     <string name="article_not_found">Статья не найдена.</string>
+    <string name="ref_continue">ПРОДОЛЖИТЬ ЧТЕНИЕ</string>
+    <string name="ref_bookmarks">ЗАКЛАДКИ</string>
+    <string name="article_bookmark_add">☆ В ЗАКЛАДКИ</string>
+    <string name="article_bookmarked">★ В ЗАКЛАДКАХ</string>
+    <string name="article_mark_read">ОТМЕТИТЬ ПРОЧИТАННЫМ</string>
+    <string name="article_read">✓ ПРОЧИТАНО</string>
+    <string name="article_text_smaller">Уменьшить текст</string>
+    <string name="article_text_larger">Увеличить текст</string>
+    <string name="article_quiz">ПРОВЕРЬ СЕБЯ</string>
+    <string name="article_show_answer">ПОКАЗАТЬ ОТВЕТ</string>
+    <string name="article_hide_answer">СКРЫТЬ ОТВЕТ</string>
     <string name="code_copied">Код скопирован</string>
     <string name="ref_tldr_category">Загружено из tldr-pages</string>
     <string name="reference">Справочник</string>

@@ -79,3 +79,15 @@ var builder = new StringBuilder(); // instead of System.Text.StringBuilder
 | Private fields | _camelCase | `_items` |
 
 The compiler does not enforce these rules, but .NET itself and most projects follow them.
+
+## Check yourself
+
+> [!QUIZ]
+> What is the `Main` method?
+> ---
+> The program's entry point: execution starts there. With top-level statements the compiler generates it for you.
+
+> [!QUIZ]
+> What is the `using System;` directive for?
+> ---
+> It imports a namespace so you can write `Console` instead of `System.Console`.

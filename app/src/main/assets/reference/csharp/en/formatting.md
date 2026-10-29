@@ -95,3 +95,15 @@ Lab 3: passed
 
 > [!NOTE]
 > For two or three concatenations, plain interpolation is simpler and no slower. `StringBuilder` is for strings built in a loop.
+
+## Check yourself
+
+> [!QUIZ]
+> What does `$"{42:D5}"` produce?
+> ---
+> `00042` — an integer with at least 5 digits, zero-padded.
+
+> [!QUIZ]
+> When should you use `StringBuilder`?
+> ---
+> When a string is built from many parts in a loop: it doesn't create a new string on every append.

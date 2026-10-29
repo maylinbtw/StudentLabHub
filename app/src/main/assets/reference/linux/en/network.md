@@ -100,3 +100,15 @@ Host lab
 ```
 
 Now `ssh lab` and `scp file.txt lab:~/` are enough.
+
+## Check yourself
+
+> [!QUIZ]
+> Which SSH key can you upload to servers and GitHub?
+> ---
+> Only the public one — the `.pub` file. Never share the private key.
+
+> [!QUIZ]
+> How do you copy a file to a remote machine?
+> ---
+> `scp file user@host:~/folder/`.

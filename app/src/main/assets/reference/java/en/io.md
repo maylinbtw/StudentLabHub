@@ -98,3 +98,15 @@ int count = scanner.nextInt();
 ```java
 System.err.println("File not found");   // error stream, shown in red in the IDE
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> Which class reads keyboard input?
+> ---
+> `Scanner`: `new Scanner(System.in)` with `nextLine()`, `nextInt()`.
+
+> [!QUIZ]
+> What does `%n` do in `printf`?
+> ---
+> It prints a newline using the OS-specific line separator.

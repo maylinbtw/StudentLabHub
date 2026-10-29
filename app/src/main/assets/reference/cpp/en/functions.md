@@ -128,3 +128,15 @@ cout << factorial(10); // 3628800
 
 > [!WARNING]
 > If a function with a result type never reaches `return`, the behavior is undefined: the program may return garbage. The compiler usually warns about this — don't ignore warnings.
+
+## Check yourself
+
+> [!QUIZ]
+> Why do you need a function prototype?
+> ---
+> To call a function before its body appears: the compiler must know the signature before the call.
+
+> [!QUIZ]
+> How does `void f(int& x)` differ from `void f(int x)`?
+> ---
+> With `&` the function gets a reference and can change the original variable; without it, it works on a copy.

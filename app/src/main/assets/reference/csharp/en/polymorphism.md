@@ -96,3 +96,15 @@ Console.WriteLine(new Student { Name = "Anna" }); // Student Anna
 
 > [!WARNING]
 > If a derived class declares a method with the same name without `override`, the compiler gives warning CS0114 and the method hides the base one instead of overriding it. You almost always want `override`.
+
+## Check yourself
+
+> [!QUIZ]
+> What makes a derived method run through a base-type variable?
+> ---
+> Declare it `virtual` (or `abstract`) in the base class and `override` in the derived class.
+
+> [!QUIZ]
+> Can you create an object of an abstract class?
+> ---
+> No, only objects of subclasses that implement all abstract methods.

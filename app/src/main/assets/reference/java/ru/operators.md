@@ -85,3 +85,15 @@ int safe = Math.addExact(Integer.MAX_VALUE, 1);   // ArithmeticException
 String status = mark >= 4 ? "зачтено" : "незачтено";
 int max = a > b ? a : b;
 ```
+
+## Проверь себя
+
+> [!QUIZ]
+> Чему равно `10 / 4` и `10 / 4.0`?
+> ---
+> `2` и `2.5`: деление целых отбрасывает дробную часть.
+
+> [!QUIZ]
+> Что будет при `Integer.MAX_VALUE + 1`?
+> ---
+> Переполнение без ошибки: получится `Integer.MIN_VALUE`. Для проверки есть `Math.addExact`.

@@ -126,3 +126,15 @@ all(m >= 4 for m in marks) # all passed? — True
 
 > [!WARNING]
 > Don't modify a list while iterating over it with `for`: removing items makes the loop skip elements. Iterate over a copy `for x in items[:]` or build a new list.
+
+## Check yourself
+
+> [!QUIZ]
+> Which numbers does `range(2, 10, 3)` produce?
+> ---
+> 2, 5, 8 — the end is not included.
+
+> [!QUIZ]
+> How do you iterate a list together with indexes?
+> ---
+> `for i, item in enumerate(items):`.

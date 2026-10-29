@@ -111,3 +111,15 @@ A condition check for debugging — raises `AssertionError` if the condition is 
 ```python
 assert len(marks) > 0, "No marks"
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> When does the `else` block after `try` run?
+> ---
+> Only if no exception occurred in `try`.
+
+> [!QUIZ]
+> Which exception does `int("abc")` raise?
+> ---
+> `ValueError`.

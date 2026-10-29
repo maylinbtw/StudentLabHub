@@ -111,3 +111,15 @@ print("Name\tMark")
 ord("A")      # 65
 chr(66)       # 'B'
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> Does `s.upper()` change the string `s` itself?
+> ---
+> No: strings are immutable, the method returns a new string. Write `s = s.upper()`.
+
+> [!QUIZ]
+> How do you join `[1, 2, 3]` into the string "1 2 3"?
+> ---
+> `" ".join(map(str, [1, 2, 3]))` — `join` accepts only strings.

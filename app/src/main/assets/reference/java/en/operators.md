@@ -85,3 +85,15 @@ Use `long` for large values, `BigInteger` for arbitrarily large ones, and `BigDe
 String status = mark >= 4 ? "passed" : "failed";
 int max = a > b ? a : b;
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> What are `10 / 4` and `10 / 4.0`?
+> ---
+> `2` and `2.5`: integer division drops the fraction.
+
+> [!QUIZ]
+> What is `Integer.MAX_VALUE + 1`?
+> ---
+> A silent overflow: it becomes `Integer.MIN_VALUE`. `Math.addExact` detects it.

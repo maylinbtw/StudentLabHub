@@ -113,3 +113,15 @@ readonly MAX_LABS=10
 ```
 
 Script variables are **global** by default and aren't visible to programs it starts until they are `export`ed.
+
+## Check yourself
+
+> [!QUIZ]
+> How does `"$name"` differ from `'$name'`?
+> ---
+> Double quotes substitute the variable, single quotes keep the text as is.
+
+> [!QUIZ]
+> What does `echo $((7 / 2))` print?
+> ---
+> `3`: bash works with integers only.

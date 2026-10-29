@@ -134,3 +134,15 @@ foreach (int[] row in jagged)
 1 2
 1 2 3
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> What is the index of the last element of array `a`?
+> ---
+> `a.Length - 1`, or simply `a[^1]`.
+
+> [!QUIZ]
+> `int[] b = a; b[0] = 100;` — does `a[0]` change?
+> ---
+> Yes. Arrays are reference types: `a` and `b` point to the same array. `a.Clone()` or `a.ToArray()` make a copy.

@@ -102,3 +102,15 @@ sealed class Config { }
 
 > [!NOTE]
 > Inheritance is an "is a" relationship: a student **is a** person. For a "has a" relationship (a student **has** a record book), use a field instead of a subclass.
+
+## Check yourself
+
+> [!QUIZ]
+> How many base classes can a C# class have?
+> ---
+> One. Any number of interfaces, though.
+
+> [!QUIZ]
+> What does `p as Student` return if `p` isn't a student?
+> ---
+> `null`. The `as` operator doesn't throw.

@@ -87,3 +87,15 @@ int main()
 - a missing `;` at the end of a statement — the compiler points at the **next** line;
 - `Main` with a capital letter — the linker cannot find the entry point;
 - garbled non-Latin text in the Windows console — call `setlocale(LC_ALL, "");` at the start of `main` and include `<clocale>`.
+
+## Check yourself
+
+> [!QUIZ]
+> Which g++ command compiles `main.cpp` into a program called `app`?
+> ---
+> `g++ main.cpp -o app`, then run it with `./app`.
+
+> [!QUIZ]
+> What does `#include <iostream>` do?
+> ---
+> It includes the standard library header with the `cin` and `cout` I/O streams.

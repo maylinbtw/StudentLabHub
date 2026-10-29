@@ -96,3 +96,15 @@ The default editor (for example, for `git commit`) is set with the `EDITOR` vari
 ```bash
 export EDITOR=nano
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> How do you quit vim without saving?
+> ---
+> `Esc`, then `:q!` and `Enter`.
+
+> [!QUIZ]
+> How do you save a file in nano?
+> ---
+> `Ctrl+O`, then `Enter`. Exit with `Ctrl+X`.

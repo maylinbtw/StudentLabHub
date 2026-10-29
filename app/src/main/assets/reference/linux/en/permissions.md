@@ -98,3 +98,15 @@ sudo usermod -aG students ivan       # add to the students group
 passwd                               # change your password
 su - ivan                            # switch to another user
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> What do the permissions `rwxr-x---` mean?
+> ---
+> The owner can do everything, the group can read and execute, others nothing. As a number: `750`.
+
+> [!QUIZ]
+> Why run a script as `./script.sh` rather than `script.sh`?
+> ---
+> The shell looks for commands only in `PATH` folders, and the current folder isn't one.

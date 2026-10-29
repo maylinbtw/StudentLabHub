@@ -95,3 +95,15 @@ bool good = score >= 7 && score <= 10;
 // the same with pattern matching (C# 9+)
 bool good2 = score is >= 7 and <= 10;
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> How does `&&` differ from `&` for `bool`?
+> ---
+> `&&` skips the right side if the left is already `false` (short-circuit). `&` evaluates both sides.
+
+> [!QUIZ]
+> What is `!(true || false)`?
+> ---
+> `false`: `true || false` is `true`, and `!` inverts it.

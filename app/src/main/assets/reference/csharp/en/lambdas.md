@@ -92,3 +92,15 @@ names.ForEach(Console.WriteLine);
 
 > [!NOTE]
 > If a lambda parameter is unused, it can be named `_`: `list.ForEach(_ => count++)`.
+
+## Check yourself
+
+> [!QUIZ]
+> What does the type `Func<int, bool>` describe?
+> ---
+> A function that takes an `int` and returns a `bool`. The last type in `Func` is the result.
+
+> [!QUIZ]
+> How does `Action<T>` differ from `Func<T, TResult>`?
+> ---
+> `Action` returns nothing, `Func` returns a result.

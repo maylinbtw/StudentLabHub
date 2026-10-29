@@ -120,3 +120,15 @@ API_KEY=secret
 
 > [!WARNING]
 > A `.env` file with passwords and keys must not be added to git. Put it into `.gitignore`.
+
+## Check yourself
+
+> [!QUIZ]
+> Why doesn't `NAME = "Anna"` work?
+> ---
+> There must be no spaces around `=`: otherwise the shell treats `NAME` as a command.
+
+> [!QUIZ]
+> Where do you put `alias` and `export` so they work in every terminal?
+> ---
+> In `~/.bashrc`, then apply with `source ~/.bashrc`.

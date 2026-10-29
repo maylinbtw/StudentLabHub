@@ -87,3 +87,15 @@ free -h                      # memory
 uptime                       # uptime and load average
 nproc                        # number of CPU cores
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> How does `kill PID` differ from `kill -9 PID`?
+> ---
+> `kill` sends SIGTERM — a request to exit. `-9` (SIGKILL) kills it immediately with no chance to clean up.
+
+> [!QUIZ]
+> How do you run a command in the background?
+> ---
+> Add `&` at the end: `long_task &`.

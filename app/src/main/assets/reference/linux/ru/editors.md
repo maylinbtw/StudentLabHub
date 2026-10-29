@@ -96,3 +96,15 @@ set expandtab
 ```bash
 export EDITOR=nano
 ```
+
+## Проверь себя
+
+> [!QUIZ]
+> Как выйти из vim без сохранения?
+> ---
+> `Esc`, затем `:q!` и `Enter`.
+
+> [!QUIZ]
+> Как сохранить файл в nano?
+> ---
+> `Ctrl+O`, затем `Enter`. Выход — `Ctrl+X`.

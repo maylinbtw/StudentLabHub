@@ -85,3 +85,15 @@ The file must be located at `com/slh/labs/Lab1.java`. IntelliJ IDEA creates the 
 | Methods and variables | camelCase | `getAverage`, `labCount` |
 | Constants | UPPER_SNAKE_CASE | `MAX_LABS` |
 | Packages | lowercase | `com.slh.labs` |
+
+## Check yourself
+
+> [!QUIZ]
+> What must the file containing `public class Main` be called?
+> ---
+> `Main.java` — the public class and file names must match.
+
+> [!QUIZ]
+> What does the JVM do?
+> ---
+> It runs the bytecode `javac` compiles the program into, so the same code works on different operating systems.

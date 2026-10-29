@@ -46,3 +46,15 @@ dotnet --version
 ```
 
 Your version number may differ — what matters is that the command does not fail.
+
+## Check yourself
+
+> [!QUIZ]
+> What does the C# compiler turn source code into?
+> ---
+> Into **IL**, an intermediate language. At run time the .NET runtime (CLR) turns it into machine code with JIT compilation.
+
+> [!QUIZ]
+> How is .NET different from C#?
+> ---
+> C# is a programming language, while .NET is the platform: the runtime and libraries the program runs on.

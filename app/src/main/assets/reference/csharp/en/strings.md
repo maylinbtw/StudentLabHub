@@ -118,3 +118,15 @@ done
 ```
 
 > For a few concatenations, `+` and interpolation are perfectly fine. `StringBuilder` is for strings built in a loop.
+
+## Check yourself
+
+> [!QUIZ]
+> Can you change a character: `s[0] = 'A'`?
+> ---
+> No: strings are immutable. Create a new string instead, e.g. `"A" + s[1..]`.
+
+> [!QUIZ]
+> How do you split `"a;b;c"` into parts?
+> ---
+> `"a;b;c".Split(';')` returns the array `{"a", "b", "c"}`.

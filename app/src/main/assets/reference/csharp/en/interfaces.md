@@ -103,3 +103,15 @@ Console.WriteLine(list[0].Name); // Oleg
 
 > [!NOTE]
 > Since C# 8 an interface can contain a default method implementation. But usually an interface is kept a pure contract.
+
+## Check yourself
+
+> [!QUIZ]
+> What access modifier must a method implementing an interface have?
+> ---
+> `public`.
+
+> [!QUIZ]
+> Which interface lets `list.Sort()` sort your objects?
+> ---
+> `IComparable<T>` with its `CompareTo` method.

@@ -115,3 +115,15 @@ String json = """
     }
     """;
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> Why compare strings with `equals` rather than `==`?
+> ---
+> `==` checks whether it's the same object in memory, `equals` compares the text.
+
+> [!QUIZ]
+> How do you split a string by a dot?
+> ---
+> `s.split("\\.")`: `split` takes a regex, where a dot means any character.

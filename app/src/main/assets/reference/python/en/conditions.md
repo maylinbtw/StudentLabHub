@@ -110,3 +110,15 @@ match parts:
     case _:
         print("Didn't get that")
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> Which values are falsy in a condition?
+> ---
+> `False`, `None`, `0`, `0.0`, the empty string and empty collections: `[]`, `{}`, `()`.
+
+> [!QUIZ]
+> How is "else if" written in Python?
+> ---
+> `elif`.

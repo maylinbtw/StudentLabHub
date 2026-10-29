@@ -115,3 +115,15 @@ double average(const vector<int>& v)
     return static_cast<double>(sum) / v.size();
 }
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> What happens when you access `a[10]` in a 5-element array?
+> ---
+> Undefined behavior: C++ doesn't check bounds. `at()` on `std::array` and `vector` does check.
+
+> [!QUIZ]
+> Why do functions taking a plain array also take its size?
+> ---
+> The array is passed as a pointer to its first element, so the length is lost.

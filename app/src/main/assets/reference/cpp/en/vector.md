@@ -99,3 +99,15 @@ If you know in advance how many elements there will be, `reserve` avoids extra r
 
 > [!NOTE]
 > After `push_back` a vector may move to another memory area. Pointers, references and iterators to old elements then become invalid.
+
+## Check yourself
+
+> [!QUIZ]
+> How does `v[i]` differ from `v.at(i)`?
+> ---
+> `at` checks bounds and throws `out_of_range`; `[]` doesn't.
+
+> [!QUIZ]
+> Why is `i < v.size() - 1` dangerous on an empty vector?
+> ---
+> `size()` is unsigned: `0 - 1` becomes a huge number and the loop runs out of bounds.

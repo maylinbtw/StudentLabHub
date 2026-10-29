@@ -116,3 +116,15 @@ System.out.println(factorial(10)); // 3628800
 
 > [!WARNING]
 > Without a base case, recursion ends with `StackOverflowError`.
+
+## Check yourself
+
+> [!QUIZ]
+> Does the array change outside if a method does `arr[0] = 100`?
+> ---
+> Yes: the reference is copied, so the method changes the same array.
+
+> [!QUIZ]
+> What does `int... numbers` mean in parameters?
+> ---
+> A variable number of arguments: inside the method it's a regular `int[]`.

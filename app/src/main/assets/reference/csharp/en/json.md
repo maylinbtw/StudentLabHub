@@ -107,3 +107,15 @@ class Lab
 
 > [!NOTE]
 > Triple quotes `"""..."""` (C# 11) make a raw string: quotes inside don't need escaping. Handy for JSON in code.
+
+## Check yourself
+
+> [!QUIZ]
+> Which method turns an object into a JSON string?
+> ---
+> `JsonSerializer.Serialize(obj)`; back again with `JsonSerializer.Deserialize<T>(json)`.
+
+> [!QUIZ]
+> How do you exclude a property from JSON?
+> ---
+> Mark it with the `[JsonIgnore]` attribute.

@@ -98,3 +98,15 @@ var m3 = m1 with { Value = 9 }; // a copy with one field changed
 1. Fields get the values from their declarations (`int count = 5;`).
 2. The constructor runs.
 3. The object initializer `{ Name = ... }` is applied, if any.
+
+## Check yourself
+
+> [!QUIZ]
+> What happens to the empty constructor once you declare one with parameters?
+> ---
+> The compiler stops generating it: `new Student()` gives error CS7036.
+
+> [!QUIZ]
+> How does `==` compare two `record`s with equal fields?
+> ---
+> By value — the result is `true`. For regular classes `==` compares references.

@@ -114,3 +114,15 @@ for row in table:
 
 > [!WARNING]
 > `[[0] * 3] * 2` creates **two references to the same row**: changing one row changes both. The right way: `[[0] * 3 for _ in range(2)]`.
+
+## Check yourself
+
+> [!QUIZ]
+> What does `nums[::-1]` return?
+> ---
+> A new list in reverse order.
+
+> [!QUIZ]
+> How does `lst.sort()` differ from `sorted(lst)`?
+> ---
+> `sort()` changes the list in place and returns `None`; `sorted()` returns a new list.

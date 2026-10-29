@@ -112,3 +112,15 @@ Console.WriteLine(Math.PI);              // 3.141592653589793
 ```
 
 > `Math.Round` uses "banker's" rounding by default: `Math.Round(2.5)` is 2 and `Math.Round(3.5)` is 4. For the usual rounding pass `MidpointRounding.AwayFromZero`.
+
+## Check yourself
+
+> [!QUIZ]
+> What are `7 / 2` and `7 % 2`?
+> ---
+> `7 / 2` is 3 — integer division drops the fraction. `7 % 2` is 1 — the remainder.
+
+> [!QUIZ]
+> What does `int i = 5; Console.WriteLine(i++ + ++i);` print?
+> ---
+> 12: `i++` yields 5 and increments to 6, then `++i` increments to 7 and yields 7.

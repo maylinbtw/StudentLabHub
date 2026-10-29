@@ -126,3 +126,15 @@ Console.ReadKey();
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 Console.InputEncoding = System.Text.Encoding.UTF8;
 ```
+
+## Проверь себя
+
+> [!QUIZ]
+> Что вернёт `Console.ReadLine()`?
+> ---
+> Строку `string?`: введённый текст без перевода строки или `null`, если ввод закончился.
+
+> [!QUIZ]
+> Как вывести число с двумя знаками после запятой?
+> ---
+> Форматом в интерполяции: `Console.WriteLine($"{x:F2}");`.

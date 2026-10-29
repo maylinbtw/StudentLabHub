@@ -225,6 +225,17 @@
     <string name="article_note">NOTE</string>
     <string name="article_warning">IMPORTANT</string>
     <string name="article_not_found">Article not found.</string>
+    <string name="ref_continue">CONTINUE READING</string>
+    <string name="ref_bookmarks">BOOKMARKS</string>
+    <string name="article_bookmark_add">☆ BOOKMARK</string>
+    <string name="article_bookmarked">★ BOOKMARKED</string>
+    <string name="article_mark_read">MARK AS READ</string>
+    <string name="article_read">✓ READ</string>
+    <string name="article_text_smaller">Smaller text</string>
+    <string name="article_text_larger">Larger text</string>
+    <string name="article_quiz">CHECK YOURSELF</string>
+    <string name="article_show_answer">SHOW ANSWER</string>
+    <string name="article_hide_answer">HIDE ANSWER</string>
     <string name="code_copied">Code copied</string>
     <string name="ref_tldr_category">Downloaded from tldr-pages</string>
     <string name="reference">Reference</string>

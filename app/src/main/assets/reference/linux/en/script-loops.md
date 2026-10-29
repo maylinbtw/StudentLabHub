@@ -127,3 +127,15 @@ done
 
 > [!WARNING]
 > An infinite loop `while true; do ... done` stops only with `break`, `exit` or `Ctrl+C`. Don't forget the exit condition.
+
+## Check yourself
+
+> [!QUIZ]
+> How do you loop over the numbers 1 to 5?
+> ---
+> `for i in {1..5}; do ... done`.
+
+> [!QUIZ]
+> How do you read a file line by line?
+> ---
+> `while IFS= read -r line; do ... done < file`.

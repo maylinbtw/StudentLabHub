@@ -105,3 +105,15 @@ catch (FileNotFoundException)
     Console.WriteLine("Settings file not found, using defaults");
 }
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> Why use `using` with a `StreamWriter`?
+> ---
+> So the file is guaranteed to close even if an error happens inside.
+
+> [!QUIZ]
+> What is the right way to build a path from a folder and a file name?
+> ---
+> `Path.Combine(dir, "marks.csv")` — it inserts the correct separator.

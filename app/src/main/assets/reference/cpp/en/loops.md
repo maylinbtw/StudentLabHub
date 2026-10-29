@@ -106,3 +106,15 @@ for (int row = 1; row <= 3; row++)
 - `for (int i = 0; i <= n; i++)` over an array of `n` elements — out of bounds on the last step;
 - a `;` right after the header: `for (...);` — the loop body is empty and the block below runs once;
 - comparing an `int` with `size()` triggers a signedness warning: use `size_t i` or a range-based loop.
+
+## Check yourself
+
+> [!QUIZ]
+> What is `for (;;)`?
+> ---
+> An infinite loop: all three header parts are omitted. Exit with `break` or `return`.
+
+> [!QUIZ]
+> How do you iterate over `vector<int> v` without indexes?
+> ---
+> With a range-based loop: `for (int x : v)`.

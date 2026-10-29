@@ -132,3 +132,15 @@ System.out.println(m);            // Mark[subject=Физика, value=8]
 ```
 
 Поля `record` неизменяемы.
+
+## Проверь себя
+
+> [!QUIZ]
+> Что нужно переопределить вместе с `equals`?
+> ---
+> `hashCode`, иначе объекты будут неправильно работать в `HashSet` и `HashMap`.
+
+> [!QUIZ]
+> Как называются геттеры у `record Mark(String subject, int value)`?
+> ---
+> Как поля, без `get`: `subject()` и `value()`.

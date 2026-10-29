@@ -114,3 +114,15 @@ if (mark.HasValue)
 ```
 
 For reference types, `?` (for example `string?`) tells the compiler that `null` is expected here, so it stops issuing a warning.
+
+## Check yourself
+
+> [!QUIZ]
+> Which type should you use for money?
+> ---
+> `decimal`: it stores decimal fractions exactly, without the rounding errors of `double`.
+
+> [!QUIZ]
+> How do value types differ from reference types?
+> ---
+> Value types (`int`, `double`, `struct`) hold the value itself and are copied whole. Reference types (`string`, arrays, classes) hold a reference to an object.

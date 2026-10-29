@@ -123,3 +123,15 @@ long failed = marks.stream().filter(m -> m < 5).count(); // 1
 | уникальные значения | `HashSet` |
 | очередь | `ArrayDeque` (`offer`, `poll`) |
 | стек | `ArrayDeque` (`push`, `pop`) |
+
+## Проверь себя
+
+> [!QUIZ]
+> Что удалит `list.remove(1)` у `List<Integer>`?
+> ---
+> Элемент по индексу 1. Чтобы удалить число 1, нужно `list.remove(Integer.valueOf(1))`.
+
+> [!QUIZ]
+> Что вернёт `map.get(key)`, если ключа нет?
+> ---
+> `null`. Значение по умолчанию даёт `getOrDefault`.

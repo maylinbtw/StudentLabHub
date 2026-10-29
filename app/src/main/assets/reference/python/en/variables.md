@@ -78,3 +78,15 @@ c = a.copy()               # an independent copy
 ```
 
 With immutable types (`int`, `str`, `tuple`) you never notice: any "change" creates a new object.
+
+## Check yourself
+
+> [!QUIZ]
+> What type does `input()` return?
+> ---
+> Always `str`. Convert it for numbers: `int(input())`.
+
+> [!QUIZ]
+> Can one variable hold a number and later a string?
+> ---
+> Yes: Python is dynamically typed — values have types, variables don't.

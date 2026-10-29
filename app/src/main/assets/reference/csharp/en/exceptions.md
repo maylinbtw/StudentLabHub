@@ -138,3 +138,15 @@ else
 ```
 
 `TryParse` doesn't throw and is faster than `try/catch` around `Parse`.
+
+## Check yourself
+
+> [!QUIZ]
+> Why can't `catch (Exception)` come before `catch (FormatException)`?
+> ---
+> The general block catches everything, so the specific one could never run — the compiler reports CS0160.
+
+> [!QUIZ]
+> When does the `finally` block run?
+> ---
+> Always: with or without an error.

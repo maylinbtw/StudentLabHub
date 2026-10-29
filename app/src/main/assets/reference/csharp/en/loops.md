@@ -140,3 +140,15 @@ while (true)
 
 > [!WARNING]
 > If your program "hangs", check whether the loop changes the variable used in the condition. A forgotten `i++` is the most common cause of an infinite loop.
+
+## Check yourself
+
+> [!QUIZ]
+> How many times does the body of `do { } while (false);` run?
+> ---
+> Once: `do…while` checks the condition after the body.
+
+> [!QUIZ]
+> How does `break` differ from `continue`?
+> ---
+> `break` exits the loop entirely, `continue` jumps to the next iteration.

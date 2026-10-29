@@ -23,7 +23,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -86,6 +90,58 @@ fun ArticleBlockView(
         }
 
         is ArticleBlock.Table -> TableBlock(table = block, modifier = modifier.padding(bottom = 12.dp))
+
+        is ArticleBlock.Quiz -> QuizBlock(quiz = block, modifier = modifier.padding(bottom = 12.dp))
+    }
+}
+
+@Composable
+private fun QuizBlock(quiz: ArticleBlock.Quiz, modifier: Modifier = Modifier) {
+    var revealed by rememberSaveable(quiz.question) { mutableStateOf(false) }
+    val shape = RoundedCornerShape(8.dp)
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(SlhSurface)
+            .border(1.dp, SlhOutline, shape)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+    ) {
+        Text(
+            text = Strings.get(R.string.article_quiz),
+            color = SlhAccent,
+            fontFamily = SlhMono,
+            fontWeight = FontWeight.Bold,
+            fontSize = 10.sp,
+            letterSpacing = 1.sp,
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        quiz.question.split("\n").forEach { part ->
+            BodyText(text = part)
+        }
+        if (quiz.answer.isNotBlank()) {
+            if (revealed) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(SlhOutline))
+                Spacer(modifier = Modifier.height(8.dp))
+                quiz.answer.split("\n").forEach { part ->
+                    BodyText(text = part)
+                }
+            }
+            Text(
+                text = Strings.get(if (revealed) R.string.article_hide_answer else R.string.article_show_answer),
+                color = SlhAccent,
+                fontFamily = SlhMono,
+                fontWeight = FontWeight.Bold,
+                fontSize = 11.sp,
+                letterSpacing = 1.sp,
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .clickable(role = Role.Button) { revealed = !revealed }
+                    .padding(vertical = 6.dp),
+            )
+        }
     }
 }
 

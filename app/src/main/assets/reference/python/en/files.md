@@ -122,3 +122,15 @@ except FileNotFoundError:
     config = ""
     print("Settings file not found")
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> Why open files with `with open(...)`?
+> ---
+> The file closes automatically even if an error happens inside the block.
+
+> [!QUIZ]
+> What does mode `"w"` do to an existing file?
+> ---
+> It empties it. To append, use mode `"a"`.

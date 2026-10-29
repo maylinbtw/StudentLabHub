@@ -145,3 +145,15 @@ void Student::introduce() const
 ```
 
 `Student::` tells which class the method belongs to.
+
+## Check yourself
+
+> [!QUIZ]
+> How does `struct` differ from `class` in C++?
+> ---
+> Only in default access: everything is `public` in a `struct` and `private` in a `class`.
+
+> [!QUIZ]
+> What does `const` after a method's parameter list promise?
+> ---
+> The method doesn't modify the object, so it can be called on a const object.

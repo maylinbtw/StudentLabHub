@@ -107,3 +107,15 @@ print(p21 & p22)   # {'Math', 'Physics'}
 | mutable | yes | no | yes | yes |
 | duplicates | yes | yes | no | keys are unique |
 | access | by index | by index | `in` check | by key |
+
+## Check yourself
+
+> [!QUIZ]
+> How do you create a one-element tuple?
+> ---
+> With a comma: `(5,)`. `(5)` is just a number in parentheses.
+
+> [!QUIZ]
+> Does `{}` create an empty set or an empty dict?
+> ---
+> An empty dict. An empty set is `set()`.

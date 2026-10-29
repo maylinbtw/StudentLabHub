@@ -105,3 +105,15 @@ if (value instanceof String s && !s.isEmpty()) {
     System.out.println(s.length());
 }
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> Do you need `break` in a `switch` with arrows `->`?
+> ---
+> No: an arrow branch doesn't fall through to the next.
+
+> [!QUIZ]
+> How do you correctly check that string `s` equals "yes"?
+> ---
+> `"yes".equals(s)` — not `s == "yes"`, which compares references.

@@ -95,3 +95,15 @@ shared_ptr<string> s2 = s1;   // both own it, count = 2
 - `shared_ptr` — several owners, memory is freed when the last one goes away.
 
 Instead of a dynamic array, `vector` is almost always better.
+
+## Check yourself
+
+> [!QUIZ]
+> What do `&x` and `*p` mean?
+> ---
+> `&x` is the address of `x`, `*p` is the value at the address stored in pointer `p`.
+
+> [!QUIZ]
+> How do you free an array created with `new int[n]`?
+> ---
+> With `delete[]`. Better yet, use `vector` or smart pointers.

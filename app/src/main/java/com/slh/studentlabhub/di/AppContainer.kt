@@ -26,6 +26,8 @@ import com.slh.studentlabhub.data.repository.ScheduleRepositoryImpl
 import com.slh.studentlabhub.domain.repository.ScheduleRepository
 import com.slh.studentlabhub.data.repository.ArticleRepositoryImpl
 import com.slh.studentlabhub.domain.repository.ArticleRepository
+import com.slh.studentlabhub.data.repository.ReadingRepositoryImpl
+import com.slh.studentlabhub.domain.repository.ReadingRepository
 
 class AppContainer(context: Context) {
 
@@ -50,6 +52,7 @@ class AppContainer(context: Context) {
             database = database,
             settingsRepository = settingsRepository,
             classroomRepository = classroomRepository,
+            readingRepository = readingRepository,
             archivedCourseIds = { sessionStore.archivedCourseIds },
         )
     }
@@ -67,6 +70,8 @@ class AppContainer(context: Context) {
     }
 
     val articleRepository: ArticleRepository by lazy { ArticleRepositoryImpl(appContext.assets) }
+
+    val readingRepository: ReadingRepository by lazy { ReadingRepositoryImpl(appContext) }
 
     val scheduleRepository: ScheduleRepository by lazy {
         ScheduleRepositoryImpl(

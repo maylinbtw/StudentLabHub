@@ -17,6 +17,11 @@ import com.slh.studentlabhub.domain.repository.ReferenceRepository
 import com.slh.studentlabhub.domain.model.ArticleHit
 import com.slh.studentlabhub.domain.model.RefChapter
 import com.slh.studentlabhub.domain.repository.ArticleRepository
+import com.slh.studentlabhub.domain.model.ReadingProgress
+import com.slh.studentlabhub.domain.model.RefArticle
+import com.slh.studentlabhub.domain.model.RefArticleLink
+import com.slh.studentlabhub.domain.model.parseArticleKey
+import com.slh.studentlabhub.domain.repository.ReadingRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,6 +51,9 @@ data class ReferenceUiState(
     val tldrState: TldrState = TldrState.Idle,
     val chapters: List<RefChapter> = emptyList(),
     val articleHits: List<ArticleHit> = emptyList(),
+    val progress: ReadingProgress = ReadingProgress(),
+    val continueLink: RefArticleLink? = null,
+    val bookmarks: List<RefArticleLink> = emptyList(),
 ) {
     val isSearching: Boolean
         get() = query.isNotBlank()
@@ -55,6 +63,7 @@ data class ReferenceUiState(
 class ReferenceViewModel(
     private val repository: ReferenceRepository,
     private val articleRepository: ArticleRepository,
+    readingRepository: ReadingRepository,
 ) : ViewModel() {
 
     private val selectedTech = MutableStateFlow(RefTech.LINUX)
@@ -64,6 +73,15 @@ class ReferenceViewModel(
     private val chapters = selectedTech.mapLatest { tech -> articleRepository.chapters(tech) }
 
     private val articleHits = query.mapLatest { text -> articleRepository.search(text) }
+
+    private val reading = readingRepository.progress.mapLatest { progress ->
+        ReadingState(
+            progress = progress,
+            continueLink = progress.lastArticle?.let { continueLink(it, progress) },
+            bookmarks = progress.bookmarks.mapNotNull { resolve(it)?.link }
+                .sortedWith(compareBy({ it.tech.ordinal }, { it.number.toChapterOrder() })),
+        )
+    }
 
     private val baseState = combine(
         repository.observeReference(),
@@ -92,15 +110,42 @@ class ReferenceViewModel(
         baseState,
         chapters,
         articleHits,
-    ) { base, techChapters, hits ->
+        reading,
+    ) { base, techChapters, hits, readingState ->
         base.copy(
             chapters = techChapters.filter { it.tech == base.selectedTech },
             articleHits = if (base.isSearching) hits else emptyList(),
+            progress = readingState.progress,
+            continueLink = readingState.continueLink,
+            bookmarks = readingState.bookmarks,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = ReferenceUiState(),
+    )
+
+    private suspend fun resolve(key: String): RefArticle? {
+        val (tech, id) = parseArticleKey(key) ?: return null
+        return articleRepository.article(tech, id)
+    }
+
+    private suspend fun continueLink(key: String, progress: ReadingProgress): RefArticleLink? {
+        val article = resolve(key) ?: return null
+        val next = article.next
+        return if (progress.isRead(article.link) && next != null && !progress.isRead(next)) next else article.link
+    }
+
+    private fun String.toChapterOrder(): Int {
+        val chapter = substringBefore('.').toIntOrNull() ?: 0
+        val article = substringAfter('.', "").toIntOrNull() ?: 0
+        return chapter * 1000 + article
+    }
+
+    private data class ReadingState(
+        val progress: ReadingProgress,
+        val continueLink: RefArticleLink?,
+        val bookmarks: List<RefArticleLink>,
     )
 
     fun onTechSelected(tech: RefTech) {
@@ -144,6 +189,7 @@ class ReferenceViewModel(
                 ReferenceViewModel(
                     repository = app.container.referenceRepository,
                     articleRepository = app.container.articleRepository,
+                    readingRepository = app.container.readingRepository,
                 )
             }
         }

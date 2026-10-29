@@ -126,3 +126,15 @@ b = {"y": 20, "z": 3}
 merged = a | b           # Python 3.9+: {'x': 1, 'y': 20, 'z': 3}
 a.update(b)              # change a in place
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> How do you get a value by key without an error if it's missing?
+> ---
+> `d.get(key)` or `d.get(key, default)`.
+
+> [!QUIZ]
+> What does `"x" in d` check for a dict?
+> ---
+> Whether the key exists. `"x" in d.values()` checks the values.

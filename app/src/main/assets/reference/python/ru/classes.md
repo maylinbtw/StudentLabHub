@@ -153,3 +153,15 @@ print(m1 == m2)    # True
 
 > [!WARNING]
 > Забытый `self` — частая ошибка: `def introduce():` вызовет `TypeError: introduce() takes 0 positional arguments but 1 was given`.
+
+## Проверь себя
+
+> [!QUIZ]
+> Что такое `self`?
+> ---
+> Ссылка на текущий объект — первый параметр каждого метода.
+
+> [!QUIZ]
+> Какой метод задаёт, как объект выглядит в `print`?
+> ---
+> `__str__`.

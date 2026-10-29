@@ -110,3 +110,15 @@ case 1:
     break;
 }
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> Why does `if (x = 5)` compile but misbehave?
+> ---
+> It's an assignment: `x` becomes 5 and the condition is always true. Comparison needs `==`.
+
+> [!QUIZ]
+> Can you `switch` on a `std::string`?
+> ---
+> No, only integer types, `char` and enums.

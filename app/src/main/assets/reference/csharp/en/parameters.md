@@ -138,3 +138,15 @@ Console.WriteLine(Sum(1, 2, 3, 4)); // 10
 
 > [!NOTE]
 > There can be only one `params` parameter, and it must be last in the list.
+
+## Check yourself
+
+> [!QUIZ]
+> How does `out` differ from `ref`?
+> ---
+> A `ref` variable must be initialized beforehand, and the method needn't change it. An `out` variable needn't be initialized, but the method must assign it.
+
+> [!QUIZ]
+> Where can `params` appear in the parameter list?
+> ---
+> Only last, and there can be only one.

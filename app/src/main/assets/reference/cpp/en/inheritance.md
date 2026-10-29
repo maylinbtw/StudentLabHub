@@ -120,3 +120,15 @@ cout << "Total area: " << total << '\n';   // 12.1416
 | `final` on a class | the class can't be inherited from |
 
 Always write `override` — it catches typos in names and parameters.
+
+## Check yourself
+
+> [!QUIZ]
+> What does `print(Circle(1))` print if `Shape::area()` isn't `virtual`?
+> ---
+> `Shape::area()` is called and prints 0: without `virtual` there's no polymorphism.
+
+> [!QUIZ]
+> Why does a base class need a virtual destructor?
+> ---
+> So that deleting a derived object through a base pointer also runs the derived destructor.

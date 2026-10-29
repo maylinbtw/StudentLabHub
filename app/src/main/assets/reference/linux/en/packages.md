@@ -71,3 +71,15 @@ flatpak install flathub org.telegram.desktop
 
 > [!WARNING]
 > The error `Could not get lock /var/lib/dpkg/lock` means `apt` is already running in another window or an automatic update is in progress. Wait for it to finish — don't delete lock files by hand.
+
+## Check yourself
+
+> [!QUIZ]
+> Why run `sudo apt update` before installing?
+> ---
+> To refresh the list of available packages and their versions.
+
+> [!QUIZ]
+> How does `apt remove` differ from `apt purge`?
+> ---
+> `purge` removes the program together with its settings; `remove` keeps the settings.

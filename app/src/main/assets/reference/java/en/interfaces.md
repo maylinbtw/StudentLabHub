@@ -120,3 +120,15 @@ list.sort(Comparator.comparingDouble(Student::getAverage).reversed()); // by ave
 | fields with state | no (constants only) | yes |
 | constructor | no | yes |
 | when to choose | a shared **ability** | a shared **base** |
+
+## Check yourself
+
+> [!QUIZ]
+> How many interfaces can a class implement?
+> ---
+> Any number, comma-separated after `implements`.
+
+> [!QUIZ]
+> Which interface can be implemented with a lambda?
+> ---
+> A functional one — with a single abstract method, like `Predicate<T>` or `Comparator<T>`.

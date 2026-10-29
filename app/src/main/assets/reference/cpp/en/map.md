@@ -104,3 +104,15 @@ stack<int> st;
 st.push(1); st.push(2);
 cout << st.top() << '\n';    // 2
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> What does `m["key"]` do if the key isn't in the `map`?
+> ---
+> It creates it with a default value. To check, use `count`, `find` or `contains`.
+
+> [!QUIZ]
+> In what order is a `std::map` iterated?
+> ---
+> In ascending key order. `unordered_map` has no defined order.

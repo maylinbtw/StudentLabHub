@@ -110,3 +110,15 @@ scanf("%d", &n);
 ```
 
 Main specifiers: `%d` — int, `%f` — double in printf, `%lf` — double in scanf, `%c` — char, `%s` — a C string.
+
+## Check yourself
+
+> [!QUIZ]
+> Why does `cin >> name` read only the first word?
+> ---
+> The `>>` operator stops at whitespace. `getline(cin, name)` reads the whole line.
+
+> [!QUIZ]
+> How do you print a number with two decimal places?
+> ---
+> `cout << fixed << setprecision(2) << x;` (needs `<iomanip>`).

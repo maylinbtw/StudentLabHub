@@ -228,6 +228,17 @@
     <string name="article_note">ЗАЎВАГА</string>
     <string name="article_warning">ВАЖНА</string>
     <string name="article_not_found">Артыкул не знойдзены.</string>
+    <string name="ref_continue">ПРАЦЯГНУЦЬ ЧЫТАННЕ</string>
+    <string name="ref_bookmarks">ЗАКЛАДКІ</string>
+    <string name="article_bookmark_add">☆ У ЗАКЛАДКІ</string>
+    <string name="article_bookmarked">★ У ЗАКЛАДКАХ</string>
+    <string name="article_mark_read">АДЗНАЧЫЦЬ ПРАЧЫТАНЫМ</string>
+    <string name="article_read">✓ ПРАЧЫТАНА</string>
+    <string name="article_text_smaller">Паменшыць тэкст</string>
+    <string name="article_text_larger">Павялічыць тэкст</string>
+    <string name="article_quiz">ПРАВЕР СЯБЕ</string>
+    <string name="article_show_answer">ПАКАЗАЦЬ АДКАЗ</string>
+    <string name="article_hide_answer">СХАВАЦЬ АДКАЗ</string>
     <string name="code_copied">Код скапіраваны</string>
     <string name="ref_tldr_category">Загружана з tldr-pages</string>
     <string name="reference">Даведнік</string>

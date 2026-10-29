@@ -111,3 +111,15 @@ class DeadlineMissedException extends Exception {
 
 > [!WARNING]
 > Don't leave an empty `catch (Exception e) {}` — the error vanishes without a trace and becomes very hard to find. At least call `e.printStackTrace()`.
+
+## Check yourself
+
+> [!QUIZ]
+> How do checked exceptions differ from unchecked ones?
+> ---
+> The compiler requires checked ones (`IOException`) to be caught or declared with `throws`. Unchecked ones (`RuntimeException`) don't need that.
+
+> [!QUIZ]
+> What does try-with-resources give you?
+> ---
+> The resource in `try (...)` closes automatically, even on an error.

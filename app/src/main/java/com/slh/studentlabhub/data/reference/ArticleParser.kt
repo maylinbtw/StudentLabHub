@@ -78,6 +78,14 @@ object ArticleParser {
                         quoted += lines[i].trim().removePrefix(">").trim()
                         i++
                     }
+                    if (quoted.firstOrNull()?.uppercase() == "[!QUIZ]") {
+                        quoted.removeAt(0)
+                        val separator = quoted.indexOfFirst { it == "---" }
+                        val question = if (separator >= 0) quoted.subList(0, separator) else quoted
+                        val answer = if (separator >= 0) quoted.subList(separator + 1, quoted.size) else emptyList()
+                        blocks += ArticleBlock.Quiz(joinLines(question), joinLines(answer))
+                        continue
+                    }
                     var kind = NoteKind.NOTE
                     if (quoted.firstOrNull()?.uppercase() == "[!WARNING]") {
                         kind = NoteKind.WARNING

@@ -78,3 +78,15 @@ students.Sort((a, b) => a.Name.CompareTo(b.Name));
 | when to use | the size is known in advance | data arrives gradually |
 
 Conversions: `list.ToArray()` and `array.ToList()`.
+
+## Check yourself
+
+> [!QUIZ]
+> How do you get the number of elements in a `List<T>`?
+> ---
+> With the `Count` property (arrays use `Length`).
+
+> [!QUIZ]
+> Why can't you remove list items inside a `foreach` over the same list?
+> ---
+> You get `InvalidOperationException`: the collection changed during iteration. Use `RemoveAll` or a backwards `for`.

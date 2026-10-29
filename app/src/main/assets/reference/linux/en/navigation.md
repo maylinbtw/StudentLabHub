@@ -89,3 +89,15 @@ df -h              # free space on disks
 du -sh labs        # how much the labs folder takes
 du -sh *           # size of each item in the current folder
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> Where do `cd ~` and `cd -` take you?
+> ---
+> `cd ~` goes home, `cd -` goes to the previous folder.
+
+> [!QUIZ]
+> How do you show hidden files?
+> ---
+> `ls -a`: files whose names start with a dot are hidden.

@@ -106,3 +106,15 @@ static int CountFiles(string path)
     return count;
 }
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> What happens to a recursive method with no base case?
+> ---
+> Calls go on forever, the stack overflows and the program crashes with `StackOverflowException`.
+
+> [!QUIZ]
+> Why is recursive `Fib(n)` slow?
+> ---
+> The same values are computed many times, and the number of calls grows exponentially. A loop takes linear time.

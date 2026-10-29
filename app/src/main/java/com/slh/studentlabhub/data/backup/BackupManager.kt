@@ -8,9 +8,11 @@ import com.slh.studentlabhub.data.local.entity.RefEntryEntity
 import com.slh.studentlabhub.data.local.entity.SubjectEntity
 import com.slh.studentlabhub.domain.model.AppSettings
 import com.slh.studentlabhub.domain.model.LabStatus
+import com.slh.studentlabhub.domain.model.ReadingProgress
 import com.slh.studentlabhub.domain.model.RefTech
 import com.slh.studentlabhub.domain.model.WorkType
 import com.slh.studentlabhub.domain.repository.ClassroomRepository
+import com.slh.studentlabhub.domain.repository.ReadingRepository
 import com.slh.studentlabhub.domain.repository.SettingsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -33,6 +35,7 @@ class BackupManager(
     private val database: AppDatabase,
     private val settingsRepository: SettingsRepository,
     private val classroomRepository: ClassroomRepository,
+    private val readingRepository: ReadingRepository,
     private val archivedCourseIds: () -> Set<String>,
 ) {
 
@@ -53,6 +56,7 @@ class BackupManager(
             .put("settings", settingsRepository.settings.value.toJson())
             .put("redoThreshold", classroomRepository.redoThreshold.value)
             .put("archivedCourses", JSONArray(archivedCourseIds().toList()))
+            .put("reading", readingRepository.progress.value.toJson())
 
         output.bufferedWriter(Charsets.UTF_8).use { it.write(root.toString(2)) }
         BackupSummary(subjects = subjects.size, works = labs.size, articles = entries.size)
@@ -87,6 +91,9 @@ class BackupManager(
         }
         val archived = root.optJSONArray("archivedCourses").strings()
         classroomRepository.setCoursesArchived(archived, archived = true)
+        root.optJSONObject("reading")?.let { json ->
+            readingRepository.restore(json.toReading(readingRepository.progress.value))
+        }
 
         BackupSummary(subjects = subjects.size, works = labs.size, articles = entries.size)
     }
@@ -238,5 +245,18 @@ private fun JSONObject.toSettings(current: AppSettings): AppSettings = AppSettin
     scheduleGroup = optString("scheduleGroup", current.scheduleGroup),
     scheduleSubgroup = optEnum("scheduleSubgroup", current.scheduleSubgroup),
     scheduleAlerts = optBoolean("scheduleAlerts", current.scheduleAlerts),
+)
+
+private fun ReadingProgress.toJson(): JSONObject = JSONObject()
+    .put("read", JSONArray(read.toList()))
+    .put("bookmarks", JSONArray(bookmarks.toList()))
+    .put("lastArticle", lastArticle ?: JSONObject.NULL)
+    .put("fontStep", fontStep)
+
+private fun JSONObject.toReading(current: ReadingProgress): ReadingProgress = ReadingProgress(
+    read = optJSONArray("read").strings().toSet(),
+    bookmarks = optJSONArray("bookmarks").strings().toSet(),
+    lastArticle = optStringOrNull("lastArticle"),
+    fontStep = optInt("fontStep", current.fontStep),
 )
 

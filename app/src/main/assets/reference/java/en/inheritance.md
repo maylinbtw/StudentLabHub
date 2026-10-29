@@ -112,3 +112,15 @@ if (p instanceof Student s) {
 
 > [!NOTE]
 > Inheritance is an "is a" relationship: a student **is a** person. For "has a" (a student **has** a record book), use a field instead of `extends`.
+
+## Check yourself
+
+> [!QUIZ]
+> Where must the `super(...)` call go in a constructor?
+> ---
+> On the first line of the constructor.
+
+> [!QUIZ]
+> Why write `@Override`?
+> ---
+> The compiler checks that the method really overrides a parent one and catches typos in its name or parameters.

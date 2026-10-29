@@ -89,3 +89,15 @@ int outer = 1;
 }
 // Console.WriteLine(inner); — error: inner is not visible here
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> Does `var x;` compile?
+> ---
+> No. `var` requires an initializer: the type is inferred from the value on the right.
+
+> [!QUIZ]
+> How is `const` different from a regular variable?
+> ---
+> A constant's value is set once, known at compile time and never changes.

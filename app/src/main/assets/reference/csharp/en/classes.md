@@ -113,3 +113,15 @@ Console.WriteLine(Student.Count); // 2
 ```
 
 This is how `Math.Sqrt`, `Console.WriteLine` and `int.Parse` work — they are called through the class name.
+
+## Check yourself
+
+> [!QUIZ]
+> What is the default access modifier of a class field?
+> ---
+> `private`: the field is visible only inside the class.
+
+> [!QUIZ]
+> How does a static member differ from a regular one?
+> ---
+> A static member belongs to the class as a whole and is accessed through the class name, not an object.

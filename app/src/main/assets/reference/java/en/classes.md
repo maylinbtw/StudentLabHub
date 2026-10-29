@@ -132,3 +132,15 @@ System.out.println(m);            // Mark[subject=Physics, value=8]
 ```
 
 `record` fields are immutable.
+
+## Check yourself
+
+> [!QUIZ]
+> What must you override together with `equals`?
+> ---
+> `hashCode`, otherwise objects misbehave in `HashSet` and `HashMap`.
+
+> [!QUIZ]
+> What are the getters of `record Mark(String subject, int value)` called?
+> ---
+> Same as the fields, without `get`: `subject()` and `value()`.

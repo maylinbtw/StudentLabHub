@@ -126,3 +126,15 @@ If question marks appear instead of non-Latin letters, set the encoding at the s
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 Console.InputEncoding = System.Text.Encoding.UTF8;
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> What does `Console.ReadLine()` return?
+> ---
+> A `string?`: the entered text without the newline, or `null` if input has ended.
+
+> [!QUIZ]
+> How do you print a number with two decimal places?
+> ---
+> With a format in interpolation: `Console.WriteLine($"{x:F2}");`.

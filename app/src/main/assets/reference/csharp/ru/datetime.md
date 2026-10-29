@@ -100,3 +100,15 @@ var begin = new TimeOnly(8, 0);
 Console.WriteLine(due.AddDays(7));        // 22.11.2026
 Console.WriteLine(begin.AddMinutes(95));  // 9:35
 ```
+
+## Проверь себя
+
+> [!QUIZ]
+> Чем `MM` отличается от `mm` в формате даты?
+> ---
+> `MM` — месяц, `mm` — минуты.
+
+> [!QUIZ]
+> Какой тип получится при вычитании двух `DateTime`?
+> ---
+> `TimeSpan` — промежуток времени, например `left.Days`.

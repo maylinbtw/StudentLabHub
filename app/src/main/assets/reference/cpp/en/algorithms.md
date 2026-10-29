@@ -120,3 +120,15 @@ vector<int> v = {2, 4, 7, 9};
 bool has = binary_search(v.begin(), v.end(), 7);   // true
 auto pos = lower_bound(v.begin(), v.end(), 5);     // at 7 — the first ≥ 5
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> Why sort a vector before `unique`?
+> ---
+> `unique` removes only adjacent duplicates.
+
+> [!QUIZ]
+> Does `remove_if` actually remove elements from a vector?
+> ---
+> No, it only moves the kept ones forward and returns the new end. `erase` removes the rest.

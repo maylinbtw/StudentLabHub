@@ -112,3 +112,15 @@ If values can be large, use `long long`.
 10. `?:`, `=`, `+=` and other assignments
 
 Because of item 5, printing an expression with a comparison needs parentheses: `cout << (a < b);`.
+
+## Check yourself
+
+> [!QUIZ]
+> What are `7 / 2` and `7.0 / 2` in C++?
+> ---
+> `3` and `3.5`: if both operands are integers, the division is integer division.
+
+> [!QUIZ]
+> What happens when an `int` overflows?
+> ---
+> For signed types it's undefined behavior: the result is unpredictable. Use `long long` for large numbers.

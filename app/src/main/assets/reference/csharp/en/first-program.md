@@ -79,3 +79,15 @@ Both versions do the same thing. `Main` is the **entry point** where execution s
 
 > [!WARNING]
 > Top-level statements appeared in C# 9 (.NET 5). If your college environment creates a project with `Main`, write your code inside the curly braces of `Main`.
+
+## Check yourself
+
+> [!QUIZ]
+> Which commands create and run a console project from the terminal?
+> ---
+> `dotnet new console -n MyApp`, then `dotnet run` inside the project folder.
+
+> [!QUIZ]
+> What is the difference between `Console.Write` and `Console.WriteLine`?
+> ---
+> `WriteLine` moves to a new line after the text, `Write` doesn't.

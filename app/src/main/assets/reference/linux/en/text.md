@@ -104,3 +104,15 @@ cut -d ' ' -f 1 access.log | sort | uniq -c | sort -rn | head -n 10
 diff old.c new.c                     # line-by-line differences
 diff -u old.c new.c                  # patch format (as in git)
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> How does `>` differ from `>>`?
+> ---
+> `>` overwrites the file, `>>` appends to it.
+
+> [!QUIZ]
+> How do you count lines containing `error`?
+> ---
+> `grep -c error log.txt` or `grep error log.txt | wc -l`.

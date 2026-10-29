@@ -106,3 +106,15 @@ Console.WriteLine(Convert.ToString(255, 2)); // 11111111 — in binary
 - Possibly lossy — `(type)value`, and `checked` when overflow is a risk.
 - User input — `TryParse`, so the program does not crash.
 - Number to text — interpolation or `ToString("format")`.
+
+## Check yourself
+
+> [!QUIZ]
+> How does `int.Parse` differ from `int.TryParse`?
+> ---
+> `Parse` throws on an invalid string, `TryParse` returns `false` without throwing.
+
+> [!QUIZ]
+> What is `(int)3.99`?
+> ---
+> 3 — an explicit cast to `int` drops the fraction without rounding.

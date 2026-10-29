@@ -9,6 +9,7 @@ sealed interface ArticleBlock {
     data class BulletList(val items: List<String>) : ArticleBlock
     data class NumberedList(val items: List<String>) : ArticleBlock
     data class Table(val header: List<String>, val rows: List<List<String>>) : ArticleBlock
+    data class Quiz(val question: String, val answer: String) : ArticleBlock
 }
 
 enum class NoteKind {

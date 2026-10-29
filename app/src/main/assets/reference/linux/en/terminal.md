@@ -77,3 +77,15 @@ ping -c1 host || echo "offline"   # run the second only if the first fails
 ```
 
 Every command returns an **exit code**: `0` means success, any other number means an error. `echo $?` shows the exit code of the last command.
+
+## Check yourself
+
+> [!QUIZ]
+> How do you quickly find a command you typed earlier?
+> ---
+> `Ctrl+R` and start typing — history search. There's also `history` and the up arrow.
+
+> [!QUIZ]
+> How does `cmd1 && cmd2` differ from `cmd1; cmd2`?
+> ---
+> With `&&` the second runs only if the first succeeds. With `;` it always runs.

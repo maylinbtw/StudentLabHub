@@ -106,3 +106,15 @@ max(3, 8, 5)         # 8
 8. `or`
 
 Note that `-2 ** 2` equals `-4` because the power is evaluated before the unary minus.
+
+## Check yourself
+
+> [!QUIZ]
+> How do `7 / 2`, `7 // 2` and `7 % 2` differ?
+> ---
+> `3.5` is true division, `3` is floor division, `1` is the remainder.
+
+> [!QUIZ]
+> How do you write "x from 1 to 10 inclusive" in one condition?
+> ---
+> `1 <= x <= 10` — Python lets you chain comparisons.

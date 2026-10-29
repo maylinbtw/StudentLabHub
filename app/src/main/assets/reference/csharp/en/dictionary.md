@@ -87,3 +87,15 @@ be: 2
 or: 1
 not: 1
 ```
+
+## Check yourself
+
+> [!QUIZ]
+> What happens on `dict["missing"]` when the key doesn't exist?
+> ---
+> `KeyNotFoundException`. Safe options are `TryGetValue` or `GetValueOrDefault`.
+
+> [!QUIZ]
+> How does `dict.Add(k, v)` differ from `dict[k] = v`?
+> ---
+> `Add` throws if the key already exists, while the indexer just replaces the value.
